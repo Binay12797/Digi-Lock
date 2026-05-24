@@ -1,0 +1,5 @@
+Day 1:
+-started initial setup of the project.
+-npm init -y for node packages
+-npm install express for express framework
+-views,controllers,models folder added
