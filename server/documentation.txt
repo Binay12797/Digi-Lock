@@ -1,5 +1,14 @@
 Day 1:
 -started initial setup of the project.
--npm init -y for node packages
--npm install express for express framework
+-"npm init -y" for node packages
+-"npm install express" for express framework
 -views,controllers,models folder added
+
+Day 2:
+-setup a basic express server 
+
+Day 3:
+-setting up routes, controllers and ejs template for sign up/login handling
+-defining the routes
+-use "npm install ejs" to intall ejs for SSR html
+-use "npm install mongoose" for the database
