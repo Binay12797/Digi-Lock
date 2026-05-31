@@ -1,0 +1,11 @@
+npm create vite@latest
+Project name: Digi-Lock
+Package name: digi-lock (there are some rules on naming)
+frame work: React
+variant: JavaScript
+
+node_modules: consist of external Package and library that our project relies on
+public: consist of public assets 
+assets: consist of image on videos 
+
+.jsx : JavaScript XML
