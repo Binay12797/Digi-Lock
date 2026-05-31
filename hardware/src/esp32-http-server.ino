@@ -1,109 +1,212 @@
-/* ESP32 HTTP IoT Server Example for Wokwi.com
+/*
+ * ============================================================
+ *  Fingerprint Scanner Skeleton – ESP32
+ *  IDE     : PlatformIO (VS Code)
+ *  Board   : esp32dev  (Wokwi uses this for the generic ESP32)
+ *  Baud    : 115200
+ * ============================================================
 
-  https://wokwi.com/arduino/projects/320964045035274834
+ *  LED STATES
+ *  ──────────
+ *  IDLE      → Green blinks every 500 ms  ("waiting for scan")
+ *  SCANNING  → Yellow ON only             ("reading finger…")
+ *  AUTH OK   → Green solid 5 s            ("access granted")
+ *  AUTH FAIL → Red solid 5 s              ("access denied")
+ *
+ *  SERIAL COMMANDS (send via Serial Monitor or HTML page)
+ *  ──────────────────────────────────────────────────────
+ *  'A'  → simulate AUTHORIZED scan
+ *  'U'  → simulate UNAUTHORIZED scan
+ *  'R'  → force reset to IDLE
+ * ============================================================
+ */
 
-  When running it on Wokwi for VSCode, you can connect to the 
-  simulated ESP32 server by opening http://localhost:8180
-  in your browser. This is configured by wokwi.toml.
-*/
+#include <Arduino.h>
 
-#include <WiFi.h>
-#include <WiFiClient.h>
-#include <WebServer.h>
-#include <uri/UriBraces.h>
+// ── Pin definitions (ESP32 GPIO numbers) ─────────────────────
+// Use only OUTPUT-capable, non-strapping GPIO pins.
+// GPIO 2  is safe and has an on-board LED on most ESP32 devkits.
+#define PIN_LED_GREEN   2   // Green  – idle blink / auth OK
+#define PIN_LED_YELLOW  4   // Yellow – scanning
+#define PIN_LED_RED     5   // Red    – auth fail
 
-#define WIFI_SSID "Wokwi-GUEST"
-#define WIFI_PASSWORD ""
-// Defining the WiFi channel speeds up the connection:
-#define WIFI_CHANNEL 6
+// ── Fingerprint sensor UART pins (for later / real hardware) ──
+// These are wired in Wokwi's diagram but not used in skeleton.
+#define FP_RX_PIN  16   // ESP32 RX2 ← sensor TX (yellow wire)
+#define FP_TX_PIN  17   // ESP32 TX2 → sensor RX (white wire)
 
-WebServer server(80);
+// ── Timing constants (milliseconds) ──────────────────────────
+#define BLINK_INTERVAL   500   // green blink half-period (ms)
+#define RESULT_HOLD_MS  5000   // how long to show auth result
 
-const int LED1 = 26;
-const int LED2 = 27;
+// ── System states ─────────────────────────────────────────────
+enum State {
+  STATE_IDLE,       // waiting – green blinks
+  STATE_SCANNING,   // finger detected – yellow on
+  STATE_AUTH_OK,    // authorised – green solid
+  STATE_AUTH_FAIL   // denied     – red solid
+};
 
-bool led1State = false;
-bool led2State = false;
+// ── Global variables ──────────────────────────────────────────
+State         currentState  = STATE_IDLE;
+bool          greenLedOn    = false;
+unsigned long lastBlinkTime = 0;
+unsigned long resultTimer   = 0;
 
-void sendHtml() {
-  String response = R"(
-    <!DOCTYPE html><html>
-      <head>
-        <title>ESP32 Web Server Demo</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <style>
-          html { font-family: sans-serif; text-align: center; }
-          body { display: inline-flex; flex-direction: column; }
-          h1 { margin-bottom: 1.2em; } 
-          h2 { margin: 0; }
-          div { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; grid-auto-flow: column; grid-gap: 1em; }
-          .btn { background-color: #5B5; border: none; color: #fff; padding: 0.5em 1em;
-                 font-size: 2em; text-decoration: none }
-          .btn.OFF { background-color: #333; }
-        </style>
-      </head>
-            
-      <body>
-        <h1>ESP32 Web Server</h1>
-
-        <div>
-          <h2>LED 1</h2>
-          <a href="/toggle/1" class="btn LED1_TEXT">LED1_TEXT</a>
-          <h2>LED 2</h2>
-          <a href="/toggle/2" class="btn LED2_TEXT">LED2_TEXT</a>
-        </div>
-      </body>
-    </html>
-  )";
-  response.replace("LED1_TEXT", led1State ? "ON" : "OFF");
-  response.replace("LED2_TEXT", led2State ? "ON" : "OFF");
-  server.send(200, "text/html", response);
+// ── Helper: turn ALL LEDs off ─────────────────────────────────
+void allLedsOff() {
+  digitalWrite(PIN_LED_GREEN,  LOW);
+  digitalWrite(PIN_LED_YELLOW, LOW);
+  digitalWrite(PIN_LED_RED,    LOW);
 }
 
-void setup(void) {
-  Serial.begin(115200);
-  pinMode(LED1, OUTPUT);
-  pinMode(LED2, OUTPUT);
+// ── State machine: transition to a new state ─────────────────
+void enterState(State newState) {
+  currentState = newState;
+  allLedsOff();
 
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD, WIFI_CHANNEL);
-  Serial.print("Connecting to WiFi ");
-  Serial.print(WIFI_SSID);
-  // Wait for connection
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(100);
-    Serial.print(".");
+  switch (newState) {
+
+    case STATE_IDLE:
+      Serial.println("[STATUS] IDLE – waiting for fingerprint…");
+      greenLedOn    = false;
+      lastBlinkTime = millis();
+      break;
+
+    case STATE_SCANNING:
+      digitalWrite(PIN_LED_YELLOW, HIGH);
+      Serial.println("[STATUS] SCANNING – reading fingerprint…");
+      break;
+
+    case STATE_AUTH_OK:
+      digitalWrite(PIN_LED_GREEN, HIGH);
+      resultTimer = millis();
+      Serial.println("[STATUS] AUTH OK – access granted!");
+      break;
+
+    case STATE_AUTH_FAIL:
+      digitalWrite(PIN_LED_RED, HIGH);
+      resultTimer = millis();
+      Serial.println("[STATUS] AUTH FAIL – access denied!");
+      break;
   }
-  Serial.println(" Connected!");
+}
 
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
+// ── Arduino setup ─────────────────────────────────────────────
+void setup() {
+  // USB Serial (for debug output and HTML page control)
+  Serial.begin(115200);
+  delay(500); // small delay so the serial monitor can connect
 
-  server.on("/", sendHtml);
+  // Configure LED GPIO pins
+  pinMode(PIN_LED_GREEN,  OUTPUT);
+  pinMode(PIN_LED_YELLOW, OUTPUT);
+  pinMode(PIN_LED_RED,    OUTPUT);
 
-  server.on(UriBraces("/toggle/{}"), []() {
-    String led = server.pathArg(0);
-    Serial.print("Toggle LED #");
-    Serial.println(led);
+  // ── Real sensor UART setup (uncomment when using real hardware)
+  // Serial2.begin(57600, SERIAL_8N1, FP_RX_PIN, FP_TX_PIN);
 
-    switch (led.toInt()) {
-      case 1:
-        led1State = !led1State;
-        digitalWrite(LED1, led1State);
+  // Start in idle
+  enterState(STATE_IDLE);
+
+  Serial.println("========================================");
+  Serial.println("  Fingerprint Scanner – ESP32 Skeleton");
+  Serial.println("  'A' = Authorized scan");
+  Serial.println("  'U' = Unauthorized scan");
+  Serial.println("  'R' = Force reset");
+  Serial.println("========================================");
+}
+
+// ── Arduino main loop ─────────────────────────────────────────
+void loop() {
+
+  // ── 1. Read Serial commands (from PC Serial Monitor or HTML page) ──
+  if (Serial.available() > 0) {
+    char cmd = (char)Serial.read();
+
+    switch (cmd) {
+
+      case 'A':   // Simulate authorized scan
+        if (currentState == STATE_IDLE) {
+          enterState(STATE_SCANNING);
+          delay(800);             // brief "reading" pause
+          enterState(STATE_AUTH_OK);
+        } else {
+          Serial.println("[WARN] Command ignored – not in IDLE state.");
+        }
         break;
-      case 2:
-        led2State = !led2State;
-        digitalWrite(LED2, led2State);
+
+      case 'U':   // Simulate unauthorized scan
+        if (currentState == STATE_IDLE) {
+          enterState(STATE_SCANNING);
+          delay(800);
+          enterState(STATE_AUTH_FAIL);
+        } else {
+          Serial.println("[WARN] Command ignored – not in IDLE state.");
+        }
         break;
+
+      case 'R':   // Force reset
+        enterState(STATE_IDLE);
+        Serial.println("[CMD] Manual reset.");
+        break;
+
+      default:
+        break;    // ignore newlines, spaces, etc.
     }
+  }
 
-    sendHtml();
-  });
+  // ── 2. State behaviour ────────────────────────────────────
+  switch (currentState) {
 
-  server.begin();
-  Serial.println("HTTP server started (http://localhost:8180)");
+    case STATE_IDLE:
+      // Non-blocking green blink using millis() (not delay!)
+      if (millis() - lastBlinkTime >= BLINK_INTERVAL) {
+        lastBlinkTime = millis();
+        greenLedOn    = !greenLedOn;
+        digitalWrite(PIN_LED_GREEN, greenLedOn ? HIGH : LOW);
+      }
+      break;
+
+    case STATE_SCANNING:
+      // ── TODO (real hardware): poll Serial2 for sensor data here ──
+      // Example:
+      //   uint8_t p = finger.getImage();
+      //   if (p == FINGERPRINT_OK) { ... image2Tz, fingerFastSearch ... }
+      break;
+
+    case STATE_AUTH_OK:
+    case STATE_AUTH_FAIL:
+      // Auto-reset after RESULT_HOLD_MS
+      if (millis() - resultTimer >= RESULT_HOLD_MS) {
+        enterState(STATE_IDLE);
+      }
+      break;
+  }
 }
 
-void loop(void) {
-  server.handleClient();
-  delay(2);
-}
+/*
+ * ============================================================
+ *  NEXT STEPS – Adding the Real Fingerprint Sensor
+ * ============================================================
+ *
+ *  1. Uncomment Serial2.begin() in setup().
+ *  2. Add to platformio.ini lib_deps:
+ *       adafruit/Adafruit Fingerprint Sensor Library
+ *  3. At the top of this file add:
+ *       #include <Adafruit_Fingerprint.h>
+ *       Adafruit_Fingerprint finger(&Serial2);
+ *  4. In STATE_SCANNING, call:
+ *       finger.getImage()
+ *       finger.image2Tz()
+ *       finger.fingerFastSearch()
+ *     and use finger.fingerID to decide AUTH_OK or AUTH_FAIL.
+ *  5. Build an authorized ID list:
+ *       const int authorizedIDs[] = {1, 2, 3};
+ *     and check if finger.fingerID is in that array.
+ *
+ *  BONUS: ESP32 has Wi-Fi built in, so you can replace the
+ *  USB Serial commands with an HTTP endpoint (WebServer.h)
+ *  and control everything from the browser over Wi-Fi!
+ * ============================================================
+ */
