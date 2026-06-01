@@ -12,3 +12,7 @@ Day 3:
 -defining the routes
 -use "npm install ejs" to intall ejs for SSR html
 -use "npm install mongoose" for the database
+
+Day 4:
+-connecting mongodB
+-npm install dotenv for installing .env

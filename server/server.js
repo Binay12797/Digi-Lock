@@ -1,10 +1,13 @@
+require("dotenv").config;
+console.log("DEBUG: MONGODB_URL is:", process.env.MONGODB_URI);
 const express = require("express"); //imports the express framework
 const server = express();           //creates the server endpoint
 const PORT = 3000;                  //defines the port 
 const Path = require("node:path");  
 const userRouter = require("./routes/userRouter")
+const connectDB = require("./config/db");
 
-
+connectDB();
 server.use(express.urlencoded({extended: true}));
 server.use(express.json());         //parses the json object
 
