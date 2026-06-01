@@ -9,3 +9,21 @@ public: consist of public assets
 assets: consist of image on videos 
 
 .jsx : JavaScript XML
+
+cd client
+npm run dev
+
+jsx file name cannot contain - dash
+
+../ bring control outside current folder by one
+
+
+# Sometime really usefull
+
+Try:
+Ctrl + Shift + P
+then run:
+Developer: Reload Window
+
+flex is used to arrange item in a row / column , centre items horizontally
+font weight is for border of font
