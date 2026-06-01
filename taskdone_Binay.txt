@@ -1,3 +1,5 @@
+date: Day 1
+
 npm create vite@latest
 Project name: Digi-Lock
 Package name: digi-lock (there are some rules on naming)
@@ -27,3 +29,9 @@ Developer: Reload Window
 
 flex is used to arrange item in a row / column , centre items horizontally
 font weight is for border of font
+
+rafc -- an extension command
+
+installing react router: (install in client)
+cd client
+npm install react-router-dom
