@@ -16,3 +16,9 @@ Day 3:
 Day 4:
 -connecting mongodB
 -npm install dotenv for installing .env
+
+Day 5:
+- defining the user schema in the models
+-using the defined schema in controller to parse the submitted form values
+- "npm install cors" this install cross origin resource sharing
+   which is essential for frontend and backend to communicate

@@ -6,8 +6,11 @@ const PORT = 3000;                  //defines the port
 const Path = require("node:path");  
 const userRouter = require("./routes/userRouter")
 const connectDB = require("./config/db");
+const cors = require("cors");
 
 connectDB();
+
+server.use(cors());  //enables cors for all routes and origins
 server.use(express.urlencoded({extended: true}));
 server.use(express.json());         //parses the json object
 
