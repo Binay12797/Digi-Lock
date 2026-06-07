@@ -22,3 +22,6 @@ Day 5:
 -using the defined schema in controller to parse the submitted form values
 - "npm install cors" this install cross origin resource sharing
    which is essential for frontend and backend to communicate
+
+Day 6:
+-created passport middleware for the authentication of users
