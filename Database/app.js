@@ -27,8 +27,6 @@ mongoose.connect(
     console.log("User exists");
   }
  
-
-
   // Save Door
   const door = new Door({
     name: 'Lab door',
