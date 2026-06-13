@@ -1,28 +1,29 @@
 const user = require("../models/userModel");
+const passport = require("passport");
 async function createUser(req,res){
     try{
         const{name, email, password} = req.body;
-        const newUser = new user(
-            name = req.body.userName,
-            email = req.body.userEmail,
-            password = req.body.userPassword
+        const newUser = new user({
+            name: name,
+            email : email,
+            password :password}
 
-        )
+        );
+        await newUser.save();
+        console.log("user created");
+        return res.status(201).json({
+            success: true,
+            message: "user created",
+            user: newUser
+        });
+
     }catch(err){
         console.log("error caught:",err);
         return res.status(400).json({
-            success: false, error: error.message
+            success: false, error: err.message
         });
 
     }
-    console.log("user created");
-    await newUser.save();
-    return res.status(201).json({
-        success: true,
-        message: `User created.`,
-        user: newUser
-    
-    });
 };
 
 async function signUpPage(req,res){
@@ -33,8 +34,46 @@ async function loginPage(req,res){
     res.render("login");
 }
 
+// async function login(req,res,next){
+//     passport.authenticate("local",{
+//         successRedirect: "/dashboard",
+//         failureRedirect: "/login"})
+//         (req,res,next);
+    
+    
+// }
+// Inside userController.js
+async function login(req, res, next) {
+    passport.authenticate("local", (err, user, info) => {
+        if (err) { 
+            return next(err); 
+        }
+        
+        // If passport strategy returned false (auth failed)
+        if (!user) { 
+            return res.status(401).json({ 
+                success: false, 
+                message: info ? info.message : "Incorrect password." 
+            }); 
+        }
+        
+        // If auth succeeded, log the user into the session
+        req.logIn(user, (err) => {
+            if (err) { 
+                return next(err); 
+            }
+            return res.status(200).json({ 
+                success: true, 
+                message: "Logged in successfully!", 
+                user: user 
+            });
+        });
+    })(req, res, next);
+}
+
 module.exports={
     createUser,
     signUpPage,
-    loginPage
+    loginPage,
+    login
 }
