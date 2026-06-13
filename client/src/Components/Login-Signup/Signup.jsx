@@ -21,12 +21,12 @@ const Signup = () => {
 
     // if name is left empty then it has bollean value 0 and !name= 1 
     if(!name || !email || !password){
-      setErrorMessage("All fields are required.");
+      setErrorMessage("All fields are required.");z
       return;
     }
 
     try{
-      const response = await axios.post('http://localhost:5000/api/auth/register',{name: name , email: email, password: password});
+      const response = await axios.post('http://localhost:5000/create',{name: name , email: email, password: password});
 
       if(response.data.success){
         alert("Account Created Sucessfully! Please log in.");
