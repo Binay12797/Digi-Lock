@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { useInsertionEffect } = require('react');
+
 
 const user = new mongoose.Schema({
     name: {

@@ -34,7 +34,7 @@ async function loginPage(req,res){
 }
 
 module.exports={
-     createUser,
+    createUser,
     signUpPage,
     loginPage
 }
