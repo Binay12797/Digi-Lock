@@ -16,7 +16,7 @@ const Signup = () => {
   const [password, setPassword ] = useState("");
   const [errorMessage, setErrorMessage ] = useState("");
 
-  const handleSighup = async () => {
+  const handleSignup = async () => {
     setErrorMessage("");
 
     // if name is left empty then it has bollean value 0 and !name= 1 
@@ -73,12 +73,12 @@ const Signup = () => {
 
           <div className='input'>
             <img src={password_icon} alt="" />
-            <input type="password" placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)}  onKeyDown={(e) => {if(e.key === 'Enter'){handleSighup();}}}/>
+            <input type="password" placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)}  onKeyDown={(e) => {if(e.key === 'Enter'){handleSignup();}}}/>
           </div>
         </div>
         
         <div className="submit-container">
-          <div className= "submit" onClick={handleSighup}>Sign Up</div>
+          <div className= "submit" onClick={handleSignup}>Sign Up</div>
           <div className= "submit gray"  onClick={()=>navigate('/Login')}>Login</div>
           {/* if you add an . before /Login eg:./Login on clicking Login button your url will be http://localhost:5173/Signup/Login which we dont want */}
         </div>

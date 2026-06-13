@@ -43,3 +43,5 @@ npm install axios
 create an fucntion handleLogin to handle login inputs and send data to backend from user name and password in login Package
 
 implemeted code for Enter key so that user dont have to manually press login button
+
+create an handlSignup function that handle signup
