@@ -10,8 +10,9 @@
     align-items: center;
     padding: 0 40px;
     box-sizing: border-box;
-    border-bottom: 2px solid #1c41b1;
+    border-bottom: 1px solid #0b1c4e;
     z-index: 1000;
+    
 }
 
 .navbar-left{

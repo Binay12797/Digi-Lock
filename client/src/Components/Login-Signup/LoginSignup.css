@@ -9,15 +9,30 @@ css file for both login and signup
     margin-top: 80px;
 }
 
+body{
+    background: linear-gradient(
+      135deg,
+      #020617,
+      #0f172a,
+      #1e3a8a
+    );
+}
 
-.container{
+/* box at the middle */
+.container{  
     display: flex;
     flex-direction: column;
     margin: auto;
-    margin-top: 200px;
-    background: #000000;
+    margin-top: 150px;
+    background: rgba(15, 23, 42, 0.9);
+    backdrop-filter: blur(12px);
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255,0.1);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.4);
     padding-top: 30px;
     padding-bottom: 30px;
+    width: 1126px;
+    /* width: 750px; */
 }
 
 .header{
@@ -31,7 +46,7 @@ css file for both login and signup
 }
 
 .text{
-    color: #1c41b1;
+    color: #2e51ba;
     font-size: 48px;
     font-weight: 700;
 }
@@ -40,7 +55,11 @@ css file for both login and signup
     width: 220px;
     height: 6px;
     margin: 0 auto;
-    background: #1c41b1;
+    background: linear-gradient(
+        90deg,
+        #2563eb,
+        #7c3aed
+    );
     border-radius: 9px;
     margin-top: 15px;
 }
@@ -58,8 +77,14 @@ css file for both login and signup
     margin: auto;
     width: 480px;
     height: 70px;
-    background: #ffffff;
+    background:#1e293b;
+    border:1px solid #334155;
     border-radius: 12px;
+}
+
+.input:focus-within{
+    border: 1px solid #2563eb;
+    box-shadow: 0 0 15px rgba(37,99,235,0.4);
 }
 
 .input img{
@@ -72,10 +97,14 @@ css file for both login and signup
     background: transparent;
     border: none;
     outline: none;
-    color: #797979;
+    color: white;
     font-size: 19px;
     align-items: center;
     margin: 0 auto;
+}
+
+.input input::placeholder{
+    color:#94a3b8;
 }
 
 .forgot-password{
@@ -102,11 +131,19 @@ css file for both login and signup
     width: 220px;
     height: 60px;
     color: #ffffff;
-    background: #4c00b4;
+     background: linear-gradient(
+        90deg,
+        #2563eb,
+        #7c3aed
+    );
     border-radius: 50px;
     font-size: 19px;
     font-weight: 700; 
     cursor: pointer;
+}
+
+.submit:hover{
+    transform: translateY(-3px);
 }
 
 .gray{
