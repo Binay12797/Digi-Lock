@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { unstable_setDevServerHooks, useNavigate } from 'react-router-dom'
+import axios from 'axios'
 import "./LoginSignup.css"
 
 import email_icon from '../../assets/email.png'
@@ -10,38 +11,74 @@ const Signup = () => {
 
   const navigate = useNavigate();
 
-//  const [action,setAction] = useState("Sign Up");
-//   // creating usestate variable
-//   // useState is a react tool which provide us with a [var,func] func can be used to set data of this variable
+  const [name, setName ] = useState("");
+  const [email, setEmail ] = useState("");
+  const [password, setPassword ] = useState("");
+  const [errorMessage, setErrorMessage ] = useState("");
+
+  const handleSighup = async () => {
+    setErrorMessage("");
+
+    // if name is left empty then it has bollean value 0 and !name= 1 
+    if(!name || !email || !password){
+      setErrorMessage("All fields are required.");
+      return;
+    }
+
+    try{
+      const response = await axios.post('http://localhost:5000/api/auth/register',{name: name , email: email, password: password});
+
+      if(response.data.success){
+        alert("Account Created Sucessfully! Please log in.");
+        navigate("/login");
+      }
+
+    } 
+     
+    catch (error){
+        if(error.response && error.response.data && error.response.data.message)
+        {
+          setErrorMessage(error.response.data.message);
+        }
+        else
+        {
+          setErrorMessage("Cannot Connect to server. Backend might not be running.")
+        }
+      }
+
+  };
 
   return (
-    <div className="page-layout-rapper">
+    <div className="page-layout-wrapper">
       <div className='container'>
         <div className='header'>
           <div className='text'>Sign Up</div>
           <div className='underline'></div>
         </div>
 
+        {errorMessage && <div style={{ color: 'red', textAlign: 'center', marginTop: '10px' }}>{errorMessage}</div>}
+
+
         <div className='inputs'>
       
           <div className='input'>
             <img src={user_icon} alt="" />
-            <input type="text" placeholder='Name'/>
+            <input type="text" placeholder='Name' value={name} onChange={(e) => setName(e.target.value)}/>
           </div>
 
           <div className='input'>
             <img src={email_icon} alt="" />
-            <input type="email" placeholder='Email Id'/>
+            <input type="email" placeholder='Email Id' value={email} onChange={(e) => setEmail(e.target.value)}/>
           </div>
 
           <div className='input'>
             <img src={password_icon} alt="" />
-            <input type="password" placeholder='Password'/>
+            <input type="password" placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)}  onKeyDown={(e) => {if(e.key === 'Enter'){handleSighup();}}}/>
           </div>
         </div>
         
         <div className="submit-container">
-          <div className= "submit">Sign Up</div>
+          <div className= "submit" onClick={handleSighup}>Sign Up</div>
           <div className= "submit gray"  onClick={()=>navigate('/Login')}>Login</div>
           {/* if you add an . before /Login eg:./Login on clicking Login button your url will be http://localhost:5173/Signup/Login which we dont want */}
         </div>
