@@ -1,5 +1,4 @@
-const mongoose = require('mongoose');
-
+import mongoose from 'mongoose';
 const accessLogSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -40,4 +39,4 @@ const accessLogSchema = new mongoose.Schema({
    versionKey : false
   }
 );
-module.exports = mongoose.model('AccessLog', accessLogSchema, 'access_logs');
+export default mongoose.model("AccessLog", accessLogSchema);

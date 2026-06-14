@@ -1,5 +1,4 @@
-const mongoose = require('mongoose');
-
+import mongoose from 'mongoose';
 const doorSchema = new mongoose.Schema({
   location: {
     type: String,
@@ -26,4 +25,4 @@ const doorSchema = new mongoose.Schema({
    versionKey : false
   });
 
-module.exports = mongoose.model('Door', doorSchema,'door');
+export default mongoose.model("Door", doorSchema);

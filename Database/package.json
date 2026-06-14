@@ -1,7 +1,6 @@
 {
   "type": "module",
   "dependencies": {
-    "mongoose": "^9.6.3",
-    "ws": "^8.21.0"
+    "systeminformation": "^5.31.7"
   }
 }
