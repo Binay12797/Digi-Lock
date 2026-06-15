@@ -22,7 +22,7 @@ const Login = () => {
 
     try{
       //now we should make an api request to running backend port.
-      const response = await axios.post('http://localhost:5000/api/auth/login',{email: email, password: password}); //awati: wait till server response
+      const response = await axios.post('http://localhost:3000/login',{email: email, password: password}); //awati: wait till server response
       //after obtaining response , response is stored in response.
 
       if(response.data.success){
