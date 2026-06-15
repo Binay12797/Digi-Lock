@@ -60,6 +60,7 @@ npm install react-pro-sidebar  (allows us to create sidebar more easily)
 finds: use ctrl+d to select and edit multiple same text at once
 
 useState: It allows a component to remember values between renders and triggers
+
 useContext: Normally in React, if a parent component has data that a deeply nested child component needs, you have to pass it down manually through every single component in between (a frustrating process known as "prop drilling"). useContext solves this.
 
 useMemo (The Performance Saver)
@@ -78,3 +79,8 @@ Best For: Fast, simple, one-liner object creation without extra logic.
 => { ... } * Meaning: Executes a standard block of code.
 Return Value: Returns undefined automatically, unless you explicitly type the return keyword.
 Best For: Complex logic where you need to run calculations or declare variables before returning a result.
+
+
+NOTE: I have written color for var and colour for codes
+
+shortcut: ctrl+D

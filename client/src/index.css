@@ -20,7 +20,9 @@ body {
 
 /* used in app.jsx */
 .app{
+  min-height: 100vh;
   display: flex;
+  flex-direction: column;
   position: relative;
 }
 
