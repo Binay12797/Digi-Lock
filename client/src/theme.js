@@ -1,5 +1,10 @@
 import { createContext, useState, useMemo } from "react";
+
+//createTheme() is an MUI function that takes your theme configuration and generates a complete theme object that Material UI components can use.
 import {createTheme} from "@mui/material/styles"
+
+import { create } from "axios";
+
 
 //colour design tokens that we wil use
 export const tokens = (mode) => ({
@@ -132,12 +137,103 @@ export const tokens = (mode) => ({
 
 })
 
+
+// material ui theme
 export const themeSettings = (mode) => {
     const colors = tokens(mode);
-
+ 
     return{
-        palette: {
+        palette: { // palette is an object here which store different values 
+            mode: mode, // take an existing variabel mode and store it inside an object property called mode
+            ...(mode == "dark"
+                ?
+                {
+                    primary:{
+                        main: colors.primary[500],
+                    },
+                    secondary:{
+                        main: colors.greenAccent[500],
+                    },
+                    neutral:{
+                        dark:colors.grey[700],
+                        main:colors.grey[500],
+                        light:colors.grey[100],
+                    },
+                    background:{
+                        default: colors.primary[500]
+                    }
+                }://when light mode
+                {
+                    primary:{
+                        main: colors.primary[100],
+                    },
+                    secondary:{
+                        main: colors.greenAccent[500],
+                    },
+                    neutral:{
+                        dark:colors.grey[700],
+                        main:colors.grey[500],
+                        light:colors.grey[100],
+                    },
+                    background:{
+                        default: "#fcfcfc",
+                    }
+                }
+            )
             
+        },
+        topography: {
+            fontfamily: ["Source Sans Pro","sans-serif"].join(","),
+            fontSize: 12, //default font size
+
+            h1: {
+              fontfamily: ["Source Sans Pro","sans-serif"].join(","),
+              fontSize: 40,
+            },
+            h2: {
+              fontfamily: ["Source Sans Pro","sans-serif"].join(","),
+              fontSize: 32,
+            },
+            h3: {
+              fontfamily: ["Source Sans Pro","sans-serif"].join(","),
+              fontSize: 24,
+            },
+            h4: {
+              fontfamily: ["Source Sans Pro","sans-serif"].join(","),
+              fontSize: 20,
+            },
+            h5: {
+              fontfamily: ["Source Sans Pro","sans-serif"].join(","),
+              fontSize: 16,
+            },
+            h6: {
+              fontfamily: ["Source Sans Pro","sans-serif"].join(","),
+              fontSize: 14,
+            }
         }
-    }
+
+    };
+};
+
+
+//context for colour mode, ColorModeContext obj
+//createContext() is a React function used to share data globally without passing properties(variables) manually.
+export const ColorModeContext = createContext({
+    toggleColorMode: () => {}  //This is the default context value. it’s empty {} Because: You are just defining the shape of the context, Real logic will be provided later using a Provider
+})
+
+export const useMode = () => {
+    const[mode, setMode] = useState("dark"); //default value dark
+
+    //new variables colorMode and theme
+    const colorMode = useMemo(  //Without useMemo, a new object would be created every render.
+        () => ({
+            toggleColorMode: () => setMode((prev) => (prev === "light"? "dark": "light")),
+        }),
+        []
+    );
+    const theme = useMemo( () => createTheme(themeSettings(mode)), [mode] ); //createTheme converts that configuration into a real MUI theme.
+
+    return [theme, colorMode];
 }
+
