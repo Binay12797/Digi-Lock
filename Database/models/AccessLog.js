@@ -35,7 +35,8 @@ const accessLogSchema = new mongoose.Schema({
     default: Date.now
   },
 },
-{collection: 'access_logs'},
-{versionKey : false}
+{collection: 'access_logs',
+versionKey : false
+},
 );
 export default mongoose.model("AccessLog", accessLogSchema);
