@@ -45,3 +45,36 @@ create an fucntion handleLogin to handle login inputs and send data to backend f
 implemeted code for Enter key so that user dont have to manually press login button
 
 create an handlSignup function that handle signup
+
+Day 3:
+
+I decided to use material UI to design the webpage
+for which i used WebKit , WebKit is a fast, open-source web browser engine developed primarily by Apple.
+
+codes from webpage:
+npm install @mui/material @emotion/react @emotion/styled
+@mui/x-data-grid @mui/icons-material
+
+npm install react-pro-sidebar  (allows us to create sidebar more easily)
+
+finds: use ctrl+d to select and edit multiple same text at once
+
+useState: It allows a component to remember values between renders and triggers
+useContext: Normally in React, if a parent component has data that a deeply nested child component needs, you have to pass it down manually through every single component in between (a frustrating process known as "prop drilling"). useContext solves this.
+
+useMemo (The Performance Saver)
+Every time a component's state or props change, React re-runs the entire component function. If you have a really slow, complex math calculation inside that component, it will re-calculate every single time, slowing down your app.
+What it does: It "memoizes" (caches) the result of a calculation. It will only re-run that calculation if the specific dependencies it relies on change.
+
+
+extension: Tailwind Shades, creates multiple shades of a colour
+shortcut: ctrl+k + ctrl+g
+
+
+=> ({ ... }) * Meaning: Returns an object literal immediately.
+Return Value: The object defined inside the parentheses.
+Best For: Fast, simple, one-liner object creation without extra logic.
+
+=> { ... } * Meaning: Executes a standard block of code.
+Return Value: Returns undefined automatically, unless you explicitly type the return keyword.
+Best For: Complex logic where you need to run calculations or declare variables before returning a result.
