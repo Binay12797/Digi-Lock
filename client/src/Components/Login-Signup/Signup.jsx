@@ -26,7 +26,7 @@ const Signup = () => {
     }
 
     try{
-      const response = await axios.post('http://localhost:5000/create',{name: name , email: email, password: password});
+      const response = await axios.post('http://localhost:3000/create',{name: name , email: email, password: password});
 
       if(response.data.success){
         alert("Account Created Sucessfully! Please log in.");

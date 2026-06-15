@@ -10,9 +10,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/icons-material": "^9.1.1",
+    "@mui/material": "^9.1.1",
+    "@mui/x-data-grid": "^9.5.0",
     "axios": "^1.17.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
+    "react-pro-sidebar": "^1.1.0",
     "react-router-dom": "^7.16.0"
   },
   "devDependencies": {
