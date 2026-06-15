@@ -10,7 +10,9 @@ const app = express();
 app.use(express.json());
 
 //MongoDB Connection 
-mongoose.connect("mongodb+srv://kranabhat338_db_user:0pQiliKmlxHqYfrW@cluster0.n030ezp.mongodb.net/")
+mongoose.connect(
+  'mongodb://rajab2007bal_db_user:Test1234@ac-nisxnkl-shard-00-00.n030ezp.mongodb.net:27017,ac-nisxnkl-shard-00-01.n030ezp.mongodb.net:27017,ac-nisxnkl-shard-00-02.n030ezp.mongodb.net:27017/digilock?ssl=true&replicaSet=atlas-aosg6b-shard-0&authSource=admin&appName=Cluster0'
+)
 .then(() => console.log("MongoDB connected"))
 .catch(err => console.log(err));
 
@@ -42,8 +44,8 @@ wss.on("connection", (ws) => {
 
     //  Check user in DB
     const user = await User.findOne({
-      pin: message.pin,
-      isActive: true
+      pin: message.pin, //pin match check
+      isActive: true //user allowed/banned
     });
 
     if (user) {

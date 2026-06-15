@@ -47,6 +47,7 @@ mongoose.connect(
   status: 'success'
 
 });
+
   await log.save();
   console.log('AccessLog Saved');
 })  
@@ -59,13 +60,13 @@ console.log("WebSocket server running at ws://localhost:8080");
 wss.on("connection", function connection(ws) {
   ws.send("something");
 
-  setInterval(async () => {
+  const Interval = setInterval(async () => {
     const cpuTemp = JSON.stringify(await si.currentLoad());
     ws.send(cpuTemp);
   }, 1000);
 
-  ws.on("close", () => clearInterval(interval)); 
-  //Interval is cleared every run
+  ws.on("close", () => clearInterval(Interval)); 
+  
 });
 
 

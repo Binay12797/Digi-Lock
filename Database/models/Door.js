@@ -21,8 +21,7 @@ const doorSchema = new mongoose.Schema({
     default: null
   }, 
 },
-{
-   versionKey : false
-  });
+{collection: 'door'},
+{versionKey : false});
 
 export default mongoose.model("Door", doorSchema);
