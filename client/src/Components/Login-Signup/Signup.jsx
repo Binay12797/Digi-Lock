@@ -1,90 +1,122 @@
-import React, { useState } from 'react'
-import { unstable_setDevServerHooks, useNavigate } from 'react-router-dom'
-import axios from 'axios'
-import "./LoginSignup.css"
+import React, { useState } from "react";
+import { unstable_setDevServerHooks, useNavigate } from "react-router-dom";
+import axios from "axios";
+import "./LoginSignup.css";
 
-import email_icon from '../../assets/email.png'
-import user_icon from '../../assets/person.png'
-import password_icon from '../../assets/password.png'
+import email_icon from "../../assets/email.png";
+import user_icon from "../../assets/person.png";
+import password_icon from "../../assets/password.png";
 
 const Signup = () => {
-
   const navigate = useNavigate();
 
-  const [name, setName ] = useState("");
-  const [email, setEmail ] = useState("");
-  const [password, setPassword ] = useState("");
-  const [errorMessage, setErrorMessage ] = useState("");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleSignup = async () => {
     setErrorMessage("");
 
-    // if name is left empty then it has bollean value 0 and !name= 1 
-    if(!name || !email || !password){
+    // if name is left empty then it has bollean value 0 and !name= 1
+    if (!name || !email || !password) {
       setErrorMessage("All fields are required.");
       return;
     }
 
-    try{
-      const response = await axios.post('http://localhost:3000/create',{name: name , email: email, password: password});
+    try {
+      const response = await axios.post("http://localhost:3000/create", {
+        name: name,
+        email: email,
+        password: password,
+      });
 
-      if(response.data.success){
+      if (response.data.success) {
         alert("Account Created Sucessfully! Please log in.");
         navigate("/login");
       }
-
-    } 
-     
-    catch (error){
-        if(error.response && error.response.data && error.response.data.message)
-        {
-          setErrorMessage(error.response.data.message);
-        }
-        else
-        {
-          setErrorMessage("Cannot Connect to server. Backend might not be running.")
-        }
+    } catch (error) {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        setErrorMessage(error.response.data.message);
+      } else {
+        setErrorMessage(
+          "Cannot Connect to server. Backend might not be running.",
+        );
       }
-
+    }
   };
 
   return (
-    <div className="page-layout-wrapper">
-      <div className='container'>
-        <div className='header'>
-          <div className='text'>Sign Up</div>
-          <div className='underline'></div>
-        </div>
-
-        {errorMessage && <div style={{ color: 'red', textAlign: 'center', marginTop: '10px' }}>{errorMessage}</div>}
-
-
-        <div className='inputs'>
-      
-          <div className='input'>
-            <img src={user_icon} alt="" />
-            <input type="text" placeholder='Name' value={name} onChange={(e) => setName(e.target.value)}/>
+    <div className="auth-page">
+      <div className="page-layout-wrapper">
+        <div className="container">
+          <div className="header">
+            <div className="text">Sign Up</div>
+            <div className="underline"></div>
           </div>
 
-          <div className='input'>
-            <img src={email_icon} alt="" />
-            <input type="email" placeholder='Email Id' value={email} onChange={(e) => setEmail(e.target.value)}/>
+          {errorMessage && (
+            <div
+              style={{ color: "red", textAlign: "center", marginTop: "10px" }}
+            >
+              {errorMessage}
+            </div>
+          )}
+
+          <div className="inputs">
+            <div className="input">
+              <img src={user_icon} alt="" />
+              <input
+                type="text"
+                placeholder="Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
+
+            <div className="input">
+              <img src={email_icon} alt="" />
+              <input
+                type="email"
+                placeholder="Email Id"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+
+            <div className="input">
+              <img src={password_icon} alt="" />
+              <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleSignup();
+                  }
+                }}
+              />
+            </div>
           </div>
 
-          <div className='input'>
-            <img src={password_icon} alt="" />
-            <input type="password" placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)}  onKeyDown={(e) => {if(e.key === 'Enter'){handleSignup();}}}/>
+          <div className="submit-container">
+            <div className="submit" onClick={handleSignup}>
+              Sign Up
+            </div>
+            <div className="submit gray" onClick={() => navigate("/Login")}>
+              Login
+            </div>
+            {/* if you add an . before /Login eg:./Login on clicking Login button your url will be http://localhost:5173/Signup/Login which we dont want */}
           </div>
-        </div>
-        
-        <div className="submit-container">
-          <div className= "submit" onClick={handleSignup}>Sign Up</div>
-          <div className= "submit gray"  onClick={()=>navigate('/Login')}>Login</div>
-          {/* if you add an . before /Login eg:./Login on clicking Login button your url will be http://localhost:5173/Signup/Login which we dont want */}
         </div>
       </div>
-    </div>  
-  )
-}
- 
+    </div>
+  );
+};
+
 export default Signup;

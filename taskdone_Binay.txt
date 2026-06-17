@@ -84,3 +84,10 @@ Best For: Complex logic where you need to run calculations or declare variables 
 NOTE: I have written color for var and colour for codes
 
 shortcut: ctrl+D
+
+
+Day 3:
+npm install react-pro-sidebar
+
+[,] for arrays
+{,} for object
