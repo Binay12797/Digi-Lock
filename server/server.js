@@ -9,7 +9,23 @@ const passport = require("passport");
 const session = require("express-session");
 const server = express();  
 
+//for websocket
+const ws = require("socket.io");
+const http = require('http');
+
 connectDB();
+
+const httpServer = http.createServer(server);
+const io = new ws(httpServer,{
+  cors: {
+    origin: "http://localhost: 5173", //Url of react
+    methods: ["GET","POST"],
+    credentials: true
+  }
+});
+
+server.set("io",io);
+
 
 
 server.use(cors());  //enables cors for all routes and origins
@@ -29,6 +45,13 @@ server.use((req,res,next)=>{
     next();
 });
 
+
+io.on("connection",(socket)=>{
+  console.log(`client conneted in websocekt Id: ${socket.id}`);
+  socket.on("disconnect",()=>{
+    console.log(`client disconnected: ${SocketAddress.id}`);
+  });
+});
 
 
 // server.set("views",Path.join(__dirname,"views"));
