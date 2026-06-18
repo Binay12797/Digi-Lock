@@ -51,7 +51,8 @@ const Signup = () => {
   };
 
   return (
-    <div className="auth-page">
+    <>
+      <div className="auth-page" />
       <div className="page-layout-wrapper">
         <div className="container">
           <div className="header">
@@ -82,6 +83,12 @@ const Signup = () => {
               <img src={email_icon} alt="" />
               <input
                 type="email"
+                required
+                onInvalid={(e) =>
+                  e.target.setCustomValidity(
+                    "Please enter a valid email format!",
+                  )
+                }
                 placeholder="Email Id"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -115,7 +122,7 @@ const Signup = () => {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

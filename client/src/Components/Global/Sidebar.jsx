@@ -12,6 +12,8 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
+import Logo from "../../assets/Logo.png";
+import LogoutIcon from "@mui/icons-material/Logout";
 
 //we make item so that we dont have to write same block of code multiple times
 const Item = ({ title, to, icon, selected, setSelected }) => {
@@ -24,100 +26,162 @@ const Item = ({ title, to, icon, selected, setSelected }) => {
       style={{ color: colors.grey[100] }}
       onClick={() => setSelected(title)}
       icon={icon}
+      component={<Link to={to} />}
     >
       <Typography>{title}</Typography>
-      <Link to={to} />
     </MenuItem>
   );
 };
 
-const DashboardSidebar = () => {
+const DashboardSidebar = ({ selected, setSelected }) => {
   const theme = useTheme(); // theme shade
   const colors = tokens(theme.palette.mode); //directly to token shade
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [selected, setSelected] = useState("Dashboard"); // which item is currently selected ie on which page we are currently in
 
   return (
     <Box
       sx={{
-        "&.pro-sidebar-inner": {
-          background: `${colors.primary[400]} !important`,
+        display: "flex",
+        position: "sticky",
+        top: 0,
+        height: "100vh",
+        "& .ps-sidebar-container": {
+          backgroundColor: colors.primary[400],
+          height: "100%",
         },
-        "&.pro-icon-wrapper": {
-          backgroundColor: "transparent !important",
+        "& .ps-menu-button": {
+          padding: "5px 35px 5px 20px ",
         },
-        "&.pro-inner-item": {
-          padding: "5px 35px 5px 20px !important",
+        "& .ps-menu-button:hover": {
+          backgroundColor: "transparent",
+          color: "#868dfb",
         },
-        "&.pro-inner-item:hover": {
-          color: "#868dfb !important",
+        "& .ps-menu-icon": {
+          backgroundColor: "transparent",
         },
-        "&.pro-menu-item.active": {
-          color: "#6870fa !important",
+        "& .ps-active": {
+          color: "#6870fa ",
         },
       }}
     >
-      <Sidebar collapsed={isCollapsed}>
+      <Sidebar
+        collapsed={isCollapsed}
+        style={{ height: "100%", position: "relative" }}
+      >
         <Menu iconShape="square">
           <MenuItem
             onClick={() => setIsCollapsed(!isCollapsed)}
             icon={isCollapsed ? <MenuOutlinedIcon /> : undefined}
             style={{
+              // top right bottom left
               margin: "10px 0 20px 0",
               color: colors.grey[100],
             }}
-          ></MenuItem>
+          >
+            {/* In JavaScript, if the left side of the && is truthy, the code returns the right side (the Box component). */}
+            {!isCollapsed && (
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  ml: "15px",
+                  // margin left
+                }}
+              >
+                <Typography variant="h3" color={colors.grey[900]}>
+                  Digi-Lock
+                </Typography>
+                <IconButton onClick={() => setIsCollapsed(!isCollapsed)}>
+                  <MenuOutlinedIcon />
+                </IconButton>
+              </Box>
+            )}
+          </MenuItem>
 
-          <Box paddingLeft={isCollapsed ? undefined : "10%"}>
-            <Item
-              title="Dashboard"
-              to="/Dashboard"
-              icon={<HomeOutlinedIcon />}
-              selected={selected}
-              setSelected={setSelected}
-            />
-            <Item
-              title="Locks"
-              to="/Dashboard"
-              icon={<LockIcon />}
-              selected={selected}
-              setSelected={setSelected}
-            />
-            <Item
-              title="Users"
-              to="/Dashboard"
-              icon={<PersonOutlinedIcon />}
-              selected={selected}
-              setSelected={setSelected}
-            />
-            <Item
-              title="Fingerprints"
-              to="/Dashboard"
-              icon={<FingerprintOutlinedIcon />}
-              selected={selected}
-              setSelected={setSelected}
-            />
-            <Item
-              title="Access Logs"
-              to="/Dashboard"
-              icon={<DescriptionIcon />}
-              selected={selected}
-              setSelected={setSelected}
-            />
-            <Item
-              title="Alerts & Notifications"
-              to="/Dashboard"
-              icon={<NotificationsNoneOutlinedIcon />}
-              selected={selected}
-              setSelected={setSelected}
-            />
-            <Item
-              title="Settings"
-              to="/Dashboard"
-              icon={<SettingsOutlinedIcon />}
-              selected={selected}
-              setSelected={setSelected}
-            />
+          {!isCollapsed && (
+            <Box mb="25px">
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  paddingBottom: "25px",
+                }}
+              >
+                {/* alt= alternative text description */}
+                <img
+                  alt="Digi-Lock Logo"
+                  height="100px"
+                  width="auto"
+                  src={Logo}
+                />
+              </Box>
+            </Box>
+          )}
+
+          <Box>
+            <Box>
+              <Item
+                title="Dashboard"
+                to="/Dashboard"
+                icon={<HomeOutlinedIcon />}
+                selected={selected}
+                setSelected={setSelected}
+              />
+              <Item
+                title="Locks"
+                to="/Dashboard"
+                icon={<LockIcon />}
+                selected={selected}
+                setSelected={setSelected}
+              />
+              <Item
+                title="Users"
+                to="/Dashboard"
+                icon={<PersonOutlinedIcon />}
+                selected={selected}
+                setSelected={setSelected}
+              />
+              <Item
+                title="Fingerprints"
+                to="/Dashboard"
+                icon={<FingerprintOutlinedIcon />}
+                selected={selected}
+                setSelected={setSelected}
+              />
+              <Item
+                title="Access Logs"
+                to="/Dashboard"
+                icon={<DescriptionIcon />}
+                selected={selected}
+                setSelected={setSelected}
+              />
+              <Item
+                title="Alerts & Notifications"
+                to="/Dashboard"
+                icon={<NotificationsNoneOutlinedIcon />}
+                selected={selected}
+                setSelected={setSelected}
+              />
+              <Item
+                title="Settings"
+                to="/Dashboard"
+                icon={<SettingsOutlinedIcon />}
+                selected={selected}
+                setSelected={setSelected}
+              />
+            </Box>
+            {/* position: "absolute" on the Logout Box: This pulls the Logout button out of the normal "flow" of the Menu. By setting bottom: "10px", you tell the browser: "No matter what, stick this to the bottom of the sidebar ie: ends at 10 px from the bottom of the page." */}
+            <Box sx={{ position: "absolute", bottom: "10px", width: "100%" }}>
+              <Item
+                title="Logout"
+                to="/"
+                icon={<LogoutIcon />}
+                selected={selected}
+                setSelected={setSelected}
+              />
+            </Box>
           </Box>
         </Menu>
       </Sidebar>

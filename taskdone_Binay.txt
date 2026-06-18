@@ -91,3 +91,9 @@ npm install react-pro-sidebar
 
 [,] for arrays
 {,} for object
+
+// ❌ Wrong - these target the Box itself, not children
+"&.pro-sidebar-inner": { ... }
+
+// ✅ Correct - use descendant selectors
+"& .pro-sidebar-inner": { ... }  // note the space

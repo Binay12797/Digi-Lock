@@ -44,7 +44,9 @@ const Login = () => {
   };
 
   return (
-    <div className="auth-page">
+    <>
+      {/* This way .auth-page is a fixed full-screen background layer behind everything */}
+      <div className="auth-page" />
       <div className="page-layout-wrapper">
         <div className="container">
           <div className="header">
@@ -65,6 +67,12 @@ const Login = () => {
               <img src={email_icon} alt="" />
               <input
                 type="email"
+                required
+                onInvalid={(e) =>
+                  e.target.setCustomValidity(
+                    "Please enter a valid email format!",
+                  )
+                }
                 placeholder="Email Id"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -102,7 +110,7 @@ const Login = () => {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

@@ -3,12 +3,19 @@ css file for both login and signup .page-layout-wrapper {
   justify-content: center;
   align-items: center;
   width: 100%;
-  min-height: calc(100vh - 80px); /* for 80px nav bar */
-  margin-top: 80px;
+  min-height: 100vh;
+  padding-top: 80px;
+  box-sizing: border-box;
 }
 
 .auth-page {
   background: linear-gradient(135deg, #020617, #0f172a, #1e3a8a);
+  min-height: 100vh;
+  position: fixed; /* ADD THIS */
+  top: 0; /* ADD THIS */
+  left: 0; /* ADD THIS */
+  width: 100%; /* ADD THIS */
+  z-index: -1; /* ADD THIS — sits behind navbar and content */
 }
 
 /* box at the middle */
@@ -16,8 +23,8 @@ css file for both login and signup .page-layout-wrapper {
   display: flex;
   flex-direction: column;
   margin: auto;
-  margin-top: 150px;
-  background: rgba(15, 23, 42, 0.4);
+  margin-top: 130px;
+  background: rgba(0, 23, 77, 0.4);
   backdrop-filter: blur(12px);
   border-radius: 24px;
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -135,3 +142,8 @@ css file for both login and signup .page-layout-wrapper {
   background: #eaeaea;
   color: #676767;
 }
+
+/* degugging */
+/* * {
+  outline: 1px solid red !important;
+} */
