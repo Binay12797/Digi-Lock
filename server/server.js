@@ -3,6 +3,7 @@ const express = require("express"); //imports the express framework         //cr
 const PORT = 3000;                  //defines the port 
 const Path = require("node:path");  
 const userRouter = require("./routes/userRouter")
+const hardwareRouter= require("./routes/hardwareRouter");
 const connectDB = require("./config/db");
 const cors = require("cors");
 const passport = require("passport");
@@ -10,13 +11,13 @@ const session = require("express-session");
 const server = express();  
 
 //for websocket
-const ws = require("socket.io");
+const {Server}= require("socket.io");
 const http = require('http');
 
 connectDB();
 
 const httpServer = http.createServer(server);
-const io = new ws(httpServer,{
+const io = new Server(httpServer,{
   cors: {
     origin: "http://localhost: 5173", //Url of react
     methods: ["GET","POST"],
@@ -49,7 +50,7 @@ server.use((req,res,next)=>{
 io.on("connection",(socket)=>{
   console.log(`client conneted in websocekt Id: ${socket.id}`);
   socket.on("disconnect",()=>{
-    console.log(`client disconnected: ${SocketAddress.id}`);
+    console.log(`client disconnected: ${socket.id}`);
   });
 });
 
@@ -59,7 +60,7 @@ io.on("connection",(socket)=>{
 
 
 server.use("/",userRouter);
-
-server.listen(PORT,()=>{             //listens at the port for req
+server.use("/api",hardwareRouter);
+httpServer.listen(PORT,()=>{             //listens at the port for req
     console.log(`server is running at port ${PORT}`);
 });

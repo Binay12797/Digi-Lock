@@ -5,3 +5,5 @@ const enrollmentState = require("../services/enrollmentState");
 const hardwareController = require("../controllers/hardwareController");
 
 hardwareRouter.post("/enrollFingerprint",hardwareController.enroll);
+
+module.exports=hardwareRouter;

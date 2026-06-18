@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema({
     
     },
     fingerprint:{
-        type: string,
+        type: String,
         required: null
     },
     isActive:{

@@ -1,5 +1,6 @@
 const user = require("../models/userModel");
 const passport = require("passport");
+const enrollmentState = require("../services/enrollmentState");
 async function createUser(req,res){
     try{
         const{name, email, password} = req.body;
@@ -31,17 +32,13 @@ async function signUpPage(req,res){
 }
 
 async function loginPage(req,res){
-    res.render("login");
-}
+    res.json({
+        success: true,
+        message: "Digilock auth operational"
+    });
+};
 
-// async function login(req,res,next){
-//     passport.authenticate("local",{
-//         successRedirect: "/dashboard",
-//         failureRedirect: "/login"})
-//         (req,res,next);
-    
-    
-// }
+
 // Inside userController.js
 async function login(req, res, next) {
     passport.authenticate("local", (err, user, info) => {
@@ -71,9 +68,22 @@ async function login(req, res, next) {
     })(req, res, next);
 }
 
+async function startEnrollment(req,res){
+    const{userId} = req.body;
+    if(!userId){
+        return res.status(400).json({success: false, meassage: "User Id is required to start enrollement"});
+
+    }
+    enrollmentState.setSession(userId);
+    return res.status(200).json({
+        success: true,
+        message: `Enrollment session started for user ${userId}. Ready for fingerprint scan`
+    });
+};
 module.exports={
     createUser,
     signUpPage,
     loginPage,
-    login
+    login,
+    startEnrollment
 }
