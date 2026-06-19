@@ -97,3 +97,10 @@ npm install react-pro-sidebar
 
 // ✅ Correct - use descendant selectors
 "& .pro-sidebar-inner": { ... }  // note the space
+
+To save the default message and finish the merge,
+ press these keys on your keyboard:
+ Press the Esc key.Type :wq (colon, then w, then q).Press Enter.
+ What just happened?: enters command mode in Vim.
+ w stands for write (which means save).
+ q stands for quit.
