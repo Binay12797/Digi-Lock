@@ -115,8 +115,9 @@ const Signup = () => {
             <div className="submit" onClick={handleSignup}>
               Sign Up
             </div>
+            <div className="line" />
             <div className="submit gray" onClick={() => navigate("/Login")}>
-              Login
+              Already Have An Account
             </div>
             {/* if you add an . before /Login eg:./Login on clicking Login button your url will be http://localhost:5173/Signup/Login which we dont want */}
           </div>

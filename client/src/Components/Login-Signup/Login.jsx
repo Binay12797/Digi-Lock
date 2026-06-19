@@ -101,11 +101,12 @@ const Login = () => {
           </div>
 
           <div className="submit-container">
-            <div className="submit gray" onClick={() => navigate("/Signup")}>
-              Sign Up
-            </div>
             <div className="submit" onClick={handleLogin}>
               Login
+            </div>
+            <div className="line" />
+            <div className="submit gray" onClick={() => navigate("/Signup")}>
+              Create New Account
             </div>
           </div>
         </div>
