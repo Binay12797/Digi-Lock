@@ -2,44 +2,66 @@ import { Box, Typography, useTheme } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { useContext } from "react";
 import { tokens, ColorModeContext } from "../../theme";
-import { mockDataLocks } from "../Data/mockdata";
+import { mockAccessLogs } from "../Data/mockdata";
+import { GridToolbar } from "@mui/x-data-grid/internals";
 
-const Locks = () => {
+const AccessLogs = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const colorMode = useContext(ColorModeContext);
 
   const columns = [
-    { field: "_id", headerName: "ID" }, //field represent value grabbed
     { field: "deviceId", headerName: "DeviceId", flex: 1 }, //flex: 1 will extend the cells width
     { field: "location", headerName: "Location", flex: 1 },
     {
-      field: "isOnline",
-      headerName: "Device Status",
+      field: "timestamp",
+      headerName: "Last Access Time",
+      valueGetter: (value, row) => new Date(row.timestamp).getTime(), //converts to date and time then date is converted into a number
+
+      renderCell: (params) =>
+        params.row.timestamp
+          ? new Date(params.row.timestamp).toLocaleString() //params passes everything about current row all cells
+          : "N/A",
       flex: 1,
-      renderCell: ({ row: { isOnline } }) => {
+    },
+    {
+      field: "name",
+      headerName: "User Name",
+      valueGetter: (value, row) => row.user?.name,
+      flex: 1,
+    },
+    {
+      field: "action",
+      headerName: "Action",
+      flex: 1,
+    },
+    {
+      field: "status",
+      headerName: "Status",
+      flex: 1,
+      renderCell: ({ row: { status } }) => {
         return (
           <Box
             sx={{
-              width: "60%",
+              width: "70%",
               m: "15px auto",
               display: "flex",
               justifyContent: "center",
               backgroundColor:
-                isOnline === true
+                status === "SUCCESS"
                   ? colors.greenAccent[700]
                   : colors.redAccent[700],
               borderRadius: "5px",
             }}
           >
-            {isOnline === true && (
+            {status === "SUCCESS" && (
               <Typography color={colors.grey[100]} sx={{ ml: "5px" }}>
-                Online
+                SUCCESS
               </Typography>
             )}
-            {isOnline === false && (
+            {status === "FAILED" && (
               <Typography color={colors.grey[100]} sx={{ ml: "5px" }}>
-                Offline
+                FAILED
               </Typography>
             )}
           </Box>
@@ -47,18 +69,13 @@ const Locks = () => {
       },
     },
     {
-      field: "time",
-      headerName: "Last Access Time",
-      valueGetter: (value, row) =>
-        row.lastAction?.time
-          ? new Date(row.lastAction.time).toLocaleString() //creates an new object called Date made by converting string to Date Object and .toLocaleString() formatt it into human reading
-          : "N/A",
+      field: "reason",
+      headerName: "Reason",
       flex: 1,
     },
     {
-      field: "action",
-      headerName: "Last attempt",
-      valueGetter: (value, row) => row.lastAction?.action,
+      field: "method",
+      headerName: "Method",
       flex: 1,
     },
   ];
@@ -89,9 +106,10 @@ const Locks = () => {
       >
         <DataGrid
           checkboxSelection
-          rows={mockDataLocks}
+          rows={mockAccessLogs}
           columns={columns}
           getRowId={(row) => row._id}
+          showToolbar
         />
         {/*getRowId is a function that tells the DataGrid:"When you need the unique ID for a row, use the _id property." */}
         {/* columns to arrange */}
@@ -100,4 +118,4 @@ const Locks = () => {
   );
 };
 
-export default Locks;
+export default AccessLogs;

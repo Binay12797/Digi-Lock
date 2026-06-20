@@ -131,7 +131,7 @@ const DashboardSidebar = ({ selected, setSelected }) => {
               />
               <Item
                 title="Locks"
-                to="/Dashboard"
+                to="/Locks"
                 icon={<LockIcon />}
                 selected={selected}
                 setSelected={setSelected}
@@ -152,7 +152,7 @@ const DashboardSidebar = ({ selected, setSelected }) => {
               />
               <Item
                 title="Access Logs"
-                to="/Dashboard"
+                to="/AccessLogs"
                 icon={<DescriptionIcon />}
                 selected={selected}
                 setSelected={setSelected}

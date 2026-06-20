@@ -99,3 +99,11 @@ npm install react-pro-sidebar
 
 // ✅ Correct - use descendant selectors
 "& .pro-sidebar-inner": { ... }  // note the space
+
+
+new Date(row.timestamp).getTime()
+This returns a number representing milliseconds since a fixed starting point in time:
+📍 1 January 1970, 00:00:00 UTC
+This is called the Unix Epoch
+
+new Date("2026-06-20T12:30:00Z").getTime() returns 1781968200000

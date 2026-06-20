@@ -12,6 +12,8 @@ import Dashboard from "./Components/Dashboard/Dashboard"; //note if any import i
 import DashboardLayout from "./Components/Layouts/DashboardLayout";
 import AuthLayout from "./Components/Layouts/AuthLayout";
 import Users from "./Components/Dashboard/Users";
+import Locks from "./Components/Dashboard/Locks";
+import AccessLogs from "./Components/Dashboard/AccessLogs";
 
 function App() {
   const [theme, colorMode] = useMode();
@@ -34,6 +36,8 @@ function App() {
             <Route element={<DashboardLayout />}>
               <Route path="/Dashboard" element={<Dashboard />} />
               <Route path="/Users" element={<Users />} />
+              <Route path="/Locks" element={<Locks />} />
+              <Route path="/AccessLogs" element={<AccessLogs />} />
             </Route>
           </Routes>
         </Router>
