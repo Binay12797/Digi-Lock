@@ -62,7 +62,12 @@ const Signup = () => {
 
           {errorMessage && (
             <div
-              style={{ color: "red", textAlign: "center", marginTop: "10px" }}
+              style={{
+                color: "red",
+                textAlign: "center",
+                marginTop: "15px",
+                fontSize: "17px",
+              }}
             >
               {errorMessage}
             </div>

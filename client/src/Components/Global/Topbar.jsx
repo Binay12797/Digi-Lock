@@ -23,7 +23,7 @@ const Topbar = ({ selected }) => {
         padding: 2,
       }}
     >
-      <Box sx={{ ml: "10px" }}>
+      <Box sx={{ ml: "4px" }}>
         <Typography variant="h4" color={colors.grey[900]}>
           {selected}
         </Typography>

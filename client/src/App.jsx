@@ -11,6 +11,7 @@ import { CssBaseline, ThemeProvider } from "@mui/material";
 import Dashboard from "./Components/Dashboard/Dashboard"; //note if any import is not used page will show white screen only
 import DashboardLayout from "./Components/Layouts/DashboardLayout";
 import AuthLayout from "./Components/Layouts/AuthLayout";
+import Users from "./Components/Dashboard/Users";
 
 function App() {
   const [theme, colorMode] = useMode();
@@ -32,6 +33,7 @@ function App() {
 
             <Route element={<DashboardLayout />}>
               <Route path="/Dashboard" element={<Dashboard />} />
+              <Route path="/Users" element={<Users />} />
             </Route>
           </Routes>
         </Router>

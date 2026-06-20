@@ -57,6 +57,8 @@ npm install @mui/material @emotion/react @emotion/styled
 
 npm install react-pro-sidebar  (allows us to create sidebar more easily)
 
+vh : view port height in percentage
+
 finds: use ctrl+d to select and edit multiple same text at once
 
 useState: It allows a component to remember values between renders and triggers

@@ -138,7 +138,7 @@ const DashboardSidebar = ({ selected, setSelected }) => {
               />
               <Item
                 title="Users"
-                to="/Dashboard"
+                to="/Users"
                 icon={<PersonOutlinedIcon />}
                 selected={selected}
                 setSelected={setSelected}
