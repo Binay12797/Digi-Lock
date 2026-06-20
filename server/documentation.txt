@@ -25,3 +25,13 @@ Day 5:
 
 Day 6:
 -created passport middleware for the authentication of users
+-implemented authentication and connected frontend login/signup to backend
+
+Day 7:
+-setting up websocket "npm install socket.io"
+-creating routes for enrollment and active sessions
+
+
+Day 8:
+-created "protectHardware" middleware for protecting the routes for unauthorized access
+-setting up accesslog schema
