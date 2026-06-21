@@ -14,12 +14,14 @@ import AuthLayout from "./Components/Layouts/AuthLayout";
 import Users from "./Components/Dashboard/Users";
 import Locks from "./Components/Dashboard/Locks";
 import AccessLogs from "./Components/Dashboard/AccessLogs";
+import AddUser from "./Components/Dashboard/AddUser";
 
 function App() {
   const [theme, colorMode] = useMode();
 
   return (
     <ColorModeContext.Provider value={colorMode}>
+      {/* The <ThemeProvider> uses React Context to broadcast your custom theme object down to every single component nested inside it */}
       <ThemeProvider theme={theme}>
         {/* A Material UI component that resets browser CSS defaults.*/}
         <CssBaseline />
@@ -38,6 +40,7 @@ function App() {
               <Route path="/Users" element={<Users />} />
               <Route path="/Locks" element={<Locks />} />
               <Route path="/AccessLogs" element={<AccessLogs />} />
+              <Route path="/AddUser" element={<AddUser />} />
             </Route>
           </Routes>
         </Router>

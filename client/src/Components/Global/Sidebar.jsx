@@ -14,6 +14,8 @@ import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import Logo from "../../assets/Logo.png";
 import LogoutIcon from "@mui/icons-material/Logout";
+import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
+import PersonAddAltOutlinedIcon from "@mui/icons-material/PersonAddAltOutlined";
 
 //we make item so that we dont have to write same block of code multiple times
 const Item = ({ title, to, icon, selected, setSelected }) => {
@@ -139,7 +141,14 @@ const DashboardSidebar = ({ selected, setSelected }) => {
               <Item
                 title="Users"
                 to="/Users"
-                icon={<PersonOutlinedIcon />}
+                icon={<GroupOutlinedIcon />}
+                selected={selected}
+                setSelected={setSelected}
+              />
+              <Item
+                title="Add User"
+                to="/AddUser"
+                icon={<PersonAddAltOutlinedIcon />}
                 selected={selected}
                 setSelected={setSelected}
               />

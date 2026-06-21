@@ -109,3 +109,21 @@ This is called the Unix Epoch
 new Date("2026-06-20T12:30:00Z").getTime() returns 1781968200000
 
 Data Fetching: Getting data from an API (like the axios call we just discussed).
+
+Day:
+ 
+i used formic over react hook form as i feel its more suitable for our project
+
+note: formik and formic are different formic is for python
+
+cd client
+npm install formik yup: installed formik and yup for add user
+
+formal parameters
+
+A schema is a structured framework, blueprint, or mental model used to organize information, concepts, or data
+
+yup.object(): This tells the app that the data being checked is an object. 
+.shape({ }): This defines the exact "shape" or blueprint of that object. Inside the curly brackets { }, you list the specific form fields and their rules.
+
+A phone regex (Regular Expression) is a search pattern used in programming and web development to match, validate, or extract phone numbers within a text
