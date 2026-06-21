@@ -1,13 +1,28 @@
-const user = require("../models/userModel");
-const passport = require("passport");
+require("dotenv").config();
+const User = require("../models/userModel");
 const enrollmentState = require("../services/enrollmentState");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt")
+
 async function createUser(req,res){
     try{
         const{name, email, password} = req.body;
-        const newUser = new user({
+        if (!name || !email || !password) {
+            return res.status(400).json({ success: false, message: "All input fields are required." });
+        }
+
+        // Check if user already exists in DB
+        const userExists = await User.findOne({ email });
+        if (userExists) {
+            return res.status(400).json({ success: false, message: "Email configuration already registered." });
+        }
+
+        const encrypt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, encrypt);
+        const newUser = new User({
             name: name,
             email : email,
-            password :password}
+            password :hashedPassword}
 
         );
         await newUser.save();
@@ -27,46 +42,55 @@ async function createUser(req,res){
     }
 };
 
-async function signUpPage(req,res){
-    res.render("sign-up");
-}
+// async function signUpPage(req,res){
+//     res.render("sign-up");
+// }
 
-async function loginPage(req,res){
-    res.json({
-        success: true,
-        message: "Digilock auth operational"
-    });
-};
+// async function loginPage(req,res){
+//     res.json({
+//         success: true,
+//         message: "Digilock auth operational"
+//     });
+// };
 
 
-// Inside userController.js
-async function login(req, res, next) {
-    passport.authenticate("local", (err, user, info) => {
-        if (err) { 
-            return next(err); 
+
+async function login(req, res) {
+   const { email, password } = req.body;
+
+    try {
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(400).json({ success: false, message: "Invalid Email or Password." });
         }
-        
-        // If passport strategy returned false (auth failed)
-        if (!user) { 
-            return res.status(401).json({ 
-                success: false, 
-                message: info ? info.message : "Incorrect password." 
-            }); 
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ success: false, message: "Invalid  Password." });
         }
-        
-        // If auth succeeded, log the user into the session
-        req.logIn(user, (err) => {
-            if (err) { 
-                return next(err); 
+        const token = jwt.sign(
+            {_id: user._id, email: user.email},
+            process.env.JWT_SECRET,{
+                expiresIn: process.env.JWT_EXPIRES
             }
+        );
+        
             return res.status(200).json({ 
                 success: true, 
                 message: "Logged in successfully!", 
-                user: user 
+                token: token,
+                user: {
+                    id: user._id,
+                    name: user.name,
+                    email: user.email,
+                    isActive: user.isActive
+                }
             });
-        });
-    })(req, res, next);
-}
+        
+    }catch(error){
+        return res.status(500).json({success: false, error: error.message});
+    }
+};
 
 async function startEnrollment(req,res){
     const{userId} = req.body;
@@ -82,8 +106,6 @@ async function startEnrollment(req,res){
 };
 module.exports={
     createUser,
-    signUpPage,
-    loginPage,
     login,
     startEnrollment
 }

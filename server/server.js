@@ -6,8 +6,8 @@ const userRouter = require("./routes/userRouter")
 const hardwareRouter= require("./routes/hardwareRouter");
 const connectDB = require("./config/db");
 const cors = require("cors");
-const passport = require("passport");
-const session = require("express-session");
+// const passport = require("passport");
+// const session = require("express-session");
 const server = express();  
 
 //for websocket
@@ -32,19 +32,19 @@ server.set("io",io);
 server.use(cors());  //enables cors for all routes and origins
 server.use(express.urlencoded({extended: true}));
 server.use(express.json());         //parses the json object
-server.use(session({
-    secret: 'key',
-    resave: false,
-    saveUninitialized: false
-}))
+// server.use(session({
+//     secret: 'key',
+//     resave: false,
+//     saveUninitialized: false
+// }))
 
-require("./middleware/passport")(passport);
-server.use(passport.initialize());
-server.use(passport.session());
-server.use((req,res,next)=>{
-    res.locals.currentUser = req.user;
-    next();
-});
+// require("./middleware/passport")(passport);
+// server.use(passport.initialize());
+// server.use(passport.session());
+// server.use((req,res,next)=>{
+//     res.locals.currentUser = req.user;
+//     next();
+// });
 
 
 io.on("connection",(socket)=>{

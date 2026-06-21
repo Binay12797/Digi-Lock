@@ -4,9 +4,10 @@ const user = require("../models/userModel");
 const enrollmentState = require("../services/enrollmentState");
 const hardwareController = require("../controllers/hardwareController");
 const protectHardware = require("../middleware/protectHardware");
+const {verifyToken} = require("../middleware/auth");
 
 hardwareRouter.post("/enrollFingerprint",hardwareController.enroll);
 hardwareRouter.post("/verifyFingerprint",protectHardware,hardwareController.verification);
-hardwareRouter.get("/logs",hardwareController.getLogs);
+hardwareRouter.get("/logs",verifyToken,hardwareController.getLogs);
 
 module.exports=hardwareRouter;
