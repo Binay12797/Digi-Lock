@@ -86,6 +86,7 @@ export const mockDataLocks = [
       by: "user1",
       time: "2026-06-20T11:47:00Z",
     },
+    status: "open",
   },
   {
     _id: "6854d9d2c77f9f0e3a7d1a4d",
@@ -97,12 +98,14 @@ export const mockDataLocks = [
       by: "user2",
       time: "2026-06-20T12:15:34Z",
     },
+    status: "open",
   },
   {
     _id: "6854d9d2c77f9f0e3a7d1a4e",
     deviceId: "LAB_DOOR_03",
     location: "Block 9: 310",
     isOnline: true,
+    status: "closed",
     lastAction: {
       action: "unlock_failed",
       by: "Unknown",
@@ -114,6 +117,7 @@ export const mockDataLocks = [
     deviceId: "OFFICE_04",
     location: "Administration Office",
     isOnline: false,
+    status: "closed",
     lastAction: {
       action: "unlock_failed",
       by: "admin",
@@ -125,6 +129,7 @@ export const mockDataLocks = [
     deviceId: "Graduate_Room_1",
     location: "Graduage Room Block 9",
     isOnline: true,
+    status: "open",
     lastAction: {
       action: "unlock",
       by: "system",
@@ -136,6 +141,7 @@ export const mockDataLocks = [
     deviceId: "B9_404",
     location: "Block 9 404",
     isOnline: true,
+    status: "closed",
     lastAction: {
       action: "unlock",
       by: "user5",

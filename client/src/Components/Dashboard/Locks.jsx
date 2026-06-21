@@ -1,18 +1,39 @@
 import { Box, Typography, useTheme } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
-import { useContext } from "react";
+import { useContext, useState, useEffect } from "react";
 import { tokens, ColorModeContext } from "../../theme";
 import { mockDataLocks } from "../Data/mockdata";
+import axios from "axios";
 
 const Locks = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const colorMode = useContext(ColorModeContext);
 
+  const [locks, setLock] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  //to export data from backend
+  useEffect(() => {
+    const fetchLocks = async () => {
+      try {
+        //axios converts response to json
+        const response = await axios.get("http://localhost:3000/api/locks");
+        setLock(response.data);
+      } catch (error) {
+        console.error("Error fetching locks data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchLocks();
+  }, []);
+
   const columns = [
     { field: "_id", headerName: "ID" }, //field represent value grabbed
     { field: "deviceId", headerName: "DeviceId", flex: 1 }, //flex: 1 will extend the cells width
     { field: "location", headerName: "Location", flex: 1 },
+    { field: "status", headerName: "Status", flex: 1 },
     {
       field: "isOnline",
       headerName: "Device Status",
@@ -89,9 +110,10 @@ const Locks = () => {
       >
         <DataGrid
           checkboxSelection
-          rows={mockDataLocks}
+          rows={locks}
           columns={columns}
           getRowId={(row) => row._id}
+          loading={loading}
         />
         {/*getRowId is a function that tells the DataGrid:"When you need the unique ID for a row, use the _id property." */}
         {/* columns to arrange */}

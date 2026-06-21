@@ -1,14 +1,34 @@
 import { Box, Typography, useTheme } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { tokens, ColorModeContext } from "../../theme";
 import { mockAccessLogs } from "../Data/mockdata";
 import { GridToolbar } from "@mui/x-data-grid/internals";
+import axios from "axios";
 
 const AccessLogs = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const colorMode = useContext(ColorModeContext);
+
+  const [accessLogs, setAccessLogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAccessLogs = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:3000/api/AccessLogs",
+        );
+        setAccessLogs(response.data);
+      } catch (error) {
+        console.error("Error fetching Access Logs:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAccessLogs();
+  }, []);
 
   const columns = [
     { field: "deviceId", headerName: "DeviceId", flex: 1 }, //flex: 1 will extend the cells width
@@ -106,10 +126,11 @@ const AccessLogs = () => {
       >
         <DataGrid
           checkboxSelection
-          rows={mockAccessLogs}
+          rows={accessLogs}
           columns={columns}
           getRowId={(row) => row._id}
           showToolbar
+          loading={loading}
         />
         {/*getRowId is a function that tells the DataGrid:"When you need the unique ID for a row, use the _id property." */}
         {/* columns to arrange */}

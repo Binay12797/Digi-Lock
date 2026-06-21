@@ -107,3 +107,5 @@ This returns a number representing milliseconds since a fixed starting point in 
 This is called the Unix Epoch
 
 new Date("2026-06-20T12:30:00Z").getTime() returns 1781968200000
+
+Data Fetching: Getting data from an API (like the axios call we just discussed).

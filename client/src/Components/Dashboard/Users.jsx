@@ -1,15 +1,34 @@
 import { Box, Typography, useTheme } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
-import { useContext } from "react";
+import { useContext, useState, useEffect } from "react";
 import { tokens, ColorModeContext } from "../../theme";
 import { mockDataUsers } from "../Data/mockdata";
 import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettingsOutlined";
 import LockOpenOutlinedIcon from "@mui/icons-material/LockOpenOutlined";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
+import axios from "axios";
 
 const Users = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+
+  const [users, setUsers] = useState([]); //array is passed
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUsersData = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/api/users");
+        setUsers(response.data);
+      } catch (error) {
+        console.error("Error while fetching Users:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUsersData();
+  }, []);
+  //[]: You are telling React: "Only run this code once, immediately after the component is first added to the screen (mounted).
 
   const columns = [
     { field: "id", headerName: "ID" }, //field represent value grabbed
@@ -61,7 +80,7 @@ const Users = () => {
           "& .MuiDataGrid-cell": { borderBottom: "none" },
           "& .name-cell": { color: colors.greenAccent[300] },
           "& .MuiDataGrid-columnHeadersInner": {
-            backgroundColor: `$colors.blueAccent[700] !important`,
+            backgroundColor: `${colors.blueAccent[700]} !important`,
             borderBottom: "none",
           },
           "& .MuiDataGrid-virtualScroller": {
@@ -79,8 +98,9 @@ const Users = () => {
         <DataGrid
           autoHeight
           checkboxSelection
-          rows={mockDataUsers}
+          rows={users}
           columns={columns}
+          loading={loading}
         />
       </Box>
     </Box>
