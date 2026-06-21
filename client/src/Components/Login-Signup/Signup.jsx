@@ -18,9 +18,15 @@ const Signup = () => {
   const handleSignup = async () => {
     setErrorMessage("");
 
+<<<<<<< HEAD
+    // if name is left empty then it has bollean value 0 and !name= 1 
+    if(!name || !email || !password){
+      setErrorMessage("All fields are required.");z
+=======
     // if name is left empty then it has bollean value 0 and !name= 1
     if (!name || !email || !password) {
       setErrorMessage("All fields are required.");
+>>>>>>> b3619d11c0f0dde4a6ad9182bbfda4cfeb5e6492
       return;
     }
 
