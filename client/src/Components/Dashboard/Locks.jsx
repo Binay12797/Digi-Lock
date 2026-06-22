@@ -19,7 +19,7 @@ const Locks = () => {
     const fetchLocks = async () => {
       try {
         //axios converts response to json
-        const response = await axios.get("/locks");
+        const response = await api.get("/locks");
         setLock(response.data);
       } catch (error) {
         console.error("Error fetching locks data:", error);
