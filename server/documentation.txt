@@ -36,3 +36,6 @@ Day 8:
 -created "protectHardware" middleware for protecting the routes for unauthorized access
 -setting up accesslog schema
 -fixing the merge issuses
+
+day 9: 
+test
