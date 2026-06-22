@@ -5,13 +5,13 @@ export const AuthContext = createContext();
 //user consist of userdetails and token
 const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
-    const savedUser = localStorage.getItem("user"); //convert sto javascript formatt
+    const savedUser = localStorage.getItem("user"); //converts to string
 
-    return savedUser ? JSON.parse(savedUser) : null;
+    return savedUser ? JSON.parse(savedUser) : null; //json.parse(savedUser) this converts to javaScript object
   });
 
   const login = (userData) => {
-    localStorage.setItem("user", JSON.stringify(userData));
+    localStorage.setItem("user", JSON.stringify(userData)); //converts to string and store it in localstorage
     setUser(userData);
   };
 

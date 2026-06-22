@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 // import axios from "axios";
 import api from "../../Api/api";
@@ -8,8 +8,11 @@ import email_icon from "../../assets/email.png";
 import user_icon from "../../assets/person.png";
 import password_icon from "../../assets/password.png";
 
+import { AuthContext } from "../Context/AuthContext";
+
 const Login = () => {
   const navigate = useNavigate();
+  const { login } = useContext(AuthContext);
 
   //creating variables to capture login details form user
   const [email, setEmail] = useState(""); //setEmail is a function that can change value of email
@@ -25,7 +28,8 @@ const Login = () => {
       const response = await api.post("/login", {
         email: email,
         password: password,
-      }); //awati: wait till server response
+      });
+      //await: wait till server response
       //after obtaining response , response is stored in response.
 
       login(response.data);
