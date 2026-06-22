@@ -1,17 +1,17 @@
-/* ESP32 HTTP IoT Server - Enrollment / Authorization Mode Demo
-   Based on Wokwi ESP32 HTTP Server example
-   Open http://localhost:8180 when running via Wokwi for VSCode (see wokwi.toml)
+/* ESP32 WebSocket IoT Server - Enrollment / Authorization Mode Demo
+   Based on Wokwi ESP32 HTTP Server example, converted to WebSocket transport
+   Connect a WebSocket client to ws://localhost:8180 (see wokwi.toml) and send
+   text messages "/", "/mode/1", or "/mode/2" to navigate.
 */
 #include <WiFi.h>
 #include <WiFiClient.h>
-#include <WebServer.h>
-#include <uri/UriBraces.h>
+#include <WebSocketsServer.h>
 
 #define WIFI_SSID "Wokwi-GUEST"
 #define WIFI_PASSWORD ""
 #define WIFI_CHANNEL 6
 
-WebServer server(80);
+WebSocketsServer webSocket = WebSocketsServer(81);
 
 const int LED_GREEN  = 25; // Enrollment indicator (part 1)
 const int LED_RED    = 26; // Enrollment indicator (part 2)
@@ -40,7 +40,7 @@ void updateLeds() {
 }
 
 // ---------- Home page: mode selector ----------
-void sendHomePage() {
+void sendHomePage(uint8_t num) {
   String response = R"(
     <!DOCTYPE html><html>
       <head>
@@ -84,11 +84,11 @@ void sendHomePage() {
   response.replace("RED_COLOR", currentMode == 1 ? "#ff4136" : "#ccc");
   response.replace("YELLOW_COLOR", currentMode == 2 ? "#ffdc00" : "#ccc");
 
-  server.send(200, "text/html", response);
+  webSocket.sendTXT(num, response);
 }
 
 // ---------- Enrollment system page ----------
-void sendEnrollmentPage() {
+void sendEnrollmentPage(uint8_t num) {
   String response = R"(
     <!DOCTYPE html><html>
       <head>
@@ -123,11 +123,11 @@ void sendEnrollmentPage() {
       </body>
     </html>
   )";
-  server.send(200, "text/html", response);
+  webSocket.sendTXT(num, response);
 }
 
 // ---------- Authorization system page (placeholder for now) ----------
-void sendAuthorizationPage() {
+void sendAuthorizationPage(uint8_t num) {
   String response = R"(
     <!DOCTYPE html><html>
       <head>
@@ -152,7 +152,50 @@ void sendAuthorizationPage() {
       </body>
     </html>
   )";
-  server.send(200, "text/html", response);
+  webSocket.sendTXT(num, response);
+}
+
+// ---------- WebSocket event handler (replaces HTTP route handlers) ----------
+void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length) {
+  switch (type) {
+    case WStype_DISCONNECTED:
+      Serial.printf("[%u] Disconnected\n", num);
+      break;
+
+    case WStype_CONNECTED: {
+      IPAddress ip = webSocket.remoteIP(num);
+      Serial.printf("[%u] Connected from %d.%d.%d.%d\n", num, ip[0], ip[1], ip[2], ip[3]);
+      sendHomePage(num);
+      break;
+    }
+
+    case WStype_TEXT: {
+      String path = String((char *)payload).substring(0, length);
+
+      if (path.startsWith("/mode/")) {
+        String modeStr = path.substring(6);
+        int m = modeStr.toInt();
+        if (m == 1 || m == 2) {
+          currentMode = m;
+          updateLeds();
+          Serial.print("Mode switched to: ");
+          Serial.println(m == 1 ? "Enrollment" : "Authorization");
+        }
+      }
+
+      if (currentMode == 1) {
+        sendEnrollmentPage(num);
+      } else if (currentMode == 2) {
+        sendAuthorizationPage(num);
+      } else {
+        sendHomePage(num);
+      }
+      break;
+    }
+
+    default:
+      break;
+  }
 }
 
 void setup(void) {
@@ -173,31 +216,13 @@ void setup(void) {
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
 
-  server.on("/", sendHomePage);
+  webSocket.begin();
+  webSocket.onEvent(webSocketEvent);
 
-  server.on(UriBraces("/mode/{}"), []() {
-    String mode = server.pathArg(0);
-    int m = mode.toInt();
-    if (m == 1 || m == 2) {
-      currentMode = m;
-      updateLeds();
-      Serial.print("Mode switched to: ");
-      Serial.println(m == 1 ? "Enrollment" : "Authorization");
-    }
-    if (currentMode == 1) {
-      sendEnrollmentPage();
-    } else if (currentMode == 2) {
-      sendAuthorizationPage();
-    } else {
-      sendHomePage();
-    }
-  });
-
-  server.begin();
-  Serial.println("HTTP server started (http://localhost:8180)");
+  Serial.println("WebSocket server started (ws://localhost:8180)");
 }
 
 void loop(void) {
-  server.handleClient();
+  webSocket.loop();
   delay(2);
 }
