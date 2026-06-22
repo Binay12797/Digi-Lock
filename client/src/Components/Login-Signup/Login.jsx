@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+// import axios from "axios";
+import api from "../../Api/api";
 import "./LoginSignup.css";
 
 import email_icon from "../../assets/email.png";
@@ -21,11 +22,13 @@ const Login = () => {
 
     try {
       //now we should make an api request to running backend port.
-      const response = await axios.post("http://localhost:3000/login", {
+      const response = await api.post("/login", {
         email: email,
         password: password,
       }); //awati: wait till server response
       //after obtaining response , response is stored in response.
+
+      login(response.data);
 
       if (response.data.success) {
         // alert("Welcome back!");

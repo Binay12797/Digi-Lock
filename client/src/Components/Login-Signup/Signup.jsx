@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { unstable_setDevServerHooks, useNavigate } from "react-router-dom";
-import axios from "axios";
+// import axios from "axios";
+import api from "../../Api/api";
 import "./LoginSignup.css";
 
 import email_icon from "../../assets/email.png";
@@ -25,7 +26,7 @@ const Signup = () => {
     }
 
     try {
-      const response = await axios.post("http://localhost:3000/create", {
+      const response = await api.post("/create", {
         name: name,
         email: email,
         password: password,

@@ -127,3 +127,56 @@ yup.object(): This tells the app that the data being checked is an object.
 .shape({ }): This defines the exact "shape" or blueprint of that object. Inside the curly brackets { }, you list the specific form fields and their rules.
 
 A phone regex (Regular Expression) is a search pattern used in programming and web development to match, validate, or extract phone numbers within a text
+
+day:
+A JWT consists of three parts separated by dots
+Header.Payload.Signature
+{
+  "alg": "HS256",
+  "typ": "JWT"
+}
+{
+  "userId": "12345",
+  "email": "john@example.com",
+  "role": "admin",
+  "exp": 1787641200
+}
+HMACSHA256(
+    header + "." + payload,
+    secretKey
+)
+
+If someone changes the payload: role: "user" to role: "admin"
+the signature no longer matches, and the server rejects the token.
+
+flow:
+
+User
+  │
+  │ Login (email + password)
+  ▼
+Server
+  │
+  │ Verify credentials
+  ▼
+Generate JWT
+  │
+  ▼
+Client stores JWT
+  │
+  │
+Future Requests
+  │
+Authorization: Bearer <JWT>
+  ▼
+Server verifies JWT
+  │
+  ▼
+Returns protected data
+
+
+Storage: Store the token securely. While localStorage is easy, using an HttpOnly cookie is more secure against XSS (Cross-Site Scripting) attacks because JavaScript cannot access it directly.
+
+Never put sensitive data (like passwords) inside the JWT payload. Anyone can decode the token to read its contents; the signature only prevents them from altering it.
+Use Environment Variables: Never hardcode your JWT_SECRET in your code. Keep it in a .env file that is listed in your .gitignore.
+Token Expiry: Always set an expiresIn time (e.g., 15m or 1h) when creating the token.

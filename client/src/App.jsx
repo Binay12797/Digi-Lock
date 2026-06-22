@@ -15,6 +15,8 @@ import Users from "./Components/Dashboard/Users";
 import Locks from "./Components/Dashboard/Locks";
 import AccessLogs from "./Components/Dashboard/AccessLogs";
 import AddUser from "./Components/Dashboard/AddUser";
+import AuthProvider from "./Components/Context/AuthContext";
+import ProtectedRoute from "./Components/ProtectedRoute";
 
 function App() {
   const [theme, colorMode] = useMode();
@@ -25,25 +27,33 @@ function App() {
       <ThemeProvider theme={theme}>
         {/* A Material UI component that resets browser CSS defaults.*/}
         <CssBaseline />
-        <Router>
-          <Routes>
-            {/* route path to login by default */}
-            <Route path="/" element={<Navigate to="/Login" />} />
+        <AuthProvider>
+          <Router>
+            <Routes>
+              {/* route path to login by default */}
+              <Route path="/" element={<Navigate to="/Login" />} />
 
-            <Route element={<AuthLayout />}>
-              <Route path="/Signup" element={<Signup />} />
-              <Route path="/Login" element={<Login />} />
-            </Route>
+              <Route element={<AuthLayout />}>
+                <Route path="/Signup" element={<Signup />} />
+                <Route path="/Login" element={<Login />} />
+              </Route>
 
-            <Route element={<DashboardLayout />}>
-              <Route path="/Dashboard" element={<Dashboard />} />
-              <Route path="/Users" element={<Users />} />
-              <Route path="/Locks" element={<Locks />} />
-              <Route path="/AccessLogs" element={<AccessLogs />} />
-              <Route path="/AddUser" element={<AddUser />} />
-            </Route>
-          </Routes>
-        </Router>
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout />
+                  </ProtectedRoute>
+                }
+              >
+                <Route path="/Dashboard" element={<Dashboard />} />
+                <Route path="/Users" element={<Users />} />
+                <Route path="/Locks" element={<Locks />} />
+                <Route path="/AccessLogs" element={<AccessLogs />} />
+                <Route path="/AddUser" element={<AddUser />} />
+              </Route>
+            </Routes>
+          </Router>
+        </AuthProvider>
       </ThemeProvider>
     </ColorModeContext.Provider>
   );

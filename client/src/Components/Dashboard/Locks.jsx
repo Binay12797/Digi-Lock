@@ -3,7 +3,8 @@ import { DataGrid } from "@mui/x-data-grid";
 import { useContext, useState, useEffect } from "react";
 import { tokens, ColorModeContext } from "../../theme";
 import { mockDataLocks } from "../Data/mockdata";
-import axios from "axios";
+// import axios from "axios";
+import api from "../../Api/api";
 
 const Locks = () => {
   const theme = useTheme();
@@ -18,7 +19,7 @@ const Locks = () => {
     const fetchLocks = async () => {
       try {
         //axios converts response to json
-        const response = await axios.get("http://localhost:3000/api/locks");
+        const response = await axios.get("/locks");
         setLock(response.data);
       } catch (error) {
         console.error("Error fetching locks data:", error);

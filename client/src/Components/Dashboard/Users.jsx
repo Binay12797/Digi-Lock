@@ -6,7 +6,8 @@ import { mockDataUsers } from "../Data/mockdata";
 import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettingsOutlined";
 import LockOpenOutlinedIcon from "@mui/icons-material/LockOpenOutlined";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
-import axios from "axios";
+// import axios from "axios";
+import api from "../../Api/api";
 
 const Users = () => {
   const theme = useTheme();
@@ -18,7 +19,7 @@ const Users = () => {
   useEffect(() => {
     const fetchUsersData = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/users");
+        const response = await api.get("/users");
         setUsers(response.data);
       } catch (error) {
         console.error("Error while fetching Users:", error);

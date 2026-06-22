@@ -4,7 +4,8 @@ import { useContext, useEffect, useState } from "react";
 import { tokens, ColorModeContext } from "../../theme";
 import { mockAccessLogs } from "../Data/mockdata";
 import { GridToolbar } from "@mui/x-data-grid/internals";
-import axios from "axios";
+// import axios from "axios";
+import api from "../../Api/api";
 
 const AccessLogs = () => {
   const theme = useTheme();
@@ -17,9 +18,7 @@ const AccessLogs = () => {
   useEffect(() => {
     const fetchAccessLogs = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:3000/api/AccessLogs",
-        );
+        const response = await api.get("/AccessLogs");
         setAccessLogs(response.data);
       } catch (error) {
         console.error("Error fetching Access Logs:", error);
