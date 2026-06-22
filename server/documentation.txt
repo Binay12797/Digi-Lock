@@ -38,4 +38,5 @@ Day 8:
 -fixing the merge issuses
 
 day 9: 
-test
+-implemented jwt for authentication and authorization
+- created auth.js which contains jwt verification

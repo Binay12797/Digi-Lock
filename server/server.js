@@ -59,7 +59,7 @@ io.on("connection",(socket)=>{
 // server.set("view engine",'ejs');
 
 
-server.use("/",userRouter);
+server.use("/api",userRouter);
 server.use("/api",hardwareRouter);
 httpServer.listen(PORT,()=>{             //listens at the port for req
     console.log(`server is running at port ${PORT}`);
