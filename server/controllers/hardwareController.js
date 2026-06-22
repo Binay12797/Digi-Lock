@@ -1,6 +1,7 @@
 const enrollmentState = require("../services/enrollmentState");
-const user = require("../models/userModel")
+const User = require("../models/userModel")
 const accessLog = require("../models/accesslogModel");
+
 async function enroll(req,res){
     const{fingerprint} = req.body;
     const userId = enrollmentState.getSession();
@@ -11,7 +12,7 @@ async function enroll(req,res){
 
     }
     try{
-        await user.findByIdAndUpdate(userId,{
+        await User.findByIdAndUpdate(userId,{
             fingerprint: fingerprint,
             isActive: true
         });
@@ -29,16 +30,16 @@ async function verification(req,res){
     const {fingerprint} = req.body;
     const io = req.app.get("io");
     try{
-        const User = await user.findOne({fingerprint,isActive: true});
+        const User = await User.findOne({fingerprint,isActive: true});
         if(user){
             await accessLog.create({
-                userId: user._id,
+                userId: User._id,
                 authType: "fingerprint",
                 status: "GRANTED",
                 scannedDataString: fingerprint
             });
-            io.emit("NEW_ACCESS_LOG",{name: user.name, status: "GRANTED", timestamp: new Date()});
-            return res.json({accessGranted: true, action: "OPEN_DOOR", username: user.name});
+            io.emit("NEW_ACCESS_LOG",{name: User.name, status: "GRANTED", timestamp: new Date()});
+            return res.json({accessGranted: true, action: "OPEN_DOOR", username: User.name});
 
         } else{
             await accessLog.create({
@@ -47,7 +48,7 @@ async function verification(req,res){
                 status: "DENIED",
                 scannedDataString: fingerprint
             });
-            io.emit("NEW_ACCESS_LOG",{name: "Unknown user", status:"DENIED", timestamp: new Data()});
+            io.emit("NEW_ACCESS_LOG",{name: "Unknown user", status:"DENIED", timestamp: new Date()});
             return res.status(401).json({accessGranted: false, action: "LOCKED"});
         }
     }catch(error){
@@ -55,28 +56,10 @@ async function verification(req,res){
     }
 }
 
-async function getLogs(req,res){
-    try {
-           const logs = await accessLog.find()
-            .populate("userId", "name email") 
-            .sort({ createdAt: -1 }) 
-            .limit(50); 
 
-        return res.json({
-            success: true,
-            count: logs.length,
-            data: logs
-        });
-    } catch (error) {
-        return res.status(500).json({ 
-            success: false, 
-            error: error.message 
-        });
-    }
-};
 
 module.exports={
     enroll,
     verification,
-    getLogs
+    
 }
