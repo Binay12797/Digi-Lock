@@ -26,7 +26,7 @@ const Signup = () => {
     }
 
     try {
-      const response = await api.post("/create", {
+      const response = await api.post("/user/create", {
         name: name,
         email: email,
         password: password,

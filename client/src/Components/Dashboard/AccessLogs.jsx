@@ -16,7 +16,7 @@ const AccessLogs = () => {
     const fetchAccessLogs = async () => {
       try {
         // Appending timestamp to bypass stale browser cache states
-        const response = await api.get(`/Logs?t=${Date.now()}`);
+        const response = await api.get(`/api/Logs?t=${Date.now()}`);
         setAccessLogs(response.data.data || []);
       } catch (error) {
         console.error("Error fetching Access Logs:", error);
