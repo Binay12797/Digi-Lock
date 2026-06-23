@@ -15,8 +15,9 @@ const AccessLogs = () => {
   useEffect(() => {
     const fetchAccessLogs = async () => {
       try {
-        const response = await api.get("/api/logs");
-        setAccessLogs(response.data);
+        // Appending timestamp to bypass stale browser cache states
+        const response = await api.get(`/api/Logs?t=${Date.now()}`);
+        setAccessLogs(response.data.data || []);
       } catch (error) {
         console.error("Error fetching Access Logs:", error);
       } finally {
