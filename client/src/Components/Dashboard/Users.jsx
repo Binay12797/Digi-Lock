@@ -19,7 +19,7 @@ const Users = () => {
   useEffect(() => {
     const fetchUsersData = async () => {
       try {
-        const response = await api.get("/users");
+        const response = await api.get("/user");
         setUsers(response.data);
       } catch (error) {
         console.error("Error while fetching Users:", error);

@@ -25,7 +25,7 @@ const Login = () => {
 
     try {
       //now we should make an api request to running backend port.
-      const response = await api.post("/login", {
+      const response = await api.post("/user/login", {
         email: email,
         password: password,
       });

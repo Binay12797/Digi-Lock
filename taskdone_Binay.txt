@@ -180,3 +180,5 @@ Storage: Store the token securely. While localStorage is easy, using an HttpOnly
 Never put sensitive data (like passwords) inside the JWT payload. Anyone can decode the token to read its contents; the signature only prevents them from altering it.
 Use Environment Variables: Never hardcode your JWT_SECRET in your code. Keep it in a .env file that is listed in your .gitignore.
 Token Expiry: Always set an expiresIn time (e.g., 15m or 1h) when creating the token.
+
+You can create a new branch form past commits of any other existing branch

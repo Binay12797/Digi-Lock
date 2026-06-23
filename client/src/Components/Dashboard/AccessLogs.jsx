@@ -18,7 +18,7 @@ const AccessLogs = () => {
   useEffect(() => {
     const fetchAccessLogs = async () => {
       try {
-        const response = await api.get("/AccessLogs");
+        const response = await api.get("/api/logs");
         setAccessLogs(response.data);
       } catch (error) {
         console.error("Error fetching Access Logs:", error);
