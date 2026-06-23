@@ -104,8 +104,24 @@ async function startEnrollment(req,res){
         message: `Enrollment session started for user ${userId}. Ready for fingerprint scan`
     });
 };
+
+async function getUserProfile(req,res){
+    try{
+        const user = await User.findById(req.user.id).select("-password");
+        if(!user){
+            return res.status(404).json({success: false, message: "User profile not found"});
+
+        }
+        return res.json({success: true, data: user});
+
+    }catch(error){
+        return res.status(500).json({success: false, error: error.message});
+
+    }
+}
 module.exports={
     createUser,
     login,
-    startEnrollment
+    startEnrollment,
+    getUserProfile
 }

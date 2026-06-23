@@ -38,4 +38,6 @@ Day 8:
 -fixing the merge issuses
 
 day 9: 
-test
+-creating lock schema
+-setting up routes for retrieving lock info
+-setting up routes for retrieving user profile

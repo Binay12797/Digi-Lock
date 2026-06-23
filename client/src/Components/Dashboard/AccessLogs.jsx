@@ -2,9 +2,6 @@ import { Box, Typography, useTheme } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { useContext, useEffect, useState } from "react";
 import { tokens, ColorModeContext } from "../../theme";
-import { mockAccessLogs } from "../Data/mockdata";
-import { GridToolbar } from "@mui/x-data-grid/internals";
-// import axios from "axios";
 import api from "../../Api/api";
 
 const AccessLogs = () => {
@@ -30,23 +27,32 @@ const AccessLogs = () => {
   }, []);
 
   const columns = [
-    { field: "deviceId", headerName: "DeviceId", flex: 1 }, //flex: 1 will extend the cells width
+    { field: "deviceId", headerName: "DeviceId", flex: 1 },
     { field: "location", headerName: "Location", flex: 1 },
     {
-      field: "timestamp",
+      field: "createdAt",
       headerName: "Last Access Time",
-      valueGetter: (value, row) => new Date(row.timestamp).getTime(), //converts to date and time then date is converted into a number
-
+      // 🔄 FIX: Read backend's 'createdAt' field and safely handle empty states to avoid NaN errors
+      valueGetter: (value, row) => {
+        const targetRow = row || value?.row;
+        return targetRow?.createdAt
+          ? new Date(targetRow.createdAt).getTime()
+          : 0;
+      },
       renderCell: (params) =>
-        params.row.timestamp
-          ? new Date(params.row.timestamp).toLocaleString() //params passes everything about current row all cells
+        params.row.createdAt
+          ? new Date(params.row.createdAt).toLocaleString()
           : "N/A",
       flex: 1,
     },
     {
-      field: "name",
+      field: "userId",
       headerName: "User Name",
-      valueGetter: (value, row) => row.user?.name,
+      // 🔄 FIX: Extracts the populated user name safely across varied DataGrid versions
+      valueGetter: (value, row) => {
+        const targetRow = row || value?.row;
+        return targetRow?.userId?.name || "System Operator";
+      },
       flex: 1,
     },
     {
@@ -59,6 +65,8 @@ const AccessLogs = () => {
       headerName: "Status",
       flex: 1,
       renderCell: ({ row: { status } }) => {
+        // Standardize status value parsing to uppercase to cleanly match conditions
+        const currentStatus = status?.toUpperCase() || "FAILED";
         return (
           <Box
             sx={{
@@ -67,22 +75,15 @@ const AccessLogs = () => {
               display: "flex",
               justifyContent: "center",
               backgroundColor:
-                status === "SUCCESS"
+                currentStatus === "SUCCESS"
                   ? colors.greenAccent[700]
                   : colors.redAccent[700],
               borderRadius: "5px",
             }}
           >
-            {status === "SUCCESS" && (
-              <Typography color={colors.grey[100]} sx={{ ml: "5px" }}>
-                SUCCESS
-              </Typography>
-            )}
-            {status === "FAILED" && (
-              <Typography color={colors.grey[100]} sx={{ ml: "5px" }}>
-                FAILED
-              </Typography>
-            )}
+            <Typography color={colors.grey[100]} sx={{ ml: "5px" }}>
+              {currentStatus}
+            </Typography>
           </Box>
         );
       },
@@ -102,8 +103,12 @@ const AccessLogs = () => {
   return (
     <Box sx={{ m: "20px" }}>
       <Typography variant="h5">Locks Status</Typography>
+
+      {/* 🔄 FIX: Added explicit height (550px) to prevent DataGrid from collapsing into invisibility */}
       <Box
         sx={{
+          height: 550,
+          width: "100%",
           m: "10px 0 0 0",
           "& .MuiDataGrid-root": { border: "none" },
           "& .MuiDataGrid-cell": { borderBottom: "none" },
@@ -128,11 +133,9 @@ const AccessLogs = () => {
           rows={accessLogs}
           columns={columns}
           getRowId={(row) => row._id}
-          showToolbar
+          slotProps={{ toolbar: { showQuickFilter: true } }} // Modern standard replacement for showToolbar
           loading={loading}
         />
-        {/*getRowId is a function that tells the DataGrid:"When you need the unique ID for a row, use the _id property." */}
-        {/* columns to arrange */}
       </Box>
     </Box>
   );
