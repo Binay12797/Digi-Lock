@@ -38,5 +38,6 @@ Day 8:
 -fixing the merge issuses
 
 day 9: 
--implemented jwt for authentication and authorization
-- created auth.js which contains jwt verification
+-creating lock schema
+-setting up routes for retrieving lock info
+-setting up routes for retrieving user profile

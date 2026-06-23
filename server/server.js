@@ -4,6 +4,9 @@ const PORT = 3000;                  //defines the port
 const Path = require("node:path");  
 const userRouter = require("./routes/userRouter")
 const hardwareRouter= require("./routes/hardwareRouter");
+const accesslogRouter = require("./routes/accesslogRouter");
+const lockRouter = require("./routes/lockRouter");
+
 const connectDB = require("./config/db");
 const cors = require("cors");
 // const passport = require("passport");
@@ -59,8 +62,10 @@ io.on("connection",(socket)=>{
 // server.set("view engine",'ejs');
 
 
-server.use("/api",userRouter);
+server.use("/user",userRouter);
 server.use("/api",hardwareRouter);
+server.use("/api",accesslogRouter);
+server.use("/lock/status", lockRouter);
 httpServer.listen(PORT,()=>{             //listens at the port for req
     console.log(`server is running at port ${PORT}`);
 });
