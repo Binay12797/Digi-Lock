@@ -108,7 +108,6 @@ const AccessLogs = () => {
       {/* 🔄 FIX: Added explicit height (550px) to prevent DataGrid from collapsing into invisibility */}
       <Box
         sx={{
-          height: 550,
           width: "100%",
           m: "10px 0 0 0",
           "& .MuiDataGrid-root": { border: "none" },
