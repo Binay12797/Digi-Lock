@@ -16,8 +16,13 @@ const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    localStorage.removeItem("user");
-    setUser(null);
+    console.log("Logout function called");
+    const confirmed = confirm("Are you sure you want to logout");
+
+    if (confirmed) {
+      localStorage.removeItem("user");
+      setUser(null);
+    }
   };
 
   return (

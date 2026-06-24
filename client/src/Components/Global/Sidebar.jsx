@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { Sidebar, Menu, MenuItem } from "react-pro-sidebar"; //helps to build you a sidebar
 // import "react-pro-sidebar/dist/css/styles.css"; used in old version library uses css in js styling internally
 import { Box, IconButton, Typography, useTheme } from "@mui/material";
 import { Link } from "react-router-dom";
 import { tokens } from "../../theme";
+import { AuthContext } from "../Context/AuthContext";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import LockIcon from "@mui/icons-material/Lock";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
@@ -18,9 +19,10 @@ import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
 import PersonAddAltOutlinedIcon from "@mui/icons-material/PersonAddAltOutlined";
 
 //we make item so that we dont have to write same block of code multiple times
-const Item = ({ title, to, icon, selected, setSelected }) => {
+const Item = ({ title, to, icon, selected, setSelected, onClick }) => {
   const theme = useTheme(); // theme shade
   const colors = tokens(theme.palette.mode); //directly to token shade
+
   return (
     //active will higilight currently selected title
     <MenuItem
@@ -39,6 +41,7 @@ const DashboardSidebar = ({ selected, setSelected }) => {
   const theme = useTheme(); // theme shade
   const colors = tokens(theme.palette.mode); //directly to token shade
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const { logout } = useContext(AuthContext);
 
   return (
     <Box
@@ -183,13 +186,17 @@ const DashboardSidebar = ({ selected, setSelected }) => {
             </Box>
             {/* position: "absolute" on the Logout Box: This pulls the Logout button out of the normal "flow" of the Menu. By setting bottom: "10px", you tell the browser: "No matter what, stick this to the bottom of the sidebar ie: ends at 10 px from the bottom of the page." */}
             <Box sx={{ position: "absolute", bottom: "10px", width: "100%" }}>
-              <Item
-                title="Logout"
-                to="/"
+              <MenuItem
+                onClick={logout}
                 icon={<LogoutIcon />}
-                selected={selected}
-                setSelected={setSelected}
-              />
+                style={{
+                  color: colors.grey[100],
+                }}
+              >
+                <Box>
+                  <Typography>Logout</Typography>
+                </Box>
+              </MenuItem>
             </Box>
           </Box>
         </Menu>
