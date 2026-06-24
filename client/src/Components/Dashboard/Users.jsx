@@ -19,8 +19,8 @@ const Users = () => {
   useEffect(() => {
     const fetchUsersData = async () => {
       try {
-        const response = await api.get("/user");
-        setUsers(response.data);
+        const response = await api.get(`/user?t=${Date.now()}`);
+        setUsers(response.data || []);
       } catch (error) {
         console.error("Error while fetching Users:", error);
       } finally {
@@ -80,7 +80,7 @@ const Users = () => {
           "& .MuiDataGrid-root": { border: "none" },
           "& .MuiDataGrid-cell": { borderBottom: "none" },
           "& .name-cell": { color: colors.greenAccent[300] },
-          "& .MuiDataGrid-columnHeadersInner": {
+          "& .MuiDataGrid-columnHeaders": {
             backgroundColor: `${colors.blueAccent[700]} !important`,
             borderBottom: "none",
           },
@@ -97,7 +97,6 @@ const Users = () => {
         }}
       >
         <DataGrid
-          autoHeight
           checkboxSelection
           rows={users}
           columns={columns}

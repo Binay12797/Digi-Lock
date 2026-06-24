@@ -2,7 +2,6 @@ import { Box, Typography, useTheme } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { useContext, useState, useEffect } from "react";
 import { tokens, ColorModeContext } from "../../theme";
-import { mockDataLocks } from "../Data/mockdata";
 // import axios from "axios";
 import api from "../../Api/api";
 
@@ -11,7 +10,7 @@ const Locks = () => {
   const colors = tokens(theme.palette.mode);
   const colorMode = useContext(ColorModeContext);
 
-  const [locks, setLock] = useState([]);
+  const [locks, setLocks] = useState([]);
   const [loading, setLoading] = useState(true);
 
   //to export data from backend
@@ -19,8 +18,8 @@ const Locks = () => {
     const fetchLocks = async () => {
       try {
         //axios converts response to json
-        const response = await api.get("/locks/:deviceId");
-        setLock(response.data);
+        const response = await api.get(`/locks/:deviceId?t=${Date.now()}`);
+        setLocks(response.data.data || []);
       } catch (error) {
         console.error("Error fetching locks data:", error);
       } finally {
@@ -71,11 +70,13 @@ const Locks = () => {
     {
       field: "time",
       headerName: "Last Access Time",
-      valueGetter: (value, row) =>
-        row.lastAction?.time
-          ? new Date(row.lastAction.time).toLocaleString() //creates an new object called Date made by converting string to Date Object and .toLocaleString() formatt it into human reading
-          : "N/A",
       flex: 1,
+      valueGetter: (value, row) => {
+        const targetRow = row || value?.row; // this is done because different DataGrid versions pass different parameters.
+        return targetRow?.time ? new Date(targetRow.time).getTime() : 0;
+      },
+      renderCell: (params) =>
+        params.row.time ? new Date(params.row.time).toLocaleString() : "N/A",
     },
     {
       field: "action",
