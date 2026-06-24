@@ -8,6 +8,7 @@ const initialValues = {
   firstName: "",
   lastName: "",
   email: "",
+  relation: "",
   contact: "", //its easier to import constact as string later we can ise phone regex to validate it
   address: "",
 };
@@ -18,6 +19,7 @@ const userFormSchema = yup.object().shape({
   firstName: yup.string().required("required"),
   lastName: yup.string().required("required"),
   email: yup.string().email("invalid email").required("required"),
+  relation: yup.string().required("required"),
   contact: yup
     .string()
     .matches(phoneRegExp, "Phone number is not valid")
@@ -100,6 +102,19 @@ const AddUser = () => {
                 onChange={handleChange}
                 value={values.email}
                 name="email" //used by touched.email and errors.email
+                error={!!touched.email && !!errors.email} //passes boolean
+                helperText={touched.email && errors.email} //passes the text
+                sx={{ gridColumn: "span 4" }}
+              />
+              <TextField
+                fullWidth
+                variant="filled" // fills the box with shade so its easier to see the box
+                type="text"
+                label="Relation/Position"
+                onBlur={handleBlur}
+                onChange={handleChange}
+                value={values.relation}
+                name="relation" //used by touched.email and errors.email
                 error={!!touched.email && !!errors.email} //passes boolean
                 helperText={touched.email && errors.email} //passes the text
                 sx={{ gridColumn: "span 4" }}

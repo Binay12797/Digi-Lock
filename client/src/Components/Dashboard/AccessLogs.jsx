@@ -15,9 +15,9 @@ const AccessLogs = () => {
   useEffect(() => {
     const fetchAccessLogs = async () => {
       try {
-        // Appending timestamp to bypass stale browser cache states
-        const response = await api.get(`/api/Logs?t=${Date.now()}`);
-        setAccessLogs(response.data.data || []);
+        // prevents locally stored cached response so an fresh request if forced, (This is called cache busting.)
+        const response = await api.get(`/api/Logs?t=${Date.now()}`); //?t=${Date.now()} this give timestamp so every request become something like /api/Logs?t=1750762145123 Since the number changes every request, the browser treats it as a completely new URL.
+        setAccessLogs(response.data.data || []); //[] is a fall back value if response.data.data is null
       } catch (error) {
         console.error("Error fetching Access Logs:", error);
       } finally {
@@ -33,9 +33,9 @@ const AccessLogs = () => {
     {
       field: "createdAt",
       headerName: "Last Access Time",
-      // 🔄 FIX: Read backend's 'createdAt' field and safely handle empty states to avoid NaN errors
+      //  Read backend's 'createdAt' field and safely handle empty states to avoid NaN errors
       valueGetter: (value, row) => {
-        const targetRow = row || value?.row;
+        const targetRow = row || value?.row; // this is done because different DataGrid versions pass different parameters.
         return targetRow?.createdAt
           ? new Date(targetRow.createdAt).getTime()
           : 0;
@@ -49,10 +49,10 @@ const AccessLogs = () => {
     {
       field: "userId",
       headerName: "User Name",
-      // 🔄 FIX: Extracts the populated user name safely across varied DataGrid versions
+      //  Extracts the populated user name safely across varied DataGrid versions
       valueGetter: (value, row) => {
         const targetRow = row || value?.row;
-        return targetRow?.userId?.name || "System Operator";
+        return targetRow?.userId?.name || "Unknown User";
       },
       flex: 1,
     },
@@ -67,7 +67,7 @@ const AccessLogs = () => {
       flex: 1,
       renderCell: ({ row: { status } }) => {
         // Standardize status value parsing to uppercase to cleanly match conditions
-        const currentStatus = status?.toUpperCase() || "FAILED";
+        const currentStatus = status?.toUpperCase() || "FAILED"; //failed if status is undefined
         return (
           <Box
             sx={{
@@ -105,7 +105,6 @@ const AccessLogs = () => {
     <Box sx={{ m: "20px" }}>
       <Typography variant="h5">Locks Status</Typography>
 
-      {/* 🔄 FIX: Added explicit height (550px) to prevent DataGrid from collapsing into invisibility */}
       <Box
         sx={{
           width: "100%",
