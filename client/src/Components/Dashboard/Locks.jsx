@@ -15,19 +15,35 @@ const Locks = () => {
 
   //to export data from backend
   useEffect(() => {
-    const fetchLocks = async () => {
-      try {
-        //axios converts response to json
-        const response = await api.get(`/locks/:deviceId?t=${Date.now()}`);
-        setLocks(response.data.data || []);
-      } catch (error) {
-        console.error("Error fetching locks data:", error);
-      } finally {
-        setLoading(false);
+  const fetchLocks = async () => {
+    try {
+      // 1. Replace with a real test deviceId string
+      const testDeviceId = "test-lock-101"; 
+      
+      // 2. Use backticks and string interpolation to inject the ID
+      const response = await api.get(`/lock/status/${testDeviceId}?t=${Date.now()}`);
+      
+      // 3. Put the single object into an array so DataGrid doesn't crash
+      if (response.data && response.data.success) {
+        // Your backend doesn't send an '_id' currently, so we inject one for DataGrid
+        const lockRow = {
+          _id: response.data.deviceId, // Using deviceId as the unique row identifier
+          deviceId: response.data.deviceId,
+          status: response.data.status,
+          time: response.data.lastUpdated,
+          isOnline: true // hardcoded placeholder since backend doesn't supply this yet
+        };
+
+        setLocks([lockRow]); 
       }
-    };
-    fetchLocks();
-  }, []);
+    } catch (error) {
+      console.error("Error fetching locks data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  fetchLocks();
+}, []);
 
   const columns = [
     { field: "_id", headerName: "ID" }, //field represent value grabbed
