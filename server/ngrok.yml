@@ -1,0 +1,9 @@
+version: "2"
+authtoken: 3FgOJLC9bytVwLEQPHejJy1aC0N_2WBdf2j2ZnUj8PMBAjn3w
+tunnels:
+  react_backend:
+    addr: 3000
+    proto: http
+  wokwi_sockets:
+    addr: 8080
+    proto: http
