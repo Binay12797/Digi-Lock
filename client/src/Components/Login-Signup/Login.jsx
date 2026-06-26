@@ -13,6 +13,7 @@ import { AuthContext } from "../Context/AuthContext";
 const Login = () => {
   const navigate = useNavigate();
   const { login } = useContext(AuthContext);
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   //creating variables to capture login details form user
   const [email, setEmail] = useState(""); //setEmail is a function that can change value of email
@@ -22,6 +23,11 @@ const Login = () => {
   //function to run when login button is pressed
   const handleLogin = async () => {
     setErrorMessage(""); //clears past errors
+
+    if (!emailRegex.test(email)) {
+      setErrorMessage("Please enter a valid Email address");
+      return;
+    }
 
     try {
       //now we should make an api request to running backend port.

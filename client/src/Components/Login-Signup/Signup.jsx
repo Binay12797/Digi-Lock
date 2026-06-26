@@ -10,18 +10,34 @@ import password_icon from "../../assets/password.png";
 
 const Signup = () => {
   const navigate = useNavigate();
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const passwordRegex =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
+  //At least 8 char, 1 U letter, 1 l letter, 1 num, 1 special char
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
   const handleSignup = async () => {
-    setErrorMessage("");
+    setErrorMessage(""); //clears past errors
 
     // if name is left empty then it has bollean value 0 and !name= 1
     if (!name || !email || !password) {
       setErrorMessage("All fields are required.");
+      return;
+    }
+
+    if (!emailRegex.test(email)) {
+      setErrorMessage("Please enter a valid Email address");
+      return;
+    }
+
+    if (!passwordRegex.test(password)) {
+      setErrorMessage(
+        "Password must be at least 8 characters and include uppercase, lowercase, number, and special character.",
+      );
       return;
     }
 
@@ -89,7 +105,6 @@ const Signup = () => {
               <img src={email_icon} alt="" />
               <input
                 type="email"
-                required
                 onInvalid={(e) =>
                   e.target.setCustomValidity(
                     "Please enter a valid email format!",

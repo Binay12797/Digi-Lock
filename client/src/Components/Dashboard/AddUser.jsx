@@ -1,5 +1,6 @@
 import { Box, Typography, Button, TextField } from "@mui/material";
 import { Formik } from "formik";
+import { useState } from "react";
 
 import * as yup from "yup";
 import useMediaQuery from "@mui/material/useMediaQuery";
@@ -11,6 +12,7 @@ const initialValues = {
   relation: "",
   contact: "", //its easier to import constact as string later we can ise phone regex to validate it
   address: "",
+  fingerprintId: "",
 };
 
 const phoneRegExp = /^\+?\d{1,15}$/; //emmet abbreviation, phone regex
@@ -25,11 +27,18 @@ const userFormSchema = yup.object().shape({
     .matches(phoneRegExp, "Phone number is not valid")
     .required("required"),
   address: yup.string().required("required"),
+  fingerprintId: yup.string().required("Please Scan fingerprint"),
 });
 
 const AddUser = () => {
   // isNonMobile  is boolean that says current device is mobile or desktop, Returns true if the viewport width is at least 600px, 600px is kind of standar helps to distinguish betn mobile and laptop
   const isNonMobile = useMediaQuery("(min-width:600px)");
+  const [isEnrolling, setIsEnrolling] = useState(false);
+
+  // must be inside as isEnrolling is definde inside
+  const handleEnrollFingerprint = (setFieldValue) => {
+    setIsEnrolling(true);
+  };
 
   //triggers when we submit or form
   //handleSubmit is formiks built in tool
@@ -56,6 +65,7 @@ const AddUser = () => {
           handleBlur,
           handleChange,
           handleSubmit,
+          setFieldValue,
         }) => (
           <form onSubmit={handleSubmit}>
             <Box
@@ -114,9 +124,9 @@ const AddUser = () => {
                 onBlur={handleBlur}
                 onChange={handleChange}
                 value={values.relation}
-                name="relation" //used by touched.email and errors.email
-                error={!!touched.email && !!errors.email} //passes boolean
-                helperText={touched.email && errors.email} //passes the text
+                name="relation"
+                error={!!touched.relation && !!errors.relation} //passes boolean
+                helperText={touched.relation && errors.relation} //passes the text
                 sx={{ gridColumn: "span 4" }}
               />
               <TextField
@@ -145,6 +155,32 @@ const AddUser = () => {
                 helperText={touched.address && errors.address} //passes the text
                 sx={{ gridColumn: "span 4" }}
               />
+              <Box
+                sx={{
+                  gridColumn: "span 4",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "20px",
+                }}
+              >
+                <TextField
+                  fullWidth
+                  variant="filled"
+                  label="Fingerprint Id"
+                  value={values.fingerprintId}
+                  disabled // User shouldn't edit this manually
+                  error={!!touched.fingerprintId && !!errors.fingerprintId}
+                  helperText={touched.fingerprintId && errors.fingerprintId}
+                  sx={{ gridColumn: "span 3" }}
+                />
+                <Button
+                  variant="outlined"
+                  color={isEnrolling ? "error" : "secondary"}
+                  onClick={() => handleEnrollFingerprint(setFieldValue)}
+                >
+                  Scan Finger
+                </Button>
+              </Box>
             </Box>
             <Box sx={{ display: "flex", justifyContent: "right", mt: "20px" }}>
               <Button type="submit" color="secondary" variant="contained">
