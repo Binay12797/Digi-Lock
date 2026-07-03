@@ -46,3 +46,8 @@ day 10:
 -setting up websocket for wokwi "npm install ws"
 -settign up ngork make "ngrok.yml" file
 -run "npx ngrok start --config ./ngrok.yml --all" to start ngrok tunnel
+
+day 11:
+-Database validation and authentication for fingerprint
+-on signup creates enrollment session for fingerprint registration
+-on scanning again gives access for registered fingerprint
