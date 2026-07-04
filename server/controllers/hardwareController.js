@@ -13,6 +13,15 @@ async function startEnrollment(req, res) {
     try {
         // This puts the userId into the server's memory
         enrollmentState.setSession(userId);
+        setTimeout(()=>{
+            const currentSession = enrollmentState.getSession();
+            if(currentSession === userId){
+                console.log("enrollment session timedout");
+
+                const io = req.app.get("io");
+                io.emit("ENROLLMENT_TIMEOUT",{message: "Enrollment window expired."});
+            }
+        },60000);
         return res.json({ 
             success: true, 
             message: `Enrollment session successfully started for user: ${userId}. Ready for fingerprint payload.` 
