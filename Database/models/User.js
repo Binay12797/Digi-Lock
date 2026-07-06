@@ -10,10 +10,10 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
-  password: {
-    type: String,
-    required: true
-  },
+  fingerprintId: {
+    type: Number,
+    unique: true
+  }
   
 },
 {collection: 'users',
