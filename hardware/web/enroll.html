@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Enrollment</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body data-page="enroll">
+  <div class="page-wrap">
+    <h1>Enrollment System</h1>
+    <div class="mode-indicator">Buzzer: beep on scan</div>
+
+    <div class="card">
+      <h2>New Enrollment</h2>
+      <p id="enrollMsg" style="display:none;margin-bottom:0.8em"></p>
+      <input type="text" id="nameField" placeholder="Full name" /><br><br>
+      <button class="primary" id="enrollBtn">Enroll Fingerprint</button>
+    </div>
+
+    <div class="card">
+      <h2>Enrolled Users (<span id="userCount">0</span>)</h2>
+      <div id="userList"><p style="color:#6a5030">No records yet.</p></div>
+      <br>
+      <a href="/api/db/clear" id="clearDbBtn" class="btn danger">Clear Database</a>
+    </div>
+
+    <div class="nav-btns">
+      <a href="/" class="btn">Home</a>
+      <a href="/mode/2" class="btn auth">Switch to Auth</a>
+    </div>
+  </div>
+
+  <!-- Popup overlay -->
+  <div class="overlay" id="overlay" style="display:none">
+    <div class="popup">
+      <h2 id="popTitle">Idle</h2>
+      <p id="popSub" style="font-size:0.82em;color:#c4a87a;margin-bottom:0.6em;text-align:center">Waiting...</p>
+      <div class="finger-anim" id="fingerAnim">~</div>
+      <div class="progress"><div class="progress-bar" id="progBar" style="width:0"></div></div>
+      <div class="status-line" id="statusLine">state: idle</div>
+      <div class="popup-actions">
+        <button id="scanBtn" class="primary">Scan 1 - Place Finger</button>
+        <button id="cancelBtn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
