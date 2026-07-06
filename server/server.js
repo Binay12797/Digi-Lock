@@ -57,7 +57,7 @@ wss.on("connection", (ws) => {
     }
 
     const user = await User.findOne({
-      pin: message.pin,
+      fingerprintId: message.fingerprintId,
       isActive: true
     });
 
