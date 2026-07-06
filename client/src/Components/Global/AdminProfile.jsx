@@ -50,10 +50,12 @@ const AdminProfileMenu = ({ anchorEl, openProfile, handleClose }) => {
       >
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
           <MenuItem onClick={handleClose}>
-            <ListItemIcon>
+            <ListItemIcon sx={{ color: colors.grey[100] }}>
               <PersonOutlinedIcon />
             </ListItemIcon>
-            <Typography variant="h5">Admin Profile</Typography>
+            <Typography variant="h5" sx={{ color: colors.grey[100] }}>
+              Admin Profile
+            </Typography>
           </MenuItem>
           <Box
             sx={{
@@ -64,15 +66,21 @@ const AdminProfileMenu = ({ anchorEl, openProfile, handleClose }) => {
               gap: 1,
             }}
           >
-            <Typography variant="h5">Name: {}</Typography>
-            <Typography variant="h5">Email: {email}</Typography>
+            <Typography variant="h5" sx={{ color: colors.grey[100] }}>
+              Name: {}
+            </Typography>
+            <Typography variant="h5" sx={{ color: colors.grey[100] }}>
+              Email: {email}
+            </Typography>
           </Box>
           <Divider sx={{ bgcolor: colors.grey[600] }} />
           <MenuItem onClick={logout}>
-            <ListItemIcon>
+            <ListItemIcon sx={{ color: colors.grey[100] }}>
               <LogoutIcon />
             </ListItemIcon>
-            <Typography variant="h5">Logout</Typography>
+            <Typography variant="h5" sx={{ color: colors.grey[100] }}>
+              Logout
+            </Typography>
           </MenuItem>
         </Box>
       </Menu>
