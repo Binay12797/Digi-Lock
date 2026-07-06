@@ -8,7 +8,7 @@ import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import SearchIcon from "@mui/icons-material/Search";
-import { Navigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import AdminProfileMenu from "./AdminProfile";
 
 const Topbar = ({ selected, setSelected }) => {
@@ -17,6 +17,7 @@ const Topbar = ({ selected, setSelected }) => {
   const colorMode = useContext(ColorModeContext);
   const [anchorEl, setAnchorEl] = useState(null); // anchor element
   const openProfile = Boolean(anchorEl); //open to know if the profile is being shown or not
+  const navigate = useNavigate();
 
   const handleClick = (e) => {
     setAnchorEl(e.currentTarget);
@@ -65,8 +66,20 @@ const Topbar = ({ selected, setSelected }) => {
             <LightModeOutlinedIcon />
           )}
         </IconButton>
-        <IconButton>
-          <NotificationsOutlinedIcon />
+        <IconButton
+          onClick={() => {
+            navigate("/AlertAndNotifications");
+            setSelected("Alerts & Notifications");
+          }}
+        >
+          <NotificationsOutlinedIcon
+            sx={{
+              color:
+                selected === "Alerts & Notifications"
+                  ? colors.blueAccent[400]
+                  : "white",
+            }}
+          />
         </IconButton>
         <IconButton>
           <SettingsOutlinedIcon />

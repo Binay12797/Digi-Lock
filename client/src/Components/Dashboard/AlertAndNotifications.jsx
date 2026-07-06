@@ -53,15 +53,15 @@ const AlertAndNotifications = () => {
 
   return (
     <Box sx={{ m: "20px" }}>
-      <Typography variant="h5">Monitor events and system activities</Typography>
+      <Typography variant="h5">Monitor Events and System Activities</Typography>
 
       <Box
         sx={{
           display: "grid",
           gridTemplateColumns: "repeat(4, 1fr)",
           gap: "20px",
-          mb: "25px",
-          mt: "30px",
+          mb: "30px",
+          mt: "25px",
         }} // it tells to make four column of equla width and fill up the screen/ grid container
       >
         <Card sx={{ bgcolor: colors.primary[400] }}>
@@ -77,7 +77,9 @@ const AlertAndNotifications = () => {
               <Typography color="error" variant="h3">
                 🚨 Critical
               </Typography>
-              <Typography variant="h3">{criticalCount}</Typography>
+              <Typography variant="h3" color="error">
+                {criticalCount}
+              </Typography>
             </Box>
           </CardContent>
         </Card>
@@ -95,7 +97,9 @@ const AlertAndNotifications = () => {
               <Typography color="warning" variant="h3">
                 ⚠️ Warning
               </Typography>
-              <Typography variant="h3">{warningCount}</Typography>
+              <Typography variant="h3" color="warning">
+                {warningCount}
+              </Typography>
             </Box>
           </CardContent>
         </Card>
@@ -113,7 +117,9 @@ const AlertAndNotifications = () => {
               <Typography color="info" variant="h3">
                 ℹ️ Info
               </Typography>
-              <Typography variant="h3">{infoCount}</Typography>
+              <Typography variant="h3" color="info">
+                {infoCount}
+              </Typography>
             </Box>
           </CardContent>
         </Card>
@@ -131,7 +137,9 @@ const AlertAndNotifications = () => {
               <Typography color="success" variant="h3">
                 📋 Total
               </Typography>
-              <Typography variant="h3">{allCount}</Typography>
+              <Typography variant="h3" color="success">
+                {allCount}
+              </Typography>
             </Box>
           </CardContent>
         </Card>
@@ -147,7 +155,16 @@ const AlertAndNotifications = () => {
           //notification is just a variable name that points to the current notification an part of the array [notification, notification , notification]= notifications
           <Card
             key={notification.id}
-            sx={{ bgcolor: colors.primary[400], pt: "5px" }}
+            sx={{
+              bgcolor: colors.primary[400],
+              pt: "5px",
+              borderLeft:
+                notification.severity === "critical"
+                  ? "6px solid #f44336"
+                  : notification.severity === "warning"
+                    ? "6px solid #ff9800"
+                    : "6px solid #2196f3",
+            }}
           >
             <CardContent>
               <Box
