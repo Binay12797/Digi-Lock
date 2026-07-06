@@ -118,6 +118,33 @@ EnrollState prevEnrollState = ENROLL_IDLE;
 unsigned long processingStartMs     = 0;
 const unsigned long PROCESSING_TIMEOUT_MS = 8000;
 
+//backend
+
+#include <HTTPClient.h>
+
+bool checkWithBackend(String uid) {
+  HTTPClient http;
+
+  http.begin("http:/192.168.16.201/verifyFingerprint"); 
+  http.addHeader("Content-Type", "application/json");
+
+  String body = "{\"uid\":\"" + uid + "\"}";
+
+  int httpResponseCode = http.POST(body);
+
+  if (httpResponseCode > 0) {
+    String response = http.getString();
+    Serial.println(response);
+
+    if (response.indexOf("GRANTED") != -1) {
+      return true;
+    }
+  }
+
+  http.end();
+  return false;
+}
+
 // ── In-memory database ────────────────────────────────────
 struct EnrolledUser {
   String name;
@@ -962,7 +989,7 @@ void authProcessLoop() {
 
     case AUTH_VERIFYING:
       if (now - authStateStartMs >= AUTH_VERIFY_MS) {
-        bool found = enrollDB_findByUID(authInputUID);
+        bool found = checkWithBackend(authInputUID);
         lastAuthHappened = true;
         lastAuthGranted  = found;
 
