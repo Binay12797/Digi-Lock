@@ -12,6 +12,25 @@ import { useState } from "react";
 import { tokens } from "../../theme";
 import notificationsData from "../Data/mockdata";
 
+const formatEvent = (event) => {
+  switch (event) {
+    case "FAILED_FINGERPRINT":
+      return "🚨 Failed Fingerprint Attempt at ";
+
+    case "LOCK_TAMPER":
+      return "🚨 Lock Tamper Detected at ";
+
+    case "LOCK_OFFLINE":
+      return "⚠️ Lock Offline at ";
+
+    case "USER_ADDED":
+      return "ℹ️ Added New User ";
+
+    default:
+      return event;
+  }
+};
+
 const AlertAndNotifications = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -36,19 +55,13 @@ const AlertAndNotifications = () => {
     <Box sx={{ m: "20px" }}>
       <Typography variant="h5">Monitor events and system activities</Typography>
 
-      <Box sx={{ display: "flex", mt: 3, gap: 5, mb: 4 }}>
-        <Button variant="contained">All</Button>
-        <Button variant="contained">Critical</Button>
-        <Button variant="contained">Warning</Button>
-        <Button variant="contained">Info</Button>
-      </Box>
-
       <Box
         sx={{
           display: "grid",
           gridTemplateColumns: "repeat(4, 1fr)",
           gap: "20px",
-          mb: "30px",
+          mb: "25px",
+          mt: "30px",
         }} // it tells to make four column of equla width and fill up the screen/ grid container
       >
         <Card sx={{ bgcolor: colors.primary[400] }}>
@@ -122,6 +135,38 @@ const AlertAndNotifications = () => {
             </Box>
           </CardContent>
         </Card>
+      </Box>
+
+      <Typography variant="h5" sx={{ mb: 2 }}>
+        Recent Notifications
+      </Typography>
+
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        {notifications.map((notification) => (
+          //map is like an for loop, here creates card for each of the notifications data present
+          //notification is just a variable name that points to the current notification an part of the array [notification, notification , notification]= notifications
+          <Card
+            key={notification.id}
+            sx={{ bgcolor: colors.primary[400], pt: "5px" }}
+          >
+            <CardContent>
+              <Box
+                sx={{ display: "flex", justifyContent: "space-between", mr: 4 }}
+              >
+                <Typography variant="h5">
+                  {formatEvent(notification.event)}
+                  {notification.entityName}
+                </Typography>
+                <Typography variant="h5">
+                  {new Date(notification.timestamp).toLocaleString("en-US", {
+                    dateStyle: "medium",
+                    timeStyle: "short",
+                  })}
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        ))}
       </Box>
     </Box>
   );

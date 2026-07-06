@@ -209,3 +209,6 @@ margin is the space outside an element's border, while padding is the space insi
 a small detail 
 while we import someting from ........................
 someting is function on that page not the whole page
+
+In JavaScript, toLocaleString() is a built-in method used to convert numbers, dates, and arrays into language-sensitive, localized strings
+Language-sensitive localized strings are text formats that change automatically based on a user's language, country, and cultural habits.

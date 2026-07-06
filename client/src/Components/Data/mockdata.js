@@ -8,7 +8,9 @@ const notificationsData = [
 
     severity: "critical",
 
-    lockName: "Main Entrance",
+    entityType: "lock",
+
+    entityName: "Main Entrance",
 
     timestamp: "2026-07-06T10:35:20",
 
@@ -22,7 +24,9 @@ const notificationsData = [
 
     severity: "critical",
 
-    lockName: "Server Room",
+    entityType: "lock",
+
+    entityName: "Server Room",
 
     timestamp: "2026-07-06T10:20:00",
 
@@ -36,7 +40,9 @@ const notificationsData = [
 
     severity: "warning",
 
-    lockName: "Garage",
+    entityType: "lock",
+
+    entityName: "Garage",
 
     timestamp: "2026-07-06T09:55:00",
 
@@ -50,7 +56,9 @@ const notificationsData = [
 
     severity: "info",
 
-    user: "Emily Watson",
+    entityType: "user",
+
+    entityName: "Sambeg Sherestha",
 
     timestamp: "2026-07-06T08:30:00",
 
