@@ -205,3 +205,7 @@ settings
 serach bar
 
 margin is the space outside an element's border, while padding is the space inside an element's border
+
+a small detail 
+while we import someting from ........................
+someting is function on that page not the whole page

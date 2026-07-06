@@ -17,6 +17,7 @@ import AccessLogs from "./Components/Dashboard/AccessLogs";
 import AddUser from "./Components/Dashboard/AddUser";
 import AuthProvider from "./Components/Context/AuthContext";
 import ProtectedRoute from "./Components/ProtectedRoute";
+import AlertAndNotifications from "./Components/Dashboard/AlertAndNotifications";
 
 function App() {
   const [theme, colorMode] = useMode();
@@ -50,6 +51,10 @@ function App() {
                 <Route path="/Locks" element={<Locks />} />
                 <Route path="/AccessLogs" element={<AccessLogs />} />
                 <Route path="/AddUser" element={<AddUser />} />
+                <Route
+                  path="/AlertAndNotifications"
+                  element={<AlertAndNotifications />}
+                />
               </Route>
             </Routes>
           </Router>

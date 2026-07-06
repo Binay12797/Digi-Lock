@@ -11,6 +11,7 @@ import {
 import { AuthContext } from "../Context/AuthContext";
 import { tokens } from "../../theme";
 import LogoutIcon from "@mui/icons-material/Logout";
+import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 
 const AdminProfileMenu = ({ anchorEl, openProfile, handleClose }) => {
   const { logout } = useContext(AuthContext);
@@ -48,10 +49,16 @@ const AdminProfileMenu = ({ anchorEl, openProfile, handleClose }) => {
         //right side and bottom of the button where you clicked
       >
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+          <MenuItem onClick={handleClose}>
+            <ListItemIcon>
+              <PersonOutlinedIcon />
+            </ListItemIcon>
+            <Typography variant="h5">Admin Profile</Typography>
+          </MenuItem>
           <Box
             sx={{
               px: 2,
-              py: 1,
+              py: 0,
               display: "flex",
               flexDirection: "column",
               gap: 1,

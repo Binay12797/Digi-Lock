@@ -171,7 +171,7 @@ const DashboardSidebar = ({ selected, setSelected }) => {
               />
               <Item
                 title="Alerts & Notifications"
-                to="/Dashboard"
+                to="/AlertAndNotifications"
                 icon={<NotificationsNoneOutlinedIcon />}
                 selected={selected}
                 setSelected={setSelected}

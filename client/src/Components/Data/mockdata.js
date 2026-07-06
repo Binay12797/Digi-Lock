@@ -1,5 +1,65 @@
 import { tokens } from "../../theme";
 
+const notificationsData = [
+  {
+    id: 1,
+
+    event: "FAILED_FINGERPRINT",
+
+    severity: "critical",
+
+    lockName: "Main Entrance",
+
+    timestamp: "2026-07-06T10:35:20",
+
+    read: false,
+  },
+
+  {
+    id: 2,
+
+    event: "LOCK_TAMPER",
+
+    severity: "critical",
+
+    lockName: "Server Room",
+
+    timestamp: "2026-07-06T10:20:00",
+
+    read: false,
+  },
+
+  {
+    id: 3,
+
+    event: "LOCK_OFFLINE",
+
+    severity: "warning",
+
+    lockName: "Garage",
+
+    timestamp: "2026-07-06T09:55:00",
+
+    read: false,
+  },
+
+  {
+    id: 4,
+
+    event: "USER_ADDED",
+
+    severity: "info",
+
+    user: "Emily Watson",
+
+    timestamp: "2026-07-06T08:30:00",
+
+    read: true,
+  },
+];
+
+export default notificationsData;
+
 export const mockDataUsers = [
   {
     id: 1,
