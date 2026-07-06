@@ -51,3 +51,11 @@ day 11:
 -Database validation and authentication for fingerprint
 -on signup creates enrollment session for fingerprint registration
 -on scanning again gives access for registered fingerprint
+-Timeout if the enrollment session begins but no fingerprint 
+
+day 12:
+-testing using supertest
+-steps:
+-create "index.ja" a modified copy of server.js
+- npm install jest supertest --save-dev
+-used supertest and postman to test routes and api endpoints
