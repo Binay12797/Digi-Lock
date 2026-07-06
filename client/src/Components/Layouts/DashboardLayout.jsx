@@ -12,7 +12,7 @@ const DashboardLayout = () => {
     <div style={{ display: "flex", height: "100vh" }}>
       <Sidebar selected={selected} setSelected={setSelected} />
       <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-        <Topbar selected={selected} />
+        <Topbar selected={selected} setSelected={setSelected} />
         {/*flex: 1 on the Outlet wrapper:" It tells the content area to expand to fill all remaining vertical space under the Topbar. */}
         <div style={{ flex: 1, overflowY: "auto" }}>
           <Outlet />

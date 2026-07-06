@@ -1,5 +1,5 @@
 import { Box, IconButton, useTheme, Typography } from "@mui/material";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { ColorModeContext, tokens } from "../../theme";
 import InputBase from "@mui/material/InputBase"; // used to create a search bar
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
@@ -8,11 +8,23 @@ import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import SearchIcon from "@mui/icons-material/Search";
+import { Navigate } from "react-router-dom";
+import AdminProfileMenu from "./AdminProfile";
 
-const Topbar = ({ selected }) => {
+const Topbar = ({ selected, setSelected }) => {
   const theme = useTheme(); // theme shade
   const colors = tokens(theme.palette.mode); //directly to token shde
   const colorMode = useContext(ColorModeContext);
+  const [anchorEl, setAnchorEl] = useState(null); // anchor element
+  const openProfile = Boolean(anchorEl); //open to know if the profile is being shown or not
+
+  const handleClick = (e) => {
+    setAnchorEl(e.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   return (
     //box is similar to div but we can write css directly inside the box
@@ -59,9 +71,16 @@ const Topbar = ({ selected }) => {
         <IconButton>
           <SettingsOutlinedIcon />
         </IconButton>
-        <IconButton>
+        <IconButton onClick={handleClick}>
           <PersonOutlinedIcon />
         </IconButton>
+
+        <AdminProfileMenu
+          // these are values being passed to adminprofilemenu function
+          anchorEl={anchorEl}
+          openProfile={openProfile}
+          handleClose={handleClose}
+        />
       </Box>
     </Box>
   );

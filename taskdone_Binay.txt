@@ -186,3 +186,22 @@ You can create a new branch form past commits of any other existing branch
 note: opp1 || opp2  //here if first opp1 is false/null/undefined then opp2 runs
 
 `/locks/:deviceId?t=${Date.now()}` ${Date.now()} this part is operation
+
+binaybista@gmail.com
+Mang@pill09
+
+
+daY:
+
+to do:
+user profile
+alerts and notification
+fingerprints
+dashboard
+
+
+next day
+settings
+serach bar
+
+margin is the space outside an element's border, while padding is the space inside an element's border
