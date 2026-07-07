@@ -50,10 +50,10 @@ const AdminProfileMenu = ({ anchorEl, openProfile, handleClose }) => {
       >
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
           <MenuItem onClick={handleClose}>
-            <ListItemIcon sx={{ color: colors.grey[100] }}>
+            <ListItemIcon sx={{ color: colors.greenAccent[400] }}>
               <PersonOutlinedIcon />
             </ListItemIcon>
-            <Typography variant="h5" sx={{ color: colors.grey[100] }}>
+            <Typography variant="h5" sx={{ color: colors.greenAccent[400] }}>
               Admin Profile
             </Typography>
           </MenuItem>

@@ -157,7 +157,7 @@ const DashboardSidebar = ({ selected, setSelected }) => {
               />
               <Item
                 title="Fingerprints"
-                to="/Dashboard"
+                to="/Fingerprints"
                 icon={<FingerprintOutlinedIcon />}
                 selected={selected}
                 setSelected={setSelected}

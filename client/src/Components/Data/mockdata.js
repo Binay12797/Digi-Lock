@@ -1,6 +1,6 @@
 import { tokens } from "../../theme";
 
-const notificationsData = [
+export const notificationsData = [
   {
     id: 1,
 
@@ -67,6 +67,49 @@ const notificationsData = [
 ];
 
 export default notificationsData;
+
+export const fingerprintData = [
+  {
+    id: 1,
+    userName: "Sambeg Sheresths",
+    role: "Admin",
+    fingerprintId: "FP-001",
+    enrolled: true,
+    locks: ["Main Entrance", "Server Room"],
+  },
+  {
+    id: 2,
+    userName: "Karan RB",
+    role: "Employee",
+    fingerprintId: "FP-002",
+    enrolled: true,
+    locks: ["Garage"],
+  },
+  {
+    id: 3,
+    userName: "ChongBang Bigyan",
+    role: "Security",
+    fingerprintId: null,
+    enrolled: false,
+    locks: ["Office"],
+  },
+  {
+    id: 4,
+    userName: "Binay Bista",
+    role: "Admin",
+    fingerprintId: null,
+    enrolled: false,
+    locks: ["Office", "Main Entrance", "Server Room"],
+  },
+  {
+    id: 4,
+    userName: "Rajab Bal",
+    role: "Security",
+    fingerprintId: null,
+    enrolled: false,
+    locks: ["Main Entrance"],
+  },
+];
 
 export const mockDataUsers = [
   {
