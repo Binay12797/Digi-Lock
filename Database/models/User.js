@@ -14,7 +14,15 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  
+  fingerprintId: {
+    type: String,
+    unique: true,
+    sparse: true   
+  },
+  isActive: {
+    type: Boolean,
+    default: true
+  },
 },
 {collection: 'users',
 versionKey : false

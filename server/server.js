@@ -1,4 +1,4 @@
-require("dotenv").config();
+require("dotenv").config({ path: __dirname + "/.env" });
 const express = require("express");
 const http = require("http");
 const WebSocket = require("ws");
@@ -10,9 +10,10 @@ const passport = require("passport");
 
 const userRouter = require("./routes/userRouter");
 
-// Models (from Database branch)
-const User = require("../Database/models/User");
-const AccessLog = require("../Database/models/AccessLog");
+// Models (from Database branch) — .default needed since these files use ESM `export default`
+const User = require("../Database/models/User").default;
+const AccessLog = require("../Database/models/AccessLog").default;
+const Door = require("../Database/models/Door").default;
 
 const app = express();
 const server = http.createServer(app);
@@ -35,12 +36,24 @@ app.use((req, res, next) => {
   next();
 });
 app.use("/", userRouter);
-mongoose.connect(
-  "mongodb+srv://kranabhat338_db_user:0pQiliKmlxHqYfrW@cluster0.n030ezp.mongodb.net/"
-)
-.then(() => console.log("MongoDB connected"))
-.catch(err => console.log(err));
-const wss = new WebSocket.Server({ server });
+
+let doorId = null;
+
+mongoose.connect(process.env.MONGODB_URI)
+  .then(async () => {
+    console.log("MongoDB connected");
+
+    const door = await Door.findOne();
+    if (door) {
+      doorId = door._id;
+      console.log("Using door:", doorId);
+    } else {
+      console.log("⚠️  No Door document found in DB — successful unlocks won't be logged until one exists.");
+    }
+  })
+  .catch(err => console.log(err));
+
+const wss = new WebSocket.Server({ server, path: "/ws" });
 
 let attempts = 0;
 let isLocked = false;
@@ -49,52 +62,70 @@ wss.on("connection", (ws) => {
   console.log("ESP32 connected");
 
   ws.on("message", async (data) => {
-    const message = JSON.parse(data);
+    let message;
 
-    if (isLocked) {
-      ws.send(JSON.stringify({ status: "LOCKED" }));
+    try {
+      message = JSON.parse(data);
+    } catch (err) {
+      console.log("Bad JSON from ESP32:", err.message);
       return;
     }
 
-    const user = await User.findOne({
-      fingerprintId: message.fingerprintId,
-      isActive: true
-    });
-
-    if (user) {
-      attempts = 0;
-
-      ws.send(JSON.stringify({ status: "GRANTED" }));
-
-      await AccessLog.create({
-        user: user._id,
-        status: "SUCCESS",
-        time: new Date()
-      });
-
-    } else {
-      attempts++;
-
-      ws.send(JSON.stringify({ status: "DENIED" }));
-
-      await AccessLog.create({
-        status: "FAILED",
-        time: new Date()
-      });
-
-      if (attempts >= 3) {
-        isLocked = true;
-
+    try {
+      if (isLocked) {
         ws.send(JSON.stringify({ status: "LOCKED" }));
-
-        setTimeout(() => {
-          isLocked = false;
-          attempts = 0;
-        }, 30000);
+        return;
       }
+
+      const user = await User.findOne({
+        fingerprintId: message.fingerprintId,
+        isActive: true
+      });
+
+      if (user) {
+        attempts = 0;
+
+        ws.send(JSON.stringify({ status: "GRANTED" }));
+
+        if (doorId) {
+          await AccessLog.create({
+            userId: user._id,
+            doorId: doorId,
+            action: "unlock",
+            status: "success",
+            methodtype: "fingerprint"
+          });
+        } else {
+          console.log("Skipped AccessLog write — no doorId available.");
+        }
+
+      } else {
+        attempts++;
+
+        ws.send(JSON.stringify({ status: "DENIED" }));
+        // Not logged to AccessLog — userId is required and there's no matched user here.
+
+        if (attempts >= 3) {
+          isLocked = true;
+
+          ws.send(JSON.stringify({ status: "LOCKED" }));
+
+          setTimeout(() => {
+            isLocked = false;
+            attempts = 0;
+          }, 30000);
+        }
+      }
+    } catch (err) {
+      console.log("Error processing message:", err.message);
     }
   });
+
+  ws.on("close", () => {
+    console.log("ESP32 disconnected");
+  });
 });
-server.listen(3000, () => {
+
+server.listen(3000, "0.0.0.0", () => {
   console.log("Server running on port 3000");
 });
