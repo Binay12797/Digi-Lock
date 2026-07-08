@@ -70,24 +70,29 @@ export default notificationsData;
 
 export const lockUsageData = [
   {
+    id: 1,
     lockName: "Main Door",
-    unlockCount: 25,
+    unlocks: 24,
   },
   {
+    id: 2,
     lockName: "Office Door",
-    unlockCount: 18,
+    unlocks: 18,
   },
   {
+    id: 3,
     lockName: "Server Room",
-    unlockCount: 9,
+    unlocks: 9,
   },
   {
+    id: 4,
     lockName: "Back Door",
-    unlockCount: 14,
+    unlocks: 14,
   },
   {
+    id: 5,
     lockName: "Storage Room",
-    unlockCount: 5,
+    unlocks: 5,
   },
 ];
 
