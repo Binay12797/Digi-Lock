@@ -72,7 +72,9 @@ const Users = () => {
 
   return (
     <Box sx={{ m: "20px" }}>
-      <Typography variant="h5">Managing Users</Typography>
+      <Typography variant="h5" sx={{ color: colors.greenAccent[400] }}>
+        Managing Users
+      </Typography>
       <Box
         sx={{
           m: "10px 0 0 0",

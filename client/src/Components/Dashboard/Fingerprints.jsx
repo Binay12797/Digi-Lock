@@ -19,7 +19,9 @@ const Fingerprints = () => {
 
   return (
     <Box sx={{ m: "20px" }}>
-      <Typography variant="h5">Manage fingerprints and Lock Access</Typography>
+      <Typography variant="h5" sx={{ color: colors.greenAccent[400] }}>
+        Manage fingerprints and Lock Access
+      </Typography>
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 4 }}>
         {/* curly bracket for js code */}

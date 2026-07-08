@@ -68,6 +68,29 @@ export const notificationsData = [
 
 export default notificationsData;
 
+export const lockUsageData = [
+  {
+    lockName: "Main Door",
+    unlockCount: 25,
+  },
+  {
+    lockName: "Office Door",
+    unlockCount: 18,
+  },
+  {
+    lockName: "Server Room",
+    unlockCount: 9,
+  },
+  {
+    lockName: "Back Door",
+    unlockCount: 14,
+  },
+  {
+    lockName: "Storage Room",
+    unlockCount: 5,
+  },
+];
+
 export const fingerprintData = [
   {
     id: 1,

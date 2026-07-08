@@ -45,7 +45,9 @@ const AlertAndNotifications = () => {
 
   return (
     <Box sx={{ m: "20px" }}>
-      <Typography variant="h5">Monitor Events and System Activities</Typography>
+      <Typography variant="h5" sx={{ color: colors.greenAccent[400] }}>
+        Monitor Events and System Activities
+      </Typography>
 
       <Box
         sx={{

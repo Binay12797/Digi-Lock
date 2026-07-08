@@ -4,6 +4,8 @@ import { useState } from "react";
 
 import * as yup from "yup";
 import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme } from "@mui/material";
+import { tokens } from "../../theme";
 
 const initialValues = {
   firstName: "",
@@ -34,6 +36,8 @@ const AddUser = () => {
   // isNonMobile  is boolean that says current device is mobile or desktop, Returns true if the viewport width is at least 600px, 600px is kind of standar helps to distinguish betn mobile and laptop
   const isNonMobile = useMediaQuery("(min-width:600px)");
   const [isEnrolling, setIsEnrolling] = useState(false);
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
 
   // must be inside as isEnrolling is definde inside
   const handleEnrollFingerprint = (setFieldValue) => {
@@ -49,7 +53,9 @@ const AddUser = () => {
   return (
     <Box sx={{ m: "20px" }}>
       <Box>
-        <Typography variant="h5">Create a New User Profile</Typography>
+        <Typography variant="h5" sx={{ color: colors.greenAccent[400] }}>
+          Create a New User Profile
+        </Typography>
       </Box>
 
       <Formik
