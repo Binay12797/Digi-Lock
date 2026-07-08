@@ -176,13 +176,13 @@ const DashboardSidebar = ({ selected, setSelected }) => {
                 selected={selected}
                 setSelected={setSelected}
               />
-              <Item
+              {/* <Item
                 title="Settings"
                 to="/Dashboard"
                 icon={<SettingsOutlinedIcon />}
                 selected={selected}
                 setSelected={setSelected}
-              />
+              /> */}
             </Box>
             {/* position: "absolute" on the Logout Box: This pulls the Logout button out of the normal "flow" of the Menu. By setting bottom: "10px", you tell the browser: "No matter what, stick this to the bottom of the sidebar ie: ends at 10 px from the bottom of the page." */}
             <Box sx={{ position: "absolute", bottom: "10px", width: "100%" }}>

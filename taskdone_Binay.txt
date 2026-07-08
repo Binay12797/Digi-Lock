@@ -214,3 +214,5 @@ In JavaScript, toLocaleString() is a built-in method used to convert numbers, da
 Language-sensitive localized strings are text formats that change automatically based on a user's language, country, and cultural habits.
 
  curly bracket for js code and () for HTML
+
+ A Chip in Material UI (MUI) is a compact UI component that represents an input, attribute, or action
