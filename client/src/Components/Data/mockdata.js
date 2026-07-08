@@ -91,6 +91,37 @@ export const lockUsageData = [
   },
 ];
 
+export const dashboardStats = [
+  {
+    id: 1,
+    title: "Total Locks",
+    value: 12,
+    subtitle: "Registered locks",
+    icon: "lock",
+  },
+  {
+    id: 2,
+    title: "Active Users",
+    value: 35,
+    subtitle: "Registered users",
+    icon: "users",
+  },
+  {
+    id: 3,
+    title: "Unlocks Today",
+    value: 84,
+    subtitle: "Successful unlocks",
+    icon: "unlock",
+  },
+  {
+    id: 4,
+    title: "Failed Attempts",
+    value: 3,
+    subtitle: "Failed authentications",
+    icon: "warning",
+  },
+];
+
 export const fingerprintData = [
   {
     id: 1,
