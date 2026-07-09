@@ -77,7 +77,7 @@ const Topbar = ({ selected, setSelected }) => {
               color:
                 selected === "Alerts & Notifications"
                   ? colors.blueAccent[400]
-                  : "white",
+                  : null,
             }}
           />
         </IconButton>
