@@ -6,39 +6,34 @@
 #include "SocketClient.h"
 
 // 0 = idle, 1 = enrollment mode, 2 = authorization mode
-// The React frontend / backend controls this via a "mode:set" socket event.
+// The React frontend / backend controls this via a { "command": "SET_MODE", "mode": N } message.
 int currentMode = 0;
 
 unsigned long lastStatusMs = 0;
 const unsigned long STATUS_INTERVAL_MS = 5000;
 
-// ── Handlers for events coming from the backend ────────────────────
-// Kept as plain functions (not lambdas) so they're easy to find/edit
-// once you know what your backend actually sends.
+// ── Handler for the events this file itself owns ────────────────────
+// EnrollmentManager::begin() and AuthManager::begin() each register
+// their own SocketClient::onCommand() subscriber for the commands they
+// own (START_ENROLL/CANCEL_ENROLL/ENROLL_SCAN1/ENROLL_SCAN2 and
+// OPEN_DOOR/DENY_ACCESS/AUTH_CHECK respectively — see SocketClient.h).
+// This file only needs to react to SET_MODE (system-level) and to
+// START_ENROLL for the purpose of switching currentMode, since only
+// main.ino knows about currentMode.
+void handleSystemCommand(const String &command, JsonObject data) {
+  if (command == "SET_MODE") {
+    int mode = data["mode"] | 0;
+    currentMode = mode;
+    if (mode == 1)      EnrollmentManager::reset();
+    else if (mode == 2) AuthManager::reset();
+    Buzzer::beepMode();
+    Serial.println("[Mode] -> " + String(mode));
 
-void setMode(int mode) {
-  currentMode = mode;
-  if (mode == 1)      EnrollmentManager::reset();
-  else if (mode == 2) AuthManager::reset();
-  Buzzer::beepMode();
-  Serial.println("[Mode] -> " + String(mode));
-}
-
-void handleEnrollStart(const String &name) {
-  currentMode = 1;
-  EnrollmentManager::start(name);
-}
-
-void handleEnrollScan1() { EnrollmentManager::scan1(); }
-void handleEnrollScan2() { EnrollmentManager::scan2(); }
-
-void handleAuthCheck(const String &uid) {
-  currentMode = 2;
-  AuthManager::checkUID(uid);
-}
-
-void handleAuthResult(bool granted) {
-  AuthManager::onBackendResult(granted);
+  } else if (command == "START_ENROLL") {
+    // EnrollmentManager's own handler (registered separately) starts the
+    // actual enrollment flow — this just flips the loop() into mode 1.
+    currentMode = 1;
+  }
 }
 
 // ── Setup / loop ────────────────────────────────────────────────────
@@ -58,13 +53,10 @@ void setup() {
   Buzzer::begin();
   connectWiFi();
 
-  SocketClient::onModeSet(setMode);
-  SocketClient::onEnrollStart(handleEnrollStart);
-  SocketClient::onEnrollScan1(handleEnrollScan1);
-  SocketClient::onEnrollScan2(handleEnrollScan2);
-  SocketClient::onAuthCheck(handleAuthCheck);
-  SocketClient::onAuthResult(handleAuthResult);
-  SocketClient::begin();
+  EnrollmentManager::begin();   // registers its own command handler
+  AuthManager::begin();         // registers its own command handler
+  SocketClient::onCommand(handleSystemCommand);
+  SocketClient::begin();        // connect last, once all handlers are registered
 
   Serial.println("[System] Ready.");
 }

@@ -31,7 +31,14 @@ void begin() {
       String nameAtCancel = pendingName_;
       EnrollmentManager::reset();
       SocketClient::emitEnrollFailed(nameAtCancel, "cancelled_by_admin");
+      SocketClient::emitEnrollLog(nameAtCancel, "", false, "cancelled_by_admin");
       Serial.println("[Enroll] Cancelled by admin");
+
+    } else if (command == "ENROLL_SCAN1") {
+      EnrollmentManager::scan1();
+
+    } else if (command == "ENROLL_SCAN2") {
+      EnrollmentManager::scan2();
     }
   });
 }
@@ -90,6 +97,7 @@ void loop() {
       state_ = ENROLL_FAILED;
       Buzzer::beepFail();
       SocketClient::emitEnrollFailed(pendingName_, "processing_timeout");
+      SocketClient::emitEnrollLog(pendingName_, "", false, "processing_timeout");
       return;
     }
     if (elapsed > 1500) {
@@ -107,6 +115,7 @@ void loop() {
       state_ = ENROLL_FAILED;
       Buzzer::beepFail();
       SocketClient::emitEnrollFailed(pendingName_, "processing_timeout");
+      SocketClient::emitEnrollLog(pendingName_, "", false, "processing_timeout");
       return;
     }
     if (elapsed > 3000) {
@@ -115,6 +124,7 @@ void loop() {
         state_ = ENROLL_FAILED;
         Buzzer::beepFail();
         SocketClient::emitEnrollFailed(pendingName_, "template_combine_failed");
+        SocketClient::emitEnrollLog(pendingName_, "", false, "template_combine_failed");
         return;
       }
       // Report to backend — it persists the UID against the user record
@@ -122,6 +132,7 @@ void loop() {
       state_ = ENROLL_DONE;
       Buzzer::beepSuccess();
       SocketClient::emitEnrollComplete(pendingName_, uid);
+      SocketClient::emitEnrollLog(pendingName_, uid, true, "enrolled");
       Serial.println("[Enroll] DONE — " + pendingName_ + " → " + uid);
     }
   }

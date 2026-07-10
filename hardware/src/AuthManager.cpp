@@ -57,7 +57,15 @@ namespace {
     Serial.println("[Auth] ALARM triggered after " + String(lockoutCount_) + " lockouts");
   }
 
-  void applyResult(bool granted) {
+  void applyResult(bool granted, const String &reason = "") {
+    // Access log: one entry per completed attempt, regardless of outcome,
+    // so the backend's access-log collection has a full history. Reason
+    // defaults to a sensible value per outcome when the caller doesn't
+    // supply one (e.g. plain granted/denied vs. a timeout).
+    String logReason = reason;
+    if (logReason.isEmpty()) logReason = granted ? "match" : "no_match";
+    SocketClient::emitAccessLog(inputUID, granted, logReason);
+
     if (granted) {
       state_          = AUTH_GRANTED;
       failedAttempts_ = 0;
@@ -89,9 +97,14 @@ namespace {
 namespace AuthManager {
 
 void begin() {
-  SocketClient::onCommand([](const String &command, JsonObject /*data*/) {
+  SocketClient::onCommand([](const String &command, JsonObject data) {
     if      (command == "OPEN_DOOR")   { AuthManager::onBackendResult(true);  }
     else if (command == "DENY_ACCESS") { AuthManager::onBackendResult(false); }
+    else if (command == "AUTH_CHECK")  {
+      // Backend-triggered test scan (e.g. a "test" button in the admin UI)
+      String uid = data["uid"] | "";
+      if (!uid.isEmpty()) AuthManager::checkUID(uid);
+    }
   });
 }
 
@@ -154,7 +167,7 @@ void loop() {
       // Waiting for onBackendResult(). Fail-safe: deny on timeout.
       if (now - stateStartMs >= AUTH_VERIFY_TIMEOUT_MS) {
         Serial.println("[Auth] Backend response timeout - denying");
-        applyResult(false);
+        applyResult(false, "backend_timeout");
       }
       break;
 

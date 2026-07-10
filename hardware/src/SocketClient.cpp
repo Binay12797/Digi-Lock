@@ -33,7 +33,7 @@ namespace {
     // Notify every registered subscriber
     JsonObject obj = doc.as<JsonObject>();
     for (int i = 0; i < commandHandlerCount_; i++) {
-      commandHandlers_[i](<command, obj>);
+      commandHandlers_[i](command, obj);
     }
   }
 
@@ -108,6 +108,15 @@ void emitHello() {
   sendMessage(doc);
 }
 
+// { "type": "STATUS_UPDATE", "deviceId": "...", "mode": N }
+void emitStatus(int mode) {
+  DynamicJsonDocument doc(128);
+  doc["type"]     = "STATUS_UPDATE";
+  doc["deviceId"] = DEVICE_ID;
+  doc["mode"]     = mode;
+  sendMessage(doc);
+}
+
 // { "type": "FINGERPRINT_SCAN", "fingerprint": "<uid>" }
 void emitFingerprintScan(const String &uid) {
   DynamicJsonDocument doc(128);
@@ -140,6 +149,41 @@ void emitEnrollFailed(const String &name, const String &reason) {
   doc["type"]   = "ENROLL_FAILED";
   doc["name"]   = name;
   doc["reason"] = reason;
+  sendMessage(doc);
+}
+
+// { "type": "ENROLL_LOG", "name": "...", "fingerprint": "...", "success": bool,
+//   "reason": "...", "uptimeMs": N }
+// A structured, self-describing record meant for an admin-facing
+// enrollment log table/collection on the backend. Fields are flat and
+// named to match the backend schema 1:1 — edit here (and the .h decl)
+// if that schema changes; nothing else in the firmware calls this
+// directly except EnrollmentManager.
+void emitEnrollLog(const String &name, const String &uid, bool success, const String &reason) {
+  DynamicJsonDocument doc(224);
+  doc["type"]        = "ENROLL_LOG";
+  doc["name"]        = name;
+  doc["fingerprint"] = uid;
+  doc["success"]     = success;
+  doc["reason"]      = reason;
+  doc["uptimeMs"]    = millis();
+  sendMessage(doc);
+}
+
+// { "type": "ACCESS_LOG", "deviceId": "...", "fingerprint": "...", "granted": bool,
+//   "reason": "...", "uptimeMs": N }
+// Same idea as emitEnrollLog, for the access/auth attempt log. Sent for
+// every completed auth attempt (granted or denied) so the backend can
+// keep a full access history, independent of the FINGERPRINT_SCAN
+// lookup message.
+void emitAccessLog(const String &uid, bool granted, const String &reason) {
+  DynamicJsonDocument doc(224);
+  doc["type"]        = "ACCESS_LOG";
+  doc["deviceId"]    = DEVICE_ID;
+  doc["fingerprint"] = uid;
+  doc["granted"]     = granted;
+  doc["reason"]      = reason;
+  doc["uptimeMs"]    = millis();
   sendMessage(doc);
 }
 

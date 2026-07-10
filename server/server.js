@@ -22,7 +22,7 @@ const{initWokwiSocket}= require("./services/wokwiSocketService");
 
 
 
-connectDB();
+//connectDB();
 
 const httpServer = http.createServer(server);
 const io = new Server(httpServer,{
