@@ -1,0 +1,81 @@
+```gitignore
+# =====================================================
+# Operating System
+# =====================================================
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# =====================================================
+# VS Code
+# =====================================================
+.vscode/
+*.code-workspace
+
+# Uncomment the line above if you DON'T want to commit
+# your VS Code workspace file.
+# If you DO want to share the workspace with collaborators,
+# remove the *.code-workspace line.
+
+# =====================================================
+# PlatformIO (ESP32)
+# =====================================================
+hardware/.pio/
+hardware/.pioenvs/
+hardware/.piolibdeps/
+hardware/.clangd/
+hardware/.cache/
+hardware/.sconsign*
+
+# Build artifacts
+hardware/build/
+
+# =====================================================
+# Node.js / Express
+# =====================================================
+backend/node_modules/
+backend/npm-debug.log*
+backend/yarn-debug.log*
+backend/yarn-error.log*
+backend/pnpm-debug.log*
+
+# Environment variables
+backend/.env
+backend/.env.*
+
+# Runtime files
+backend/logs/
+backend/*.log
+
+# =====================================================
+# Frontend (if using npm later)
+# =====================================================
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+
+# =====================================================
+# Database
+# =====================================================
+backend/database/*.sqlite
+backend/database/*.sqlite3
+backend/database/*.db
+
+# Keep migrations and schema
+!backend/database/migrations/
+!backend/database/schema.sql
+
+# =====================================================
+# Coverage / Testing
+# =====================================================
+coverage/
+.nyc_output/
+
+# =====================================================
+# Temporary files
+# =====================================================
+*.tmp
+*.temp
+*.swp
+*.swo
+```
