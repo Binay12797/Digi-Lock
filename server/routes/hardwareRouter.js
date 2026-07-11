@@ -9,5 +9,5 @@ const protectHardware = require("../middleware/protectHardware");
 hardwareRouter.post("/enrollFingerprint",hardwareController.enroll);
 hardwareRouter.post("/verifyFingerprint",protectHardware,hardwareController.verification);
 //hardwareRouter.get("/logs",verifyToken,hardwareController.getLogs);
-
+hardwareRouter.post("/startEnroll",hardwareController.startEnrollment);
 module.exports=hardwareRouter;
