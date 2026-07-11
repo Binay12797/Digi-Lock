@@ -15,16 +15,26 @@ namespace EnrollmentManager {
 
 // ── Initialisation ────────────────────────────────────────────────────────────
 // Must be called once in setup(), AFTER SocketClient::begin().
+static int currentScanPass = 0;
+static bool isReadyToScan = false;
+
 void begin() {
   SocketClient::onCommand([](const String &command, JsonObject data) {
 
     if (command == "START_ENROLL") {
-      String name = data["name"] | "";
-      if (name.isEmpty()) {
-        Serial.println("[Enroll] START_ENROLL received with no 'name' field — ignored");
-        return;
-      }
-      EnrollmentManager::start(name);
+      // String name = data["name"] | "";
+      // if (name.isEmpty()) {
+      //   Serial.println("[Enroll] START_ENROLL received with no 'name' field — ignored");
+      //   return;
+      // }
+      // EnrollmentManager::start(name);
+      Serial.println("[Enroll] Initializing fingerprint enrollment matrix...");
+        
+        // Reset local scan state variables
+        currentScanPass = 1; 
+        isReadyToScan = true; 
+        
+        Serial.println("[Hardware] Ready for finger placement.");
 
     } else if (command == "CANCEL_ENROLL") {
       if (state_ == ENROLL_IDLE || state_ == ENROLL_DONE) return; // nothing active
@@ -33,6 +43,8 @@ void begin() {
       SocketClient::emitEnrollFailed(nameAtCancel, "cancelled_by_admin");
       SocketClient::emitEnrollLog(nameAtCancel, "", false, "cancelled_by_admin");
       Serial.println("[Enroll] Cancelled by admin");
+      isReadyToScan = false;
+      currentScanPass = 0;
 
     } else if (command == "ENROLL_SCAN1") {
       EnrollmentManager::scan1();

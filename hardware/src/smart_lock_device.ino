@@ -27,15 +27,16 @@ void handleSystemCommand(const String &command, JsonObject data) {
     if (mode == 1)      EnrollmentManager::reset();
     else if (mode == 2) AuthManager::reset();
     Buzzer::beepMode();
-    Serial.println("[Mode] -> " + String(mode));
+    Serial.println("[Mode] -> " + String(mode));}
 
-  } else if (command == "START_ENROLL") {
-    // EnrollmentManager's own handler (registered separately) starts the
-    // actual enrollment flow — this just flips the loop() into mode 1.
-    currentMode = 1;
-  }
+  else if (command == "START_ENROLL" || command == "ENROLL_SCAN1" || command == "ENROLL_SCAN2") {
+    if (currentMode != 1) {
+      currentMode = 1;
+      EnrollmentManager::reset();
+      Serial.println("[Mode] Auto-switched to Enrollment (1)");
+    }
 }
-
+  }
 // ── Setup / loop ────────────────────────────────────────────────────
 
 void connectWiFi() {
