@@ -3,6 +3,7 @@ const User = require("../models/userModel");
 const accessLog = require("../models/accesslogModel");
 const enrollmentState = require("./enrollmentState");
 let deviceSocket = null;
+
 function initWokwiSocket(io){
     const wss = new WebSocketServer({port: 8080});
     wss.on('listening', () => console.log(" WebSocket Server successfully listening on port 8080!"));
@@ -29,14 +30,18 @@ function initWokwiSocket(io){
                     //         userName: user.name,
                     //         role: user.role || "User"
 
-                    const userId = enrollmentState.getSession();
-                    if(userId){
+                    const sessionId = enrollmentState.getSession();
+                    if(sessionId){
                         console.log(`Enrollment active`)
-                        await User.findByIdAndUpdate(userId,{
-                            fingerprint: scannedToken,
-                            isActive: true
+                        // await User.findByIdAndUpdate(userId,{
+                        //     fingerprint: scannedToken,
+                        //     isActive: true
+                        // });
+                        io.emit("FINGERPRINT_READY",{
+                            success: true,
+                            sessionId: sessionId,
+                            fingerprint: scannedToken
                         });
-                        io.emit("BIOMETRIC_LINKED",{success: true, message: "Registration successful!"});
                         enrollmentState.clearSession();
 
                         ws.send(JSON.stringify({
@@ -92,6 +97,9 @@ function initWokwiSocket(io){
 
         ws.on("close",()=>{
             console.log("wokwi connection closed");
+            if(deviceSocket === ws){
+                deviceSocket = null;
+            }
         });
     });
     return wss;
