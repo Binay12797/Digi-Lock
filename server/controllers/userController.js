@@ -120,9 +120,23 @@ async function getUserProfile(req,res){
 
     }
 }
+
+async function userInfo(req,res){
+    try {
+    // Fetch all user records from your collection, sorted by newest first
+    const users = await User.find({}).sort({ createdAt: -1 });
+    //console.log(`[DB Debug] Found ${users.length} users in the database collection.`);
+    
+    res.status(200).json({ success: true, data: users });
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.status(500).json({ success: false, message: "Failed to retrieve users from database." });
+  }
+}
 module.exports={
     createUser,
     login,
     startEnrollment,
-    getUserProfile
+    getUserProfile,
+    userInfo
 }
