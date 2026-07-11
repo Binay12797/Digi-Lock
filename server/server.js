@@ -48,7 +48,7 @@ mongoose.connect(process.env.MONGODB_URI)
       doorId = door._id;
       console.log("Using door:", doorId);
     } else {
-      console.log("⚠️  No Door document found in DB — successful unlocks won't be logged until one exists.");
+      console.log("No Door document found in DB — successful unlocks won't be logged until one exists.");
     }
   })
   .catch(err => console.log(err));
