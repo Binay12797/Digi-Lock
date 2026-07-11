@@ -39,6 +39,7 @@
 namespace SocketClient {
   void begin();
   void loop();
+  void setInsecure();
   bool isConnected();
 
   // ── Outgoing ─────────────────────────────────────────────────────

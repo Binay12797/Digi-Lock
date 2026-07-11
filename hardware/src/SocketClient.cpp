@@ -15,7 +15,7 @@ namespace {
 
   // ── Dispatch incoming { "command": "..." } frames ─────────────────
   void handleIncomingMessage(uint8_t *payload, size_t length) {
-    DynamicJsonDocument doc(512);
+    JsonDocument doc;
     DeserializationError err = deserializeJson(doc, payload, length);
     if (err) {
       Serial.println("[WS] JSON parse error: " + String(err.c_str()));
@@ -79,6 +79,9 @@ namespace SocketClient {
 
 void begin() {
   ws.begin(WS_HOST, WS_PORT, WS_PATH);
+  
+  //ws.setExtraHeaders("ngrok-skip-browser-warning: true\r\n");
+  //ws.setExtraHeaders("Host: art-dinginess-activity.ngrok-free.dev");
   ws.onEvent(wsEvent);
   ws.setReconnectInterval(5000);
 }
@@ -102,7 +105,7 @@ void onCommand(CommandHandler handler) {
 
 // { "type": "HELLO", "deviceId": "..." }
 void emitHello() {
-  DynamicJsonDocument doc(128);
+  JsonDocument doc;
   doc["type"]     = "HELLO";
   doc["deviceId"] = DEVICE_ID;
   sendMessage(doc);
@@ -110,7 +113,7 @@ void emitHello() {
 
 // { "type": "STATUS_UPDATE", "deviceId": "...", "mode": N }
 void emitStatus(int mode) {
-  DynamicJsonDocument doc(128);
+  JsonDocument doc;
   doc["type"]     = "STATUS_UPDATE";
   doc["deviceId"] = DEVICE_ID;
   doc["mode"]     = mode;
@@ -119,7 +122,7 @@ void emitStatus(int mode) {
 
 // { "type": "FINGERPRINT_SCAN", "fingerprint": "<uid>" }
 void emitFingerprintScan(const String &uid) {
-  DynamicJsonDocument doc(128);
+  JsonDocument doc;
   doc["type"]        = "FINGERPRINT_SCAN";
   doc["fingerprint"] = uid;
   sendMessage(doc);
@@ -127,7 +130,7 @@ void emitFingerprintScan(const String &uid) {
 
 // { "type": "ENROLL_PROGRESS", "state": "...", "name": "..." }
 void emitEnrollProgress(const String &state, const String &name) {
-  DynamicJsonDocument doc(192);
+  JsonDocument doc;
   doc["type"]  = "ENROLL_PROGRESS";
   doc["state"] = state;
   doc["name"]  = name;
@@ -136,7 +139,7 @@ void emitEnrollProgress(const String &state, const String &name) {
 
 // { "type": "ENROLL_COMPLETE", "name": "...", "fingerprint": "<uid>" }
 void emitEnrollComplete(const String &name, const String &uid) {
-  DynamicJsonDocument doc(192);
+  JsonDocument doc;
   doc["type"]        = "ENROLL_COMPLETE";
   doc["name"]        = name;
   doc["fingerprint"] = uid;
@@ -145,7 +148,7 @@ void emitEnrollComplete(const String &name, const String &uid) {
 
 // { "type": "ENROLL_FAILED", "name": "...", "reason": "..." }
 void emitEnrollFailed(const String &name, const String &reason) {
-  DynamicJsonDocument doc(192);
+  JsonDocument doc;
   doc["type"]   = "ENROLL_FAILED";
   doc["name"]   = name;
   doc["reason"] = reason;
@@ -160,7 +163,7 @@ void emitEnrollFailed(const String &name, const String &reason) {
 // if that schema changes; nothing else in the firmware calls this
 // directly except EnrollmentManager.
 void emitEnrollLog(const String &name, const String &uid, bool success, const String &reason) {
-  DynamicJsonDocument doc(224);
+  JsonDocument doc;
   doc["type"]        = "ENROLL_LOG";
   doc["name"]        = name;
   doc["fingerprint"] = uid;
@@ -177,7 +180,7 @@ void emitEnrollLog(const String &name, const String &uid, bool success, const St
 // keep a full access history, independent of the FINGERPRINT_SCAN
 // lookup message.
 void emitAccessLog(const String &uid, bool granted, const String &reason) {
-  DynamicJsonDocument doc(224);
+  JsonDocument doc;
   doc["type"]        = "ACCESS_LOG";
   doc["deviceId"]    = DEVICE_ID;
   doc["fingerprint"] = uid;
@@ -189,7 +192,7 @@ void emitAccessLog(const String &uid, bool granted, const String &reason) {
 
 // { "type": "ALARM", "attempts": N }
 void emitAlarm(int attempts) {
-  DynamicJsonDocument doc(96);
+  JsonDocument doc;
   doc["type"]     = "ALARM";
   doc["attempts"] = attempts;
   sendMessage(doc);

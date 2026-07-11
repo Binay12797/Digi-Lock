@@ -39,6 +39,8 @@ void handleSystemCommand(const String &command, JsonObject data) {
 // ── Setup / loop ────────────────────────────────────────────────────
 
 void connectWiFi() {
+  IPAddress dns(8, 8, 8, 8);
+  WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE, dns);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD, WIFI_CHANNEL);
   Serial.print("Connecting to WiFi");
   while (WiFi.status() != WL_CONNECTED) {
@@ -49,6 +51,8 @@ void connectWiFi() {
 }
 
 void setup() {
+  // Force ESP32 to use Google's DNS server
+  
   Serial.begin(115200);
   Buzzer::begin();
   connectWiFi();
@@ -71,7 +75,12 @@ void loop() {
   unsigned long now = millis();
   if (now - lastStatusMs >= STATUS_INTERVAL_MS) {
     lastStatusMs = now;
-    SocketClient::emitStatus(currentMode);
+    if (SocketClient::isConnected()) {
+      SocketClient::emitStatus(currentMode);
+    } else {
+      Serial.println("[WS] Postponing status update: Waiting for active connection...");
+    }
+   // SocketClient::emitStatus(currentMode);
   }
 
   delay(2);

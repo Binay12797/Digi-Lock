@@ -4,3 +4,4 @@ tunnels:
   wokwi_sockets:
     addr: 8080
     proto: http
+    hostname: art-dinginess-activity.ngrok-free.dev
