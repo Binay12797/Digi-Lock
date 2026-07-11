@@ -1,7 +1,43 @@
 const enrollmentState = require("../services/enrollmentState");
 const User = require("../models/userModel")
 const accessLog = require("../models/accesslogModel");
+const { sendToDevice } = require("../services/wokwiSocketService");
 
+async function scan1(req, res){
+    const success = sendToDevice({
+        command: "ENROLL_SCAN1"
+    });
+
+    if(!success){
+        return res.status(500).json({
+            success : fakse,
+            message : "ESP not connected"
+        });
+    }
+
+    res.json({
+        success: true,
+        message : "Scan 1 requested"
+    })
+}
+
+async function scan2(req, res) {
+    const success = sendToDevice({
+        command: "ENROLL_SCAN2"
+    });
+
+    if (!success) {
+        return res.status(500).json({
+            success: false,
+            message: "ESP32 not connected"
+        });
+    }
+
+    res.json({
+        success: true,
+        message: "Scan 2 requested"
+    });
+}
 
 async function startEnrollment(req, res) {
     const { userId } = req.body;
@@ -13,6 +49,16 @@ async function startEnrollment(req, res) {
     try {
         // This puts the userId into the server's memory
         enrollmentState.setSession(userId);
+
+        //debug
+        console.log("Starting Enroll");
+
+        sendToDevice({
+            command: "START_ENROLL",
+        });
+
+        console.log("START_ENROLL sent");
+
         setTimeout(()=>{
             const currentSession = enrollmentState.getSession();
             if(currentSession === userId){
@@ -90,6 +136,7 @@ async function verification(req,res){
 module.exports={
     enroll,
     verification,
-    startEnrollment
-    
+    startEnrollment,
+    scan1,
+    scan2
 }
