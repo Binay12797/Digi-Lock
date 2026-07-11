@@ -2,12 +2,16 @@ const {WebSocketServer} = require("ws");
 const User = require("../models/userModel");
 const accessLog = require("../models/accesslogModel");
 const enrollmentState = require("./enrollmentState");
+let deviceSocket = null;
 function initWokwiSocket(io){
     const wss = new WebSocketServer({port: 8080});
     wss.on('listening', () => console.log("✅ WebSocket Server successfully listening on port 8080!"));
 
     wss.on("connection",(ws)=>{
         console.log("wokwi ESP32 connection established ");
+        //server remembers which websocket belongs to ESP
+        deviceSocket = ws;
+        console.log("Device socket stored.");
         ws.on("message",async (rawData)=>{
             try{
                 const parsedData = JSON.parse(rawData.toString());
@@ -93,4 +97,22 @@ function initWokwiSocket(io){
     return wss;
 }
 
-module.exports = { initWokwiSocket};
+//added as a helper function
+function sendToDevice(data) {
+    //debug logs
+    console.log("sendTodevice Called");
+    if (!deviceSocket) {
+        console.log("No ESP32 connected.");
+        return false;
+    }
+    //debug logs
+    console.log("Sending to ESP: ", data);
+
+    deviceSocket.send(JSON.stringify(data));
+    return true;
+}
+
+module.exports = { 
+    initWokwiSocket,
+    sendToDevice
+};
