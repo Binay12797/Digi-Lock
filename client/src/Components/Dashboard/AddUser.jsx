@@ -217,11 +217,20 @@ const AddUser = () => {
         open={openDialog}
         onClose={() => {}}
         maxWidth="xs"
-        fullWidth
-        sx={{ Color: colors.primary[400] }}
+        fullWidth //automatically sets width according to the content
+        slotProps={{
+          paper: {
+            sx: {
+              bgcolor: colors.primary[600],
+              borderRadius: 2,
+              minWidth: 450,
+              p: 1,
+            },
+          },
+        }}
       >
         {/* onClose={() => {} prevents closing by clicking outside currently */}
-        <DialogTitle>Enroll Fingerprint</DialogTitle>
+        <DialogTitle variant="h5">Enroll Fingerprint</DialogTitle>
 
         <DialogContent
           sx={{
