@@ -1,0 +1,6 @@
+version: "2"
+authtoken: 3FgOJLC9bytVwLEQPHejJy1aC0N_2WBdf2j2ZnUj8PMBAjn3w
+tunnels:
+  wokwi_sockets:
+    addr: 8080
+    proto: http

@@ -13,16 +13,21 @@ const cors = require("cors");
 // const session = require("express-session");
 const server = express();  
 
-//for websocket
+//for socket.io
 const {Server}= require("socket.io");
 const http = require('http');
+
+//for websocket
+const{initWokwiSocket}= require("./services/wokwiSocketService");
+
+
 
 connectDB();
 
 const httpServer = http.createServer(server);
 const io = new Server(httpServer,{
   cors: {
-    origin: "http://localhost: 5173", //Url of react
+    origin: "http://localhost:5173", //Url of react
     methods: ["GET","POST"],
     credentials: true
   }
@@ -35,19 +40,6 @@ server.set("io",io);
 server.use(cors());  //enables cors for all routes and origins
 server.use(express.urlencoded({extended: true}));
 server.use(express.json());         //parses the json object
-// server.use(session({
-//     secret: 'key',
-//     resave: false,
-//     saveUninitialized: false
-// }))
-
-// require("./middleware/passport")(passport);
-// server.use(passport.initialize());
-// server.use(passport.session());
-// server.use((req,res,next)=>{
-//     res.locals.currentUser = req.user;
-//     next();
-// });
 
 
 io.on("connection",(socket)=>{
@@ -58,9 +50,7 @@ io.on("connection",(socket)=>{
 });
 
 
-// server.set("views",Path.join(__dirname,"views"));
-// server.set("view engine",'ejs');
-
+initWokwiSocket(io);
 
 server.use("/user",userRouter);
 server.use("/api",hardwareRouter);
@@ -69,3 +59,4 @@ server.use("/lock/status", lockRouter);
 httpServer.listen(PORT,()=>{             //listens at the port for req
     console.log(`server is running at port ${PORT}`);
 });
+

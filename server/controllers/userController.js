@@ -6,7 +6,7 @@ const bcrypt = require("bcrypt")
 
 async function createUser(req,res){
     try{
-        const{name, email, password} = req.body;
+        const{name, email, password, fingerprint} = req.body;
         if (!name || !email || !password) {
             return res.status(400).json({ success: false, message: "All input fields are required." });
         }
@@ -22,7 +22,8 @@ async function createUser(req,res){
         const newUser = new User({
             name: name,
             email : email,
-            password :hashedPassword}
+            password :hashedPassword,
+            fingerprint: fingerprint}
 
         );
         await newUser.save();
