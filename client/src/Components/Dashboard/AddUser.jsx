@@ -1,4 +1,12 @@
 import { Box, Typography, Button, TextField } from "@mui/material";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  CircularProgress,
+} from "@mui/material";
+
 import { Formik } from "formik";
 import { useState } from "react";
 
@@ -35,13 +43,22 @@ const userFormSchema = yup.object().shape({
 const AddUser = () => {
   // isNonMobile  is boolean that says current device is mobile or desktop, Returns true if the viewport width is at least 600px, 600px is kind of standar helps to distinguish betn mobile and laptop
   const isNonMobile = useMediaQuery("(min-width:600px)");
+
+  const [openDialog, setOpenDialog] = useState(false);
   const [isEnrolling, setIsEnrolling] = useState(false);
+
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
   // must be inside as isEnrolling is definde inside
-  const handleEnrollFingerprint = (setFieldValue) => {
+  const handleEnrollFingerprint = () => {
     setIsEnrolling(true);
+    setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setIsEnrolling(false);
   };
 
   //triggers when we submit or form
@@ -196,6 +213,40 @@ const AddUser = () => {
           </form>
         )}
       </Formik>
+      <Dialog
+        open={openDialog}
+        onClose={() => {}}
+        maxWidth="xs"
+        fullWidth
+        sx={{ Color: colors.primary[400] }}
+      >
+        {/* onClose={() => {} prevents closing by clicking outside currently */}
+        <DialogTitle>Enroll Fingerprint</DialogTitle>
+
+        <DialogContent
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 2,
+            py: 2,
+          }}
+        >
+          <CircularProgress color="secondary" />
+          {/* colors.greenAccent[500] */}
+
+          <Typography variant="h6">Waiting for fingerprint ....</Typography>
+          <Typography variant="h6" color="secondary">
+            Place Your Fingerprint On Scanner.
+          </Typography>
+        </DialogContent>
+
+        <DialogActions>
+          <Button color="error" onClick={handleCloseDialog}>
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
