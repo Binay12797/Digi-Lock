@@ -1,4 +1,6 @@
 const user = require("../models/userModel");
+const Notification = require("../models/Notification"); 
+
 const passport = require("passport");
 async function createUser(req,res){
     try{

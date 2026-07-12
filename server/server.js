@@ -10,13 +10,17 @@ const passport = require("passport");
 
 const userRouter = require("./routes/userRouter");
 
-// Models (from Database branch) — .default needed since these files use ESM `export default`
-const User = require("../Database/models/User").default;
-const AccessLog = require("../Database/models/AccessLog").default;
-const Door = require("../Database/models/Door").default;
+
+const User = require("./models/userModel");
+const AccessLog = require("./models/AccessLog");
+const Door = require("./models/Door");
+const Notification = require('./models/Notification')
 
 const app = express();
 const server = http.createServer(app);
+const statsRoutes = require("./routes/stats");
+app.use("/api/stats", statsRoutes);
+
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -37,13 +41,12 @@ app.use((req, res, next) => {
 });
 app.use("/", userRouter);
 
-let doorId = null;
-
+let door = null;
 mongoose.connect(process.env.MONGODB_URI)
   .then(async () => {
     console.log("MongoDB connected");
 
-    const door = await Door.findOne();
+    door = await Door.findOne();
     if (door) {
       doorId = door._id;
       console.log("Using door:", doorId);
@@ -87,22 +90,36 @@ wss.on("connection", (ws) => {
 
         ws.send(JSON.stringify({ status: "GRANTED" }));
 
-        if (doorId) {
-          await AccessLog.create({
-            userId: user._id,
-            doorId: doorId,
-            action: "unlock",
-            status: "success",
-            methodtype: "fingerprint"
-          });
-        } else {
-          console.log("Skipped AccessLog write — no doorId available.");
-        }
+      if (door) {
+        await AccessLog.create({
+          userId: user._id,
+          doorId: doorId,
+          action: "unlock",
+          status: "success",
+          methodtype: "fingerprint"
+        });
+        await Door.findByIdAndUpdate(doorId, {
+          status: "unlocked",
+          lastAccessedAt: new Date()
+        });
+      } else {
+        console.log("Skipped AccessLog write — no doorId available.");
+      }
 
       } else {
         attempts++;
 
         ws.send(JSON.stringify({ status: "DENIED" }));
+
+        if (doorId) {
+          await Notification.create({
+            event: "FAILED_FINGERPRINT",
+            severity: "critical",
+            entityType: "lock",
+            entityId: doorId,
+            entityName: door ? door.location : "Unknown"
+          });
+        }
         // Not logged to AccessLog — userId is required and there's no matched user here.
 
         if (attempts >= 3) {
@@ -121,8 +138,20 @@ wss.on("connection", (ws) => {
     }
   });
 
-  ws.on("close", () => {
+  ws.on("close", async () => {
     console.log("ESP32 disconnected");
+
+    if (doorId) {
+      await Door.findByIdAndUpdate(doorId, { status: "offline" });
+
+      await Notification.create({
+        event: "LOCK_OFFLINE",
+        severity: "warning",
+        entityType: "lock",
+        entityId: doorId,
+        entityName: door ? door.location : "Unknown"
+      });
+    }
   });
 });
 
