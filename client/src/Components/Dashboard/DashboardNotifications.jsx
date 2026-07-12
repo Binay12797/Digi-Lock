@@ -5,6 +5,10 @@ import { tokens } from "../../theme";
 import notificationsData from "../Data/mockdata";
 
 import { formatDistanceToNow } from "date-fns";
+import { useNavigate } from "react-router-dom";
+
+import { useOutletContext } from "react-router-dom";
+import AlertAndNotifications from "./AlertAndNotifications";
 
 const formatEvent = (event) => {
   switch (event) {
@@ -33,12 +37,32 @@ const DashboardNotifications = () => {
   const colors = tokens(theme.palette.mode);
 
   const [notifications, setNotifications] = useState(notificationsData); // first variable second function
+  const navigate = useNavigate();
+
+  const { setSelected } = useOutletContext();
 
   return (
     <Box sx={{ m: "20px" }}>
-      <Typography variant="h5" sx={{ mb: 2 }}>
-        Recent Notifications
-      </Typography>
+      <Box sx={{ display: "flex", justifyContent: "space-between", pr: 1 }}>
+        <Typography variant="h5" sx={{ mb: 2 }}>
+          Recent Notifications
+        </Typography>
+        <Typography
+          variant="h5"
+          sx={{
+            mb: 2,
+            color: colors.greenAccent[400],
+            cursor: "pointer",
+            "&:hover": { textDecoration: "underline" },
+          }}
+          onClick={() => {
+            navigate("/AlertAndNotifications");
+            setSelected("Alerts & Notifications");
+          }}
+        >
+          View All
+        </Typography>
+      </Box>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         {/* [...notifications] this is a spread operator creates a copy of notificaiton array so that sort dosent affect original array*/}
         {[...notifications]
@@ -77,7 +101,7 @@ const DashboardNotifications = () => {
                   </Typography>
                   <Typography variant="h6">
                     {formatDistanceToNow(new Date(notification.timestamp), {
-                      addSuffix: true, //with addSuffix true ago is added
+                      addSuffix: true, //with addSuffix true "ago" is added
                     })}
                   </Typography>
                 </Box>

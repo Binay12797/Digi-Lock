@@ -22,7 +22,7 @@ const DashboardLayout = () => {
         <Topbar selected={selected} setSelected={setSelected} />
         {/*flex: 1 on the Outlet wrapper:" It tells the content area to expand to fill all remaining vertical space under the Topbar. */}
         <div style={{ flex: 1, overflowY: "auto" }}>
-          <Outlet />
+          <Outlet context={{ selected, setSelected }} />
           {/* The <Outlet/> is a hole you cut out in that container that holds your Sidebar and Topbar. You are telling React, "Whatever page the user clicks on, please show it right here inside this window" */}
         </div>
       </div>
