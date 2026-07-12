@@ -16,7 +16,13 @@ const LockUsageChart = ({ lockData }) => {
   const colors = tokens(theme.palette.mode);
 
   return (
-    <Card sx={{ height: "100%", bgcolor: colors.primary[400] }}>
+    <Card
+      sx={{
+        height: "100%",
+        bgcolor: colors.primary[400],
+        borderRadius: 3,
+      }}
+    >
       <CardContent>
         <Typography variant="h5">Unlocks</Typography>
         <Typography variant="subtitle2" mb={2}>
@@ -28,6 +34,7 @@ const LockUsageChart = ({ lockData }) => {
             data={lockData} //passes data for mock data
             margin={{ top: 20, right: 20, left: 0, bottom: 5 }}
           >
+            <CartesianGrid strokeDasharray="3 3" stroke={colors.grey[800]} />
             <XAxis
               dataKey="lockName"
               tick={{ fill: colors.grey[100] }}
@@ -40,7 +47,14 @@ const LockUsageChart = ({ lockData }) => {
               axisLine={{ stroke: colors.grey[500] }}
               tickLine={{ stroke: colors.grey[600] }}
             />
-            <Tooltip />
+            <Tooltip
+              contentStyle={{
+                background: colors.primary[500],
+                border: "none",
+                borderRadius: 8,
+                color: "#fff",
+              }}
+            />
             <Bar
               dataKey="unlocks"
               fill={colors.blueAccent[700]}

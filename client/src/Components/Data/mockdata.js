@@ -95,6 +95,7 @@ export const dashboardStats = [
     value: 12,
     subtitle: "Registered locks",
     icon: "lock",
+    color: "#3b82f6",
   },
   {
     id: 2,
@@ -102,6 +103,7 @@ export const dashboardStats = [
     value: 35,
     subtitle: "Registered users",
     icon: "users",
+    color: "#10b981",
   },
   {
     id: 3,
@@ -109,6 +111,7 @@ export const dashboardStats = [
     value: 84,
     subtitle: "Successful unlocks",
     icon: "unlock",
+    color: "#8b5cf6",
   },
   {
     id: 4,
@@ -116,6 +119,7 @@ export const dashboardStats = [
     value: 3,
     subtitle: "Failed authentications",
     icon: "warning",
+    color: "#ef4444",
   },
 ];
 

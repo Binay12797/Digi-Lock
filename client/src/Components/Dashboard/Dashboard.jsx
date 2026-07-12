@@ -38,6 +38,7 @@ const Dashboard = () => {
                 value={stat.value}
                 subtitle={stat.subtitle}
                 icon={stat.icon}
+                color={stat.color}
               />
             </Grid>
           ))}
