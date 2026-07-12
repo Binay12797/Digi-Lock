@@ -19,8 +19,17 @@ const Users = () => {
   useEffect(() => {
     const fetchUsersData = async () => {
       try {
-        const response = await api.get(`/user?t=${Date.now()}`);
-        setUsers(response.data || []);
+        const response = await api.get(`/user/info?t=${Date.now()}`);
+        //setUsers(response.data.data || []);
+        if (response.data.success) {
+  // Map through the array and assign the value of _id to a new id key
+  const formattedUsers = response.data.data.map(user => ({
+    ...user,
+    id: user._id // Maps MongoDB's _id to the standard id field MUI expects
+  }));
+  
+  setUsers(formattedUsers);
+}
       } catch (error) {
         console.error("Error while fetching Users:", error);
       } finally {
