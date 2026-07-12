@@ -100,7 +100,6 @@ const AddUser = () => {
       socket.off("enrollmentError");
     };
   }, []);
-
   // must be inside as isEnrolling is definde inside
   const handleEnrollFingerprint = async (setFieldValue) => {
     try {
@@ -108,7 +107,9 @@ const AddUser = () => {
 
       sessionIdRef.current = crypto.randomUUID();
 
-      await api.post("/startEnroll", {
+      console.log(sessionIdRef.current);
+
+      await api.post("api/startEnroll", {
         sessionId: sessionIdRef.current,
       });
 

@@ -147,40 +147,47 @@ const AlertAndNotifications = () => {
       </Typography>
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-        {notifications.map((notification) => (
-          //map is like an for loop, here creates card for each of the notifications data present
-          //notification is just a variable name that points to the current notification an part of the array [notification, notification , notification]= notifications
-          <Card
-            key={notification.id}
-            sx={{
-              bgcolor: colors.primary[400],
-              pt: "5px",
-              borderLeft:
-                notification.severity === "critical"
-                  ? "6px solid #f44336"
-                  : notification.severity === "warning"
-                    ? "6px solid #ff9800"
-                    : "6px solid #2196f3",
-            }}
-          >
-            <CardContent>
-              <Box
-                sx={{ display: "flex", justifyContent: "space-between", mr: 4 }}
-              >
-                <Typography variant="h5">
-                  {formatEvent(notification.event)}
-                  {notification.entityName}
-                </Typography>
-                <Typography variant="h5">
-                  {new Date(notification.timestamp).toLocaleString("en-US", {
-                    dateStyle: "medium",
-                    timeStyle: "short",
-                  })}
-                </Typography>
-              </Box>
-            </CardContent>
-          </Card>
-        ))}
+        {[...notifications]
+          // if b-a is positive it tells b should come before a ie sorted such that b>a ie highest come first
+          .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+          .map((notification) => (
+            //map is like an for loop, here creates card for each of the notifications data present
+            //notification is just a variable name that points to the current notification an part of the array [notification, notification , notification]= notifications
+            <Card
+              key={notification.id}
+              sx={{
+                bgcolor: colors.primary[400],
+                pt: "5px",
+                borderLeft:
+                  notification.severity === "critical"
+                    ? "6px solid #f44336"
+                    : notification.severity === "warning"
+                      ? "6px solid #ff9800"
+                      : "6px solid #2196f3",
+              }}
+            >
+              <CardContent>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    mr: 4,
+                  }}
+                >
+                  <Typography variant="h5">
+                    {formatEvent(notification.event)}
+                    {notification.entityName}
+                  </Typography>
+                  <Typography variant="h5">
+                    {new Date(notification.timestamp).toLocaleString("en-US", {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    })}
+                  </Typography>
+                </Box>
+              </CardContent>
+            </Card>
+          ))}
       </Box>
     </Box>
   );
