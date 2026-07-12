@@ -18,6 +18,9 @@ const formatEvent = (event) => {
     case "USER_ADDED":
       return "ℹ️ Added New User ";
 
+    case "DOOR_OPENED":
+      return "ℹ️ Door Openned by ";
+
     default:
       return event;
   }

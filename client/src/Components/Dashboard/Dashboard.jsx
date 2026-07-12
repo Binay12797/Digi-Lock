@@ -50,6 +50,10 @@ const Dashboard = () => {
             <LockUsageChart lockData={lockUsageData} />
           </Grid>
         </Grid>
+
+        <Box>
+          <Grid container></Grid>
+        </Box>
       </Box>
     </Box>
   );

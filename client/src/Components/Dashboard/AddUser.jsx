@@ -14,7 +14,7 @@ import * as yup from "yup";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material";
 import { tokens } from "../../theme";
-
+import api from "../../Api/api";
 import { socket } from "../../Api/socket";
 
 const initialValues = {
@@ -61,6 +61,8 @@ const AddUser = () => {
     "Place your finger on scanner",
   );
 
+  const sessionIdRef = useRef(null);
+
   useEffect(() => {
     //you tell socket.io "Whenever you receive an event named enrollmentStatus, run this function."
     //.on "Start listening for this event."
@@ -72,6 +74,8 @@ const AddUser = () => {
 
     socket.on("enrollmentSuccess", (data) => {
       setFieldValueRef.current?.("fingerprintId", data.fingerprintId); //?. means "only call it if it exists"
+
+      sessionIdRef.current = null;
 
       //close the dialogue
       setOpenDialog(false);
@@ -94,15 +98,20 @@ const AddUser = () => {
   }, []);
 
   // must be inside as isEnrolling is definde inside
-  const handleEnrollFingerprint = (setFieldValue) => {
+  const handleEnrollFingerprint = async (setFieldValue) => {
     setFieldValueRef.current = setFieldValue; //stores the reference to the setFieldValue function inside .current.
+
+    const response = await api.post("/startEnroll");
+    sessionIdRef.current = response.data.sessionId;
 
     socket.connect();
 
     setIsEnrolling(true);
     setOpenDialog(true);
 
-    socket.emit("StartEnrollment");
+    socket.emit("StartEnrollment", {
+      sessionId: sessionIdRef.current,
+    });
   };
 
   const handleCloseDialog = () => {

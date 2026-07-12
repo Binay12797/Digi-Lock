@@ -56,6 +56,20 @@ export const notificationsData = [
 
     timestamp: "2026-07-06T08:30:00",
   },
+
+  {
+    id: 4,
+
+    event: "DOOR_OPENED",
+
+    severity: "info",
+
+    entityType: "user",
+
+    entityName: "Sambeg Sherestha",
+
+    timestamp: "2026-07-06T09:50:00",
+  },
 ];
 
 export default notificationsData;
