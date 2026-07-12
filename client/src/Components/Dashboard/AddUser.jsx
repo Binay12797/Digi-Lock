@@ -8,12 +8,14 @@ import {
 } from "@mui/material";
 
 import { Formik } from "formik";
-import { useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 import * as yup from "yup";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material";
 import { tokens } from "../../theme";
+
+import { socket } from "../../Api/socket";
 
 const initialValues = {
   firstName: "",
@@ -41,22 +43,71 @@ const userFormSchema = yup.object().shape({
 });
 
 const AddUser = () => {
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
+
   // isNonMobile  is boolean that says current device is mobile or desktop, Returns true if the viewport width is at least 600px, 600px is kind of standar helps to distinguish betn mobile and laptop
   const isNonMobile = useMediaQuery("(min-width:600px)");
 
   const [openDialog, setOpenDialog] = useState(false);
   const [isEnrolling, setIsEnrolling] = useState(false);
 
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
+  const setFieldValueRef = useRef(null); //works like a pointer
+
+  const [enrollmentStatus, setEnrollmentStatus] = useState(
+    "Waiting for fingerprint....",
+  );
+  const [instruction, setInstruction] = useState(
+    "Place your finger on scanner",
+  );
+
+  useEffect(() => {
+    //you tell socket.io "Whenever you receive an event named enrollmentStatus, run this function."
+    //.on "Start listening for this event."
+    //.emit() means: "Send an event."
+
+    socket.on("enrollmentStatus", (data) => {
+      setEnrollmentStatus(data.message);
+    });
+
+    socket.on("enrollmentSuccess", (data) => {
+      setFieldValueRef.current?.("fingerprintId", data.fingerprintId); //?. means "only call it if it exists"
+
+      //close the dialogue
+      setOpenDialog(false);
+      setIsEnrolling(false);
+
+      //disconnect as work is done
+      socket.disconnect();
+    });
+
+    socket.on("enrollmentError", (data) => {
+      console.log(data);
+    });
+
+    //.off() means: "Stop listening for this event." if you dont turn off listner multiple same listener will be formed when page is refreshed
+    return () => {
+      socket.off("enrollmentStatus");
+      socket.off("enrollmentSuccess");
+      socket.off("enrollmentError");
+    };
+  }, []);
 
   // must be inside as isEnrolling is definde inside
-  const handleEnrollFingerprint = () => {
+  const handleEnrollFingerprint = (setFieldValue) => {
+    setFieldValueRef.current = setFieldValue; //stores the reference to the setFieldValue function inside .current.
+
+    socket.connect();
+
     setIsEnrolling(true);
     setOpenDialog(true);
+
+    socket.emit("StartEnrollment");
   };
 
   const handleCloseDialog = () => {
+    socket.disconnect();
+
     setOpenDialog(false);
     setIsEnrolling(false);
   };
@@ -245,9 +296,9 @@ const AddUser = () => {
           <CircularProgress color="secondary" />
           {/* colors.greenAccent[500] */}
 
-          <Typography variant="h6">Waiting for fingerprint ....</Typography>
+          <Typography variant="h6">{enrollmentStatus}</Typography>
           <Typography variant="h6" color="secondary">
-            Place Your Fingerprint On Scanner.
+            {instruction}
           </Typography>
         </DialogContent>
 

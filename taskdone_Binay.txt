@@ -221,3 +221,40 @@ install recharts inside client
  npm install recharts : for charts
 
  The useEffect hook is a built-in React tool used to synchronized functional components with external systems or handle side effects
+
+Socket.IO is a JavaScript library that enables real-time, bidirectional communication between a client (browser) and a server
+  normally:
+  Client ----request----> Server
+  Client <---response---- Server
+
+  Socket.IO keeps a persistent connection open:
+  Client <=======================> Server
+          Always Connected
+
+  No refreshing.
+  No polling.
+  No delay.
+
+
+Installed Socket.io inside client
+for client: npm install socket.io-client //client and server used different versions 
+for server: npm install socket.io
+
+Use Socket.IO for
+New access logs
+Live notifications
+Lock status changes (online/offline)
+Tamper alerts
+Fingerprint enrollment progress
+Dashboard statistics updating in real time
+
+
+//stores the reference to the setFieldValue function inside .current.
+const setFieldValueRef = useRef(null);
+is
+
+const setFieldValueRef = {
+    current: null
+};
+
+setFieldValueRef.current = setFieldValue;
