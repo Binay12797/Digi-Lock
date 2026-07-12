@@ -69,10 +69,13 @@ const AddUser = () => {
     //.emit() means: "Send an event."
 
     socket.on("enrollmentStatus", (data) => {
+      if (data.sessionId !== sessionIdRef.current) return; //if session id deffers dont execute enrollmentSuccess Event
       setEnrollmentStatus(data.message);
     });
 
     socket.on("enrollmentSuccess", (data) => {
+      if (data.sessionId !== sessionIdRef.current) return; //if session id deffers dont execute enrollmentSuccess Event
+
       setFieldValueRef.current?.("fingerprintId", data.fingerprintId); //?. means "only call it if it exists"
 
       sessionIdRef.current = null;
@@ -86,6 +89,7 @@ const AddUser = () => {
     });
 
     socket.on("enrollmentError", (data) => {
+      if (data.sessionId !== sessionIdRef.current) return; //if session id deffers dont execute enrollmentSuccess Event
       console.log(data);
     });
 
@@ -99,22 +103,31 @@ const AddUser = () => {
 
   // must be inside as isEnrolling is definde inside
   const handleEnrollFingerprint = async (setFieldValue) => {
-    setFieldValueRef.current = setFieldValue; //stores the reference to the setFieldValue function inside .current.
+    try {
+      setFieldValueRef.current = setFieldValue; //stores the reference to the setFieldValue function inside .current.
 
-    const response = await api.post("/startEnroll");
-    sessionIdRef.current = response.data.sessionId;
+      sessionIdRef.current = crypto.randomUUID();
 
-    socket.connect();
+      await api.post("/startEnroll", {
+        sessionId: sessionIdRef.current,
+      });
 
-    setIsEnrolling(true);
-    setOpenDialog(true);
+      socket.connect();
 
-    socket.emit("StartEnrollment", {
-      sessionId: sessionIdRef.current,
-    });
+      setIsEnrolling(true);
+      setOpenDialog(true);
+
+      socket.emit("StartEnrollment", {
+        sessionId: sessionIdRef.current,
+      });
+    } catch (error) {
+      console.error("Failed to start Enrollment:", error);
+    }
   };
 
   const handleCloseDialog = () => {
+    sessionIdRef.current = null;
+
     socket.disconnect();
 
     setOpenDialog(false);
