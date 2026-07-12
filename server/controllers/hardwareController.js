@@ -3,44 +3,12 @@ const User = require("../models/userModel");
 const accessLog = require("../models/accesslogModel");
 const { sendToDevice } = require("../services/wokwiSocketService");
 
-async function scan1(req, res) {
-    const success = sendToDevice({
-        command: "ENROLL_SCAN1"
-    });
 
-    if (!success) {
-        return res.status(500).json({
-            success: false, // ─── FIXED: typo "fakse" changed to false
-            message: "ESP not connected"
-        });
-    }
 
-    res.json({
-        success: true,
-        message: "Scan 1 requested"
-    });
-}
-
-async function scan2(req, res) {
-    const success = sendToDevice({
-        command: "ENROLL_SCAN2"
-    });
-
-    if (!success) {
-        return res.status(500).json({
-            success: false,
-            message: "ESP32 not connected"
-        });
-    }
-
-    res.json({
-        success: true,
-        message: "Scan 2 requested"
-    });
-}
 
 async function startEnrollment(req, res) {
     const { sessionId } = req.body;
+    //const user = await User.findById(sessionId);
 
     if (!sessionId) {
         return res.status(400).json({ success: false, message: "sessionId is required to start an enrollment session" });
@@ -50,9 +18,18 @@ async function startEnrollment(req, res) {
         enrollmentState.setSession(sessionId);
         console.log("Starting Enroll");
 
-        sendToDevice({
+        const success = sendToDevice({
             command: "START_ENROLL",
+            //still left to put name given from the front end
+            name : "USER"
         });
+
+        if (!success) {
+            return res.status(500).json({
+                success: false,
+                message: "ESP32 not connected"
+            });
+        }
 
         console.log("START_ENROLL sent");
 
@@ -75,6 +52,57 @@ async function startEnrollment(req, res) {
         return res.status(500).json({ success: false, error: error.message });
     }
 }
+
+async function scan1(req, res) {
+    const sessionId = enrollmentState.getSession();
+
+    if (!sessionId) {
+        return res.status(400).json({
+            success: false,
+            message: "No active enrollment session."
+        });
+    }
+    const success = sendToDevice({
+        command: "ENROLL_SCAN1"
+    });
+    if (!success) {
+        return res.status(500).json({
+            success: false, // ─── FIXED: typo "fakse" changed to false
+            message: "ESP not connected"
+        });
+    }
+    res.json({
+        success: true,
+        message: "Scan 1 requested"
+    });
+}
+
+async function scan2(req, res) {
+    const sessionId = enrollmentState.getSession();
+
+    if (!sessionId) {
+        return res.status(400).json({
+            success: false,
+            message: "No active enrollment session."
+        });
+    }
+    const success = sendToDevice({
+        command: "ENROLL_SCAN2"
+    });
+
+    if (!success) {
+        return res.status(500).json({
+            success: false,
+            message: "ESP32 not connected"
+        });
+    }
+
+    res.json({
+        success: true,
+        message: "Scan 2 requested"
+    });
+}
+
 
 async function enroll(req, res) {
     const { fingerprint } = req.body;
@@ -99,6 +127,7 @@ async function enroll(req, res) {
         return res.status(500).json({ success: false, error: error.message });
     }
 }
+
 
 async function verification(req, res) {
     const { fingerprint } = req.body;

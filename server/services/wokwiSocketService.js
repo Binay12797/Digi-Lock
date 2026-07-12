@@ -17,41 +17,57 @@ function initWokwiSocket(io){
             try{
                 const parsedData = JSON.parse(rawData.toString());
                 console.log("Raw payload from wokwi:",parsedData);
-                if(parsedData.type == "FINGERPRINT_SCAN" && parsedData.fingerprint){
+                // STATUS UPDATE
+                if (parsedData.type === "STATUS_UPDATE") 
+                {
+                    console.log("Status:", parsedData);
+                }
+
+                // ENROLLMENT PROGRESS
+                else if (parsedData.type === "ENROLL_PROGRESS") {
+                    console.log("Enrollment Progress:", parsedData.state);
+                    io.emit("ENROLL_PROGRESS", parsedData);
+                }
+                // ENROLLMENT COMPLETE
+                else if (parsedData.type === "ENROLL_COMPLETE" && parsedData.fingerprint) {
                     const scannedToken = parsedData.fingerprint;
-                    console.log(`Tunneling biometric token [${parsedData.fingerprint}] to UI dashboard...`);
-
-                    // const user =  User.findOne({fingerprint: scannedToken });
-                    // if(user){
-                    //     console.log(`Access Granted! Welcome, ${user.name}`);
-                    //     io.emit("AUTH_RESULT",{
-                    //         success: true,
-                    //         message: "ACCESS GRANTED",
-                    //         userName: user.name,
-                    //         role: user.role || "User"
-
                     const sessionId = enrollmentState.getSession();
-                    if(sessionId){
-                        console.log(`Enrollment active`)
-                        // await User.findByIdAndUpdate(userId,{
-                        //     fingerprint: scannedToken,
-                        //     isActive: true
-                        // });
-                        io.emit("FINGERPRINT_READY",{
-                            success: true,
-                            sessionId: sessionId,
-                            fingerprint: scannedToken
-                        });
-                        enrollmentState.clearSession();
+                    if (!sessionId) {
+                        console.log("No active enrollment session.");
+                        return;
+                    }
+                    console.log("==================================");
+                    console.log("Enrollment Complete");
+                    console.log("Session ID:", sessionId);
+                    console.log("Fingerprint:", scannedToken);
+                    console.log("==================================");
 
-                        ws.send(JSON.stringify({
-                            command: "ENROLL_SUCCESS",
-                            status: "ENROLLED",
-                            message: "Fingerprint saved successfully"
-                        }));
-                    
-                        
-                    }else{
+                    // =====================================================
+                    // DATABASE SAVE (TEMPORARILY DISABLED)
+                    // Uncomment when MongoDB is enabled.
+                    // =====================================================
+                    /*
+                    await User.findByIdAndUpdate(sessionId, {
+                        fingerprint: scannedToken,
+                        isActive: true
+                    });
+
+                    console.log("Fingerprint successfully saved.");
+                    */
+                    io.emit("FINGERPRINT_READY", {
+                        success: true,
+                        sessionId,
+                        fingerprint: scannedToken
+                    });
+                    enrollmentState.clearSession();
+                    // Tell the ESP to return to idle/auth mode.
+                    sendToDevice({
+                        command: "SET_MODE",
+                        mode: 0
+                    });
+                    console.log("Enrollment finished. Switching ESP back to mode 0.");
+                }
+                else{
                         // console.log(`Access Denied! Token [${scannedToken}] not registered.`);
                         // io.emit("AUTH_RESULT",{
                         //     success: false,
@@ -89,7 +105,7 @@ function initWokwiSocket(io){
                     }}
 
                     //io.emit("WOKWI_PRINT_CAPTURED",{fingerprint: parsedData.fingerprint});
-                }
+                
             }catch(error){
                 console.log(` Plain-text String from Wokwi: ${rawData.toString()}`);
             }

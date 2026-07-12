@@ -30,13 +30,12 @@ void handleSystemCommand(const String &command, JsonObject data) {
     Serial.println("[Mode] -> " + String(mode));}
 
   else if (command == "START_ENROLL" || command == "ENROLL_SCAN1" || command == "ENROLL_SCAN2") {
-    if (currentMode != 1) {
+   if (currentMode != 1) {
       currentMode = 1;
-      EnrollmentManager::reset();
       Serial.println("[Mode] Auto-switched to Enrollment (1)");
     }
-}
   }
+}
 // ── Setup / loop ────────────────────────────────────────────────────
 
 void connectWiFi() {

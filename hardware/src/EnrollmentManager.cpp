@@ -22,12 +22,12 @@ void begin() {
   SocketClient::onCommand([](const String &command, JsonObject data) {
 
     if (command == "START_ENROLL") {
-      // String name = data["name"] | "";
-      // if (name.isEmpty()) {
-      //   Serial.println("[Enroll] START_ENROLL received with no 'name' field — ignored");
-      //   return;
-      // }
-      // EnrollmentManager::start(name);
+      String name = data["name"] | "";
+      if (name.isEmpty()) {
+          Serial.println("[Enroll] START_ENROLL received with no 'name' field — ignored");
+         return;
+      }
+      EnrollmentManager::start(name);
       Serial.println("[Enroll] Initializing fingerprint enrollment matrix...");
         
         // Reset local scan state variables
@@ -46,11 +46,17 @@ void begin() {
       isReadyToScan = false;
       currentScanPass = 0;
 
-    } else if (command == "ENROLL_SCAN1") {
+    }else if (command == "ENROLL_SCAN1") {
+      Serial.println("[DEBUG] ENROLL_SCAN1 command received");
       EnrollmentManager::scan1();
-
     } else if (command == "ENROLL_SCAN2") {
       EnrollmentManager::scan2();
+    }else if (command == "EXIT_ENROLL") {
+        Serial.println("[DEBUG] EXIT_ENROLL received");
+        EnrollmentManager::reset();
+        isReadyToScan = false;
+        currentScanPass = 0;
+        Serial.println("[Enroll] Enrollment reset");
     }
   });
 }
@@ -72,16 +78,32 @@ void start(const String &name) {
 // Called by the main loop when the fingerprint sensor detects a finger
 // while an enrollment is in the ENROLL_WAITING_SCAN1 stage.
 void scan1() {
-  if (state_ != ENROLL_WAITING_SCAN1) return;
+  Serial.println("[DEBUG] scan1() called");
+
+  Serial.print("[DEBUG] Current State = ");
+  Serial.println(stateString());
+
+  if (state_ != ENROLL_WAITING_SCAN1) {
+    Serial.println("[DEBUG] Wrong state for Scan1");
+    return;
+  }
+
+  Serial.println("[DEBUG] Calling captureTemplate1()");
 
   if (FingerprintSensor::captureTemplate1()) {
+
+    Serial.println("[DEBUG] captureTemplate1 SUCCESS");
+
     state_ = ENROLL_SCAN1_DONE;
+
     Buzzer::beepScan();
+
     SocketClient::emitEnrollProgress("scan1_done", pendingName_);
 
-    // Immediately advance to waiting for the second scan
     state_ = ENROLL_WAITING_SCAN2;
+
     SocketClient::emitEnrollProgress("waiting_scan2", pendingName_);
+
     Serial.println("[Enroll] Scan 1 done — waiting for scan 2");
   }
 }
