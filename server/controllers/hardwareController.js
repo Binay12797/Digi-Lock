@@ -55,7 +55,6 @@ async function startEnrollment(req, res) {
 
 async function scan1(req, res) {
     const sessionId = enrollmentState.getSession();
-
     if (!sessionId) {
         return res.status(400).json({
             success: false,
@@ -103,7 +102,6 @@ async function scan2(req, res) {
     });
 }
 
-
 async function enroll(req, res) {
     const { fingerprint } = req.body;
     const userId = enrollmentState.getSession();
@@ -114,58 +112,70 @@ async function enroll(req, res) {
     }
 
     try {
+        // =====================================================
+        // TEMPORARY: MongoDB integration disabled.
+        // Uncomment the code below once the database is connected.
+        // ====================================================
+        /*
         await User.findByIdAndUpdate(userId, {
-            fingerprint: fingerprint,
+            fingerprint,
             isActive: true
         });
-        
-        io.emit("BIOMETRIC_LINKED", { success: true, message: "Registration successful!" });
+        */
+
+        io.emit("BIOMETRIC_LINKED", {
+            success: true,
+            message: "Registration successful!"
+        });
+
+        sendToDevice({
+            command: "SET_MODE",
+            mode: 0
+        });
+
         enrollmentState.clearSession();
-        
-        return res.json({ success: true, message: "Data successfully synced to db" });
+
+        return res.json({
+            success: true,
+            message: "Enrollment simulation completed."
+        });
+
     } catch (error) {
-        return res.status(500).json({ success: false, error: error.message });
+        return res.status(500).json({
+            success: false,
+            error: error.message
+        });
     }
 }
 
 
 async function verification(req, res) {
-    const { fingerprint } = req.body;
-    const io = req.app.get("io");
+    const { uid } = req.body;
 
-    try {
-        const user = await User.findOne({ fingerprint, isActive: true });
-        
-        if (user) {
-            // ─── FIXED: Changed "User._id" and "User.name" to "user._id" and "user.name" ───
-            // The uppercase 'User' refers to the model template itself, while lowercase 'user' 
-            // refers to the specific individual record returned by findOne().
-            await accessLog.create({
-                userId: user._id, 
-                authType: "fingerprint",
-                status: "GRANTED",
-                scannedDataString: fingerprint
-            });
-
-            io.emit("NEW_ACCESS_LOG", { name: user.name, status: "GRANTED", timestamp: new Date() });
-            return res.json({ accessGranted: true, action: "OPEN_DOOR", username: user.name });
-
-        } else {
-            await accessLog.create({
-                userId: null,
-                authType: "fingerprint",
-                status: "DENIED",
-                scannedDataString: fingerprint
-            });
-
-            io.emit("NEW_ACCESS_LOG", { name: "Unknown user", status: "DENIED", timestamp: new Date() });
-            return res.status(401).json({ accessGranted: false, action: "LOCKED" });
-        }
-    } catch (error) {
-        return res.status(500).json({ success: false, error: error.message });
+    if (!uid) {
+        return res.status(400).json({
+            success: false,
+            message: "UID is required."
+        });
     }
-}
 
+    const success = sendToDevice({
+        command: "AUTH_CHECK",
+        uid
+    });
+
+    if (!success) {
+        return res.status(500).json({
+            success: false,
+            message: "ESP32 not connected."
+        });
+    }
+
+    return res.status(200).json({
+        success: true,
+        message: "Authentication request sent to ESP."
+    });
+}
 module.exports = {
     enroll,
     verification,

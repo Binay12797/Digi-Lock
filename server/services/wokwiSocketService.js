@@ -59,14 +59,11 @@ function initWokwiSocket(io){
                         sessionId,
                         fingerprint: scannedToken
                     });
-                    enrollmentState.clearSession();
-                    // Tell the ESP to return to idle/auth mode.
-                    sendToDevice({
-                        command: "SET_MODE",
-                        mode: 0
-                    });
-                    console.log("Enrollment finished. Switching ESP back to mode 0.");
                 }
+                else if (parsedData.type === "FINGERPRINT_SCAN") {
+                    await handleFingerprintScan(parsedData, io);
+                }
+                /*
                 else{
                         // console.log(`Access Denied! Token [${scannedToken}] not registered.`);
                         // io.emit("AUTH_RESULT",{
@@ -102,7 +99,7 @@ function initWokwiSocket(io){
                             ws.send(JSON.stringify({command: "KEEP_LOCKED"}));
                             console.log("unknow user!");
                         
-                    }}
+                    }}*/
 
                     //io.emit("WOKWI_PRINT_CAPTURED",{fingerprint: parsedData.fingerprint});
                 
@@ -121,6 +118,45 @@ function initWokwiSocket(io){
     return wss;
 }
 
+//verifation haldler
+async function handleFingerprintScan(parsedData, io) {
+    const scannedToken = parsedData.fingerprint;
+    console.log("================================");
+    console.log("Fingerprint Scan Received");
+    console.log("UID:", scannedToken);
+    console.log("================================");
+    const granted = verifyFingerprint(scannedToken);
+    sendAuthenticationResult(granted);
+}
+
+//temp verification id list - later replace with ids from databse
+function verifyFingerprint(uid) {
+    // Temporary verification
+    return uid === "1";
+}
+/* later for database implementation 
+async function verifyFingerprint(uid) {
+    const user = await User.findOne({
+        fingerprint: uid,
+        isActive: true
+    });
+    return !!user;
+}*/ 
+
+//authetication helper function
+function sendAuthenticationResult(granted) {
+    if (granted) {
+        sendToDevice({
+            command: "OPEN_DOOR"
+        });
+    } else {
+        sendToDevice({
+            command: "DENY_ACCESS"
+        });
+    }
+}
+
+
 //added as a helper function
 function sendToDevice(data) {
     //debug logs
@@ -135,6 +171,7 @@ function sendToDevice(data) {
     deviceSocket.send(JSON.stringify(data));
     return true;
 }
+
 
 module.exports = { 
     initWokwiSocket,

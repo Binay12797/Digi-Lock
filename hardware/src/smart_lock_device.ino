@@ -4,8 +4,10 @@
 #include "EnrollmentManager.h"
 #include "AuthManager.h"
 #include "SocketClient.h"
+#include "Display.h"
 
-// 0 = idle, 1 = enrollment mode, 2 = authorization mode
+// 0 = normal operation (authentication)
+// 1 = enrollment mode
 // The React frontend / backend controls this via a { "command": "SET_MODE", "mode": N } message.
 int currentMode = 0;
 
@@ -22,18 +24,15 @@ const unsigned long STATUS_INTERVAL_MS = 5000;
 // main.ino knows about currentMode.
 void handleSystemCommand(const String &command, JsonObject data) {
   if (command == "SET_MODE") {
-    int mode = data["mode"] | 0;
-    currentMode = mode;
-    if (mode == 1)      EnrollmentManager::reset();
-    else if (mode == 2) AuthManager::reset();
-    Buzzer::beepMode();
-    Serial.println("[Mode] -> " + String(mode));}
+      int mode = data["mode"] | 0;
+      currentMode = mode;
 
-  else if (command == "START_ENROLL" || command == "ENROLL_SCAN1" || command == "ENROLL_SCAN2") {
-   if (currentMode != 1) {
-      currentMode = 1;
-      Serial.println("[Mode] Auto-switched to Enrollment (1)");
-    }
+      if (mode == 1) {
+          EnrollmentManager::reset();
+      }
+
+      Buzzer::beepMode();
+      Serial.println("[Mode] -> " + String(mode));
   }
 }
 // ── Setup / loop ────────────────────────────────────────────────────
@@ -55,6 +54,7 @@ void setup() {
   
   Serial.begin(115200);
   Buzzer::begin();
+  Display::begin();
   connectWiFi();
 
   EnrollmentManager::begin();   // registers its own command handler
@@ -68,9 +68,16 @@ void setup() {
 void loop() {
   SocketClient::loop();
   Buzzer::loop();
+  Display::render(currentMode);
 
-  if (currentMode == 1)      EnrollmentManager::loop();
-  else if (currentMode == 2) AuthManager::loop();
+  if(currentMode == 1)
+  {
+      EnrollmentManager::loop();
+  }
+  else
+  {
+      AuthManager::loop();
+  }
 
   unsigned long now = millis();
   if (now - lastStatusMs >= STATUS_INTERVAL_MS) {
