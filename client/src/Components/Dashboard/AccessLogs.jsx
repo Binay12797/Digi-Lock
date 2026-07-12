@@ -104,7 +104,7 @@ const AccessLogs = () => {
   return (
     <Box sx={{ m: "20px" }}>
       <Typography variant="h5" sx={{ color: colors.greenAccent[400] }}>
-        Locks Status
+        View Access Logs
       </Typography>
 
       <Box

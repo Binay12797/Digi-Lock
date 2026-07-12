@@ -19,19 +19,33 @@ const LockUsageChart = ({ lockData }) => {
     <Card sx={{ height: "100%", bgcolor: colors.primary[400] }}>
       <CardContent>
         <Typography variant="h5">Unlocks</Typography>
-        <Typography variant="subtitle1" mb={2}>
+        <Typography variant="subtitle2" mb={2}>
           Todays successful unlocks
         </Typography>
         {/* The ResponsiveContainer component is a container that adjusts its width and height based on the size of its parent element. */}
         <ResponsiveContainer width={"100%"} height={320}>
           <BarChart
-            data={lockData}
+            data={lockData} //passes data for mock data
             margin={{ top: 20, right: 20, left: 0, bottom: 5 }}
           >
-            <XAxis dataKey="lockName" />
-            <YAxis allowDecimals={false} />
+            <XAxis
+              dataKey="lockName"
+              tick={{ fill: colors.grey[100] }}
+              tickLine={{ stroke: colors.grey[600] }}
+              axisLine={{ stroke: colors.grey[500] }}
+            />
+            <YAxis
+              allowDecimals={false}
+              tick={{ fill: colors.grey[100] }}
+              axisLine={{ stroke: colors.grey[500] }}
+              tickLine={{ stroke: colors.grey[600] }}
+            />
             <Tooltip />
-            <Bar dataKey="unlocks" radius={[6, 6, 0, 0]} />
+            <Bar
+              dataKey="unlocks"
+              fill={colors.blueAccent[700]}
+              radius={[8, 8, 0, 0]}
+            ></Bar>
           </BarChart>
         </ResponsiveContainer>
       </CardContent>

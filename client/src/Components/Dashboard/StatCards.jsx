@@ -7,7 +7,7 @@ import ReportProblemOutlinedIcon from "@mui/icons-material/ReportProblemOutlined
 import { tokens } from "../../theme";
 
 const iconMap = {
-  lock: <LockOutlinedIcon fontSize="large" color="blue" />,
+  lock: <LockOutlinedIcon fontSize="large" />,
   users: <PeopleAltOutlinedIcon fontSize="large" />,
   unlock: <LockOpenOutlinedIcon fontSize="large" />,
   warning: <ReportProblemOutlinedIcon fontSize="large" />,

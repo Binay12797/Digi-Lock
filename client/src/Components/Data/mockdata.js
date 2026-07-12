@@ -13,8 +13,6 @@ export const notificationsData = [
     entityName: "Main Entrance",
 
     timestamp: "2026-07-06T10:35:20",
-
-    read: false,
   },
 
   {
@@ -29,8 +27,6 @@ export const notificationsData = [
     entityName: "Server Room",
 
     timestamp: "2026-07-06T10:20:00",
-
-    read: false,
   },
 
   {
@@ -45,8 +41,6 @@ export const notificationsData = [
     entityName: "Garage",
 
     timestamp: "2026-07-06T09:55:00",
-
-    read: false,
   },
 
   {
@@ -61,8 +55,6 @@ export const notificationsData = [
     entityName: "Sambeg Sherestha",
 
     timestamp: "2026-07-06T08:30:00",
-
-    read: true,
   },
 ];
 

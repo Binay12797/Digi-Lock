@@ -10,7 +10,7 @@ import { tokens } from "../../theme";
 import { Bar, BarChart, ResponsiveContainer } from "recharts";
 
 import { dashboardStats } from "../Data/mockdata";
-import StatCards from "./statcards";
+import StatCards from "./StatCards";
 import { useState } from "react";
 
 import LockUsageChart from "./LockUsageChart";
