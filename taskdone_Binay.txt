@@ -219,3 +219,5 @@ Language-sensitive localized strings are text formats that change automatically 
 
 install recharts inside client
  npm install recharts : for charts
+
+ The useEffect hook is a built-in React tool used to synchronized functional components with external systems or handle side effects

@@ -214,14 +214,20 @@ export const ColorModeContext = createContext({
 });
 
 export const useMode = () => {
-  const [mode, setMode] = useState("dark"); //default value dark
+  const [mode, setMode] = useState(() => {
+    return localStorage.getItem("theme") || "dark"; //checks storage for previous theme if not found then dark theme
+  }); //default value dark
 
   //new variables colorMode and theme
   const colorMode = useMemo(
     //Without useMemo, a new object would be created every render.
     () => ({
       toggleColorMode: () =>
-        setMode((prev) => (prev === "light" ? "dark" : "light")),
+        setMode((prev) => {
+          const newMode = prev === "light" ? "dark" : "light";
+          localStorage.setItem("theme", newMode);
+          return newMode;
+        }),
     }),
     [],
   );

@@ -221,7 +221,8 @@ const AddUser = () => {
         slotProps={{
           paper: {
             sx: {
-              bgcolor: colors.primary[600],
+              bgcolor:
+                theme.palette.mode === "dark" ? colors.primary[600] : null,
               borderRadius: 2,
               minWidth: 450,
               p: 1,

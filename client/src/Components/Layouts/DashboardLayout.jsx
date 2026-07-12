@@ -1,10 +1,17 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
 import Topbar from "../Global/Topbar";
 import Sidebar from "../Global/Sidebar";
 
 const DashboardLayout = () => {
-  const [selected, setSelected] = useState("Dashboard"); // which item is currently selected ie on which page we are currently in
+  const [selected, setSelected] = useState(() => {
+    return localStorage.getItem("CurrentPage") || "Dashboard";
+  }); // which item is currently selected ie on which page we are currently in
+
+  //"Whenever the selected value changes ie the vaue writtem in {},[], run this code."--------> useEffect
+  useEffect(() => {
+    localStorage.setItem("CurrentPage", selected);
+  }, [selected]);
   return (
     //That's a React Fragment, written in its shorthand form. it exists because every component in React must return a single root element. Without it, this would be invalid:
 
