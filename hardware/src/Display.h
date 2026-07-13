@@ -9,7 +9,12 @@
 // Call Display::begin() once in setup() (after Serial.begin()), and
 // Display::render(currentMode) every loop() iteration — it internally
 // throttles its own refresh rate so calling it every loop is fine.
+//
+// currentMode contract (matches smart_lock_device.ino): 0 = normal
+// operation / authentication (the default at boot), 1 = enrollment.
+// There is no separate "idle" mode — the device is always doing one or
+// the other, so mode 0 always renders the auth screen.
 namespace Display {
   void begin();
-  void render(int mode); // 0 = idle, 1 = enrollment, 2 = authorization
+  void render(int mode); // 0 = authentication (default), 1 = enrollment
 }

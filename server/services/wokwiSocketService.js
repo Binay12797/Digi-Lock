@@ -2,11 +2,7 @@ const {WebSocketServer} = require("ws");
 const User = require("../models/userModel");
 const accessLog = require("../models/accesslogModel");
 const enrollmentState = require("./enrollmentState");
-<<<<<<< HEAD
-const deviceManager = require("./deviceManager");
-=======
->>>>>>> parent of d95904a (display fix)
-let deviceSocket = null;
+const devices = new Map();
 
 function initWokwiSocket(io){
     const wss = new WebSocketServer({port: 8080});
@@ -14,33 +10,19 @@ function initWokwiSocket(io){
 
     wss.on("connection",(ws)=>{
         console.log("wokwi ESP32 connection established ");
+        //server remembers which websocket belongs to ESP
+        deviceSocket = ws;
+        console.log("Device socket stored.");
         ws.on("message",async (rawData)=>{
             try{
                 const parsedData = JSON.parse(rawData.toString());
-                // -----------------------------------------
-                // Determine which device sent this message
-                // -----------------------------------------
-                const deviceId = parsedData.deviceId || ws.deviceId;
-                // Any valid message means the device is alive
-                if (deviceId) {
-                    deviceManager.heartbeat(deviceId);
-                }
-                // Device registration
-                if (parsedData.type === "HELLO") {
-                    if (!parsedData.deviceId) {
-                        console.log("HELLO received without deviceId.");
-                        return;
-                    }
-                    ws.deviceId = parsedData.deviceId;
-                    deviceManager.register(parsedData.deviceId, ws);
-                    console.log(`Device registered: ${parsedData.deviceId}`);
-                    return;
-                }
-                console.log("Raw payload from wokwi:", parsedData);
+                console.log("Raw payload from wokwi:",parsedData);
                 // STATUS UPDATE
-                if (parsedData.type === "STATUS_UPDATE") {
+                if (parsedData.type === "STATUS_UPDATE") 
+                {
                     console.log("Status:", parsedData);
                 }
+
                 // ENROLLMENT PROGRESS
                 else if (parsedData.type === "ENROLL_PROGRESS") {
                     console.log("Enrollment Progress:", parsedData.state);
@@ -126,32 +108,27 @@ function initWokwiSocket(io){
             }
         });
 
-        ws.on("close", (code, reason) => {
-            console.log("========== CLOSE EVENT ==========");
-            console.log("Code:", code);
-            console.log("Reason:", reason.toString());
-            if (ws.deviceId) {
-                deviceManager.unregister(ws.deviceId);
+        ws.on("close",()=>{
+            console.log("wokwi connection closed");
+            if(deviceSocket === ws){
+                deviceSocket = null;
             }
-        });
-        ws.on("error", (err) => {
-            console.log("Socket Error:", err.message);
         });
     });
     return wss;
 }
 
 //verifation haldler
-async function handleFingerprintScan(deviceId, parsedData, io) {
+async function handleFingerprintScan(parsedData, io) {
     const scannedToken = parsedData.fingerprint;
     console.log("================================");
     console.log("Fingerprint Scan Received");
-    console.log("Device:", deviceId);
     console.log("UID:", scannedToken);
     console.log("================================");
     const granted = verifyFingerprint(scannedToken);
-    sendAuthenticationResult(deviceId, granted);
+    sendAuthenticationResult(granted);
 }
+
 //temp verification id list - later replace with ids from databse
 function verifyFingerprint(uid) {
     // Temporary verification
@@ -167,26 +144,34 @@ async function verifyFingerprint(uid) {
 }*/ 
 
 //authetication helper function
-function sendAuthenticationResult(deviceId, granted) {
+function sendAuthenticationResult(granted) {
     if (granted) {
-        sendToDevice(deviceId, {
+        sendToDevice({
             command: "OPEN_DOOR"
         });
     } else {
-        sendToDevice(deviceId, {
+        sendToDevice({
             command: "DENY_ACCESS"
         });
     }
 }
 
+
 //added as a helper function
-/*[WS] Sending START_ENROLL -> door-lock-01
-[WS] Sending AUTH_CHECK -> door-lock-01
-[WS] Sending OPEN_DOOR -> door-lock-01*/ 
-function sendToDevice(deviceId, data) {
-    console.log(`[WS] Sending ${data.command} -> ${deviceId}`);
-    return deviceManager.send(deviceId, data);
+function sendToDevice(data) {
+    //debug logs
+    console.log("sendTodevice Called");
+    if (!deviceSocket) {
+        console.log("No ESP32 connected.");
+        return false;
+    }
+    //debug logs
+    console.log("Sending to ESP: ", data);
+
+    deviceSocket.send(JSON.stringify(data));
+    return true;
 }
+
 
 module.exports = { 
     initWokwiSocket,

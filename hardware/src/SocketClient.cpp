@@ -121,30 +121,27 @@ void emitStatus(int mode) {
 }
 
 // { "type": "FINGERPRINT_SCAN", "fingerprint": "<uid>" }
-void emitFingerprintScan(const String &uid)
-{
-    JsonDocument doc;
-    doc["type"] = "FINGERPRINT_SCAN";
-    doc["deviceId"] = DEVICE_ID;
-    doc["fingerprint"] = uid;
-    sendMessage(doc);
+void emitFingerprintScan(const String &uid) {
+  JsonDocument doc;
+  doc["type"]        = "FINGERPRINT_SCAN";
+  doc["fingerprint"] = uid;
+  sendMessage(doc);
 }
+
 // { "type": "ENROLL_PROGRESS", "state": "...", "name": "..." }
 void emitEnrollProgress(const String &state, const String &name) {
   JsonDocument doc;
-  doc["type"] = "ENROLL_PROGRESS";
-  doc["deviceId"] = DEVICE_ID;
+  doc["type"]  = "ENROLL_PROGRESS";
   doc["state"] = state;
-  doc["name"] = name;
+  doc["name"]  = name;
   sendMessage(doc);
 }
 
 // { "type": "ENROLL_COMPLETE", "name": "...", "fingerprint": "<uid>" }
 void emitEnrollComplete(const String &name, const String &uid) {
   JsonDocument doc;
-  doc["type"] = "ENROLL_COMPLETE";
-  doc["deviceId"] = DEVICE_ID;
-  doc["name"] = name;
+  doc["type"]        = "ENROLL_COMPLETE";
+  doc["name"]        = name;
   doc["fingerprint"] = uid;
   sendMessage(doc);
 }
@@ -152,9 +149,8 @@ void emitEnrollComplete(const String &name, const String &uid) {
 // { "type": "ENROLL_FAILED", "name": "...", "reason": "..." }
 void emitEnrollFailed(const String &name, const String &reason) {
   JsonDocument doc;
-  doc["type"] = "ENROLL_FAILED";
-  doc["deviceId"] = DEVICE_ID;
-  doc["name"] = name;
+  doc["type"]   = "ENROLL_FAILED";
+  doc["name"]   = name;
   doc["reason"] = reason;
   sendMessage(doc);
 }
@@ -174,7 +170,6 @@ void emitEnrollLog(const String &name, const String &uid, bool success, const St
   doc["success"]     = success;
   doc["reason"]      = reason;
   doc["uptimeMs"]    = millis();
-  doc["deviceId"] = DEVICE_ID;
   sendMessage(doc);
 }
 
@@ -200,7 +195,6 @@ void emitAlarm(int attempts) {
   JsonDocument doc;
   doc["type"]     = "ALARM";
   doc["attempts"] = attempts;
-  doc["deviceId"] = DEVICE_ID;
   sendMessage(doc);
 }
 
