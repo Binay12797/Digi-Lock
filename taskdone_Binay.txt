@@ -262,3 +262,6 @@ setFieldValueRef.current = setFieldValue;
 
 Installed date-fns for converting time to : x min ago formatt
 npm install date-fns
+
+used ngrok for development and connecting to devices
+npx ngrok start --config ./ngrok.yml --all

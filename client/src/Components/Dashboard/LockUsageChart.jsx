@@ -29,39 +29,41 @@ const LockUsageChart = ({ lockData }) => {
           Todays successful unlocks
         </Typography>
         {/* The ResponsiveContainer component is a container that adjusts its width and height based on the size of its parent element. */}
-        <ResponsiveContainer width={"100%"} height={320}>
-          <BarChart
-            data={lockData} //passes data for mock data
-            margin={{ top: 20, right: 20, left: 0, bottom: 5 }}
-          >
-            <CartesianGrid strokeDasharray="3 3" stroke={colors.grey[800]} />
-            <XAxis
-              dataKey="lockName"
-              tick={{ fill: colors.grey[100] }}
-              tickLine={{ stroke: colors.grey[600] }}
-              axisLine={{ stroke: colors.grey[500] }}
-            />
-            <YAxis
-              allowDecimals={false}
-              tick={{ fill: colors.grey[100] }}
-              axisLine={{ stroke: colors.grey[500] }}
-              tickLine={{ stroke: colors.grey[600] }}
-            />
-            <Tooltip
-              contentStyle={{
-                background: colors.primary[500],
-                border: "none",
-                borderRadius: 8,
-                color: "#fff",
-              }}
-            />
-            <Bar
-              dataKey="unlocks"
-              fill={colors.blueAccent[700]}
-              radius={[8, 8, 0, 0]}
-            ></Bar>
-          </BarChart>
-        </ResponsiveContainer>
+        <Box sx={{ mt: 3 }}>
+          <ResponsiveContainer width={"100%"} height={320}>
+            <BarChart
+              data={lockData} //passes data for mock data
+              margin={{ top: 20, right: 20, left: 0, bottom: 5 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke={colors.grey[800]} />
+              <XAxis
+                dataKey="lockName"
+                tick={{ fill: colors.grey[100] }}
+                tickLine={{ stroke: colors.grey[600] }}
+                axisLine={{ stroke: colors.grey[500] }}
+              />
+              <YAxis
+                allowDecimals={false}
+                tick={{ fill: colors.grey[100] }}
+                axisLine={{ stroke: colors.grey[500] }}
+                tickLine={{ stroke: colors.grey[600] }}
+              />
+              <Tooltip
+                contentStyle={{
+                  background: colors.primary[500],
+                  border: "none",
+                  borderRadius: 8,
+                  color: "#fff",
+                }}
+              />
+              <Bar
+                dataKey="unlocks"
+                fill={colors.blueAccent[700]}
+                radius={[8, 8, 0, 0]}
+              ></Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </Box>
       </CardContent>
     </Card>
   );
