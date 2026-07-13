@@ -107,9 +107,7 @@ const AddUser = () => {
 
       sessionIdRef.current = crypto.randomUUID();
 
-      console.log(sessionIdRef.current);
-
-      await api.post("api/startEnroll", {
+      await api.post("/api/startEnroll", {
         sessionId: sessionIdRef.current,
       });
 
