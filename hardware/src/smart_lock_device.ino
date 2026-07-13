@@ -10,6 +10,7 @@
 // 1 = enrollment mode
 // The React frontend / backend controls this via a { "command": "SET_MODE", "mode": N } message.
 int currentMode = 0;
+String currentLockStatus = "LOCKED";
 
 unsigned long lastStatusMs = 0;
 const unsigned long STATUS_INTERVAL_MS = 5000;
@@ -25,10 +26,6 @@ const unsigned long STATUS_INTERVAL_MS = 5000;
 void handleSystemCommand(const String &command, JsonObject data) {
   if (command == "SET_MODE") {
       int mode = data["mode"] | 0;
-      if (mode != 0 && mode != 1) {
-          Serial.println("[Mode] Invalid mode received");
-          return;
-      }
       currentMode = mode;
 
       if (mode == 1) {
@@ -74,27 +71,20 @@ void loop() {
   Buzzer::loop();
   Display::render(currentMode);
 
-  switch (currentMode)
+  if(currentMode == 1)
   {
-      case 0:
-          AuthManager::loop();
-          break;
-
-      case 1:
-          EnrollmentManager::loop();
-          break;
-
-      default:
-          Serial.println("[Mode] Invalid mode");
-          currentMode = 0;
-          break;
+      EnrollmentManager::loop();
+  }
+  else
+  {
+      AuthManager::loop();
   }
 
   unsigned long now = millis();
   if (now - lastStatusMs >= STATUS_INTERVAL_MS) {
     lastStatusMs = now;
     if (SocketClient::isConnected()) {
-      SocketClient::emitStatus(currentMode);
+      SocketClient::emitStatus(currentMode, currentLockStatus);
     } else {
       Serial.println("[WS] Postponing status update: Waiting for active connection...");
     }

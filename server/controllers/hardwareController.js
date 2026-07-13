@@ -42,8 +42,21 @@ async function scan2(req, res) {
 async function startEnrollment(req, res) {
     const { sessionId } = req.body;
 
-    if (!sessionId) {
-        return res.status(400).json({ success: false, message: "sessionId is required to start an enrollment session" });
+    if (!sessionId || typeof sessionId !== "string") {
+        return res.status(400).json({
+            success: false,
+            message: "A valid sessionId is required."
+        });
+    }
+
+    // Prevent multiple enrollment sessions
+    const activeSession = enrollmentState.getSession();
+
+    if (activeSession) {
+        return res.status(409).json({
+            success: false,
+            message: "Another enrollment session is already in progress."
+        });
     }
 
     try {
@@ -59,22 +72,32 @@ async function startEnrollment(req, res) {
         console.log(`Enrollment session successfully started for user: ${sessionId}. Ready for fingerprint payload.`)
         setTimeout(() => {
             const currentSession = enrollmentState.getSession();
+
             if (currentSession === sessionId) {
                 
                 console.log("enrollment session timedout");
 
                 const io = req.app.get("io");
-                io.emit("ENROLLMENT_TIMEOUT", { message: "Enrollment window expired." });
-                enrollmentState.clearSession(); // Explicit clean up on timeout
+
+                io.emit("ENROLLMENT_TIMEOUT", {
+                    message: "Enrollment window expired."
+                });
+
+                enrollmentState.clearSession();
+                enrollmentTimer = null;
             }
         }, 60000);
 
-        return res.json({ 
-            success: true, 
-            message: `Enrollment session successfully started for user: ${sessionId}. Ready for fingerprint payload.` 
+        return res.json({
+            success: true,
+            message: `Enrollment session started for user: ${sessionId}.`
         });
+
     } catch (error) {
-        return res.status(500).json({ success: false, error: error.message });
+        return res.status(500).json({
+            success: false,
+            error: error.message
+        });
     }
 }
 
@@ -84,7 +107,10 @@ async function enroll(req, res) {
     const io = req.app.get("io");
 
     if (!userId) {
-        return res.status(400).json({ success: false, message: "No active enrollment session found" });
+        return res.status(400).json({
+            success: false,
+            message: "No active enrollment session found."
+        });
     }
 
     try {

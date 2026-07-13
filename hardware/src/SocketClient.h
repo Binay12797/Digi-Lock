@@ -44,7 +44,7 @@ namespace SocketClient {
 
   // ── Outgoing ─────────────────────────────────────────────────────
   void emitHello();
-  void emitStatus(int mode);
+  void emitStatus(int mode, const String &status);
   void emitFingerprintScan(const String &uid);
   void emitEnrollProgress(const String &state, const String &name);
   void emitEnrollComplete(const String &name, const String &uid);
