@@ -18,7 +18,7 @@ async function startEnrollment(req, res) {
         enrollmentState.setSession(sessionId);
         console.log("Starting Enroll");
 
-        const success = sendToDevice({
+        const success = sendToDevice("door-lock-01",{
             command: "START_ENROLL",
             //still left to put name given from the front end
             name : "USER"
@@ -61,7 +61,7 @@ async function scan1(req, res) {
             message: "No active enrollment session."
         });
     }
-    const success = sendToDevice({
+    const success = sendToDevice("door-lock-01",{
         command: "ENROLL_SCAN1"
     });
     if (!success) {
@@ -85,7 +85,7 @@ async function scan2(req, res) {
             message: "No active enrollment session."
         });
     }
-    const success = sendToDevice({
+    const success = sendToDevice("door-lock-01",{
         command: "ENROLL_SCAN2"
     });
 
@@ -128,7 +128,7 @@ async function enroll(req, res) {
             message: "Registration successful!"
         });
 
-        sendToDevice({
+        sendToDevice("door-lock-01",{
             command: "SET_MODE",
             mode: 0
         });
@@ -159,7 +159,7 @@ async function verification(req, res) {
         });
     }
 
-    const success = sendToDevice({
+    const success = sendToDevice("door-lock-01",{
         command: "AUTH_CHECK",
         uid
     });

@@ -25,6 +25,10 @@ const unsigned long STATUS_INTERVAL_MS = 5000;
 void handleSystemCommand(const String &command, JsonObject data) {
   if (command == "SET_MODE") {
       int mode = data["mode"] | 0;
+      if (mode != 0 && mode != 1) {
+          Serial.println("[Mode] Invalid mode received");
+          return;
+      }
       currentMode = mode;
 
       if (mode == 1) {
@@ -70,13 +74,20 @@ void loop() {
   Buzzer::loop();
   Display::render(currentMode);
 
-  if(currentMode == 1)
+  switch (currentMode)
   {
-      EnrollmentManager::loop();
-  }
-  else
-  {
-      AuthManager::loop();
+      case 0:
+          AuthManager::loop();
+          break;
+
+      case 1:
+          EnrollmentManager::loop();
+          break;
+
+      default:
+          Serial.println("[Mode] Invalid mode");
+          currentMode = 0;
+          break;
   }
 
   unsigned long now = millis();
