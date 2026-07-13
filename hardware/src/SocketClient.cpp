@@ -111,12 +111,13 @@ void emitHello() {
   sendMessage(doc);
 }
 
-// { "type": "STATUS_UPDATE", "deviceId": "...", "mode": N }
-void emitStatus(int mode) {
+// { "type": "STATUS_UPDATE", "deviceId": "...", "mode": N, "status": "LOCKED|UNLOCKED" }
+void emitStatus(int mode, const String &status) {
   JsonDocument doc;
   doc["type"]     = "STATUS_UPDATE";
   doc["deviceId"] = DEVICE_ID;
   doc["mode"]     = mode;
+  doc["status"]   = status;
   sendMessage(doc);
 }
 

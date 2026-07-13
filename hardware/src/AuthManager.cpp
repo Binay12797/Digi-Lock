@@ -109,15 +109,28 @@ void begin() {
 }
 
 void checkUID(const String &uid) {
-  // Ignore new scans while any of these are active:
-  if (state_ == AUTH_WAITING_SCAN || state_ == AUTH_SCANNING  ||
-      state_ == AUTH_PROCESSING   || state_ == AUTH_VERIFYING ||
-      state_ == AUTH_LOCKOUT      || state_ == AUTH_ALARM     ||
-      uid.isEmpty()) {
+  if (uid.isEmpty()) {
+    Serial.println("[Auth] AUTH_CHECK received with empty UID");
     return;
   }
-  inputUID     = uid;
-  state_       = AUTH_WAITING_SCAN;
+  if (state_ == AUTH_WAITING_SCAN ||
+      state_ == AUTH_SCANNING ||
+      state_ == AUTH_PROCESSING ||
+      state_ == AUTH_VERIFYING) {
+
+    Serial.println("[Auth] AUTH_CHECK ignored: authentication already in progress");
+    return;
+  }
+  if (state_ == AUTH_LOCKOUT) {
+    Serial.println("[Auth] AUTH_CHECK ignored: device is in lockout");
+    return;
+  }
+  if (state_ == AUTH_ALARM) {
+    Serial.println("[Auth] AUTH_CHECK ignored: alarm active");
+    return;
+  }
+  inputUID = uid;
+  state_ = AUTH_WAITING_SCAN;
   stateStartMs = millis();
   Serial.println("[Auth] Check started for UID: " + uid);
 }

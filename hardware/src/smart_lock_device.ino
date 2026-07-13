@@ -10,6 +10,7 @@
 // 1 = enrollment mode
 // The React frontend / backend controls this via a { "command": "SET_MODE", "mode": N } message.
 int currentMode = 0;
+String currentLockStatus = "LOCKED";
 
 unsigned long lastStatusMs = 0;
 const unsigned long STATUS_INTERVAL_MS = 5000;
@@ -83,7 +84,7 @@ void loop() {
   if (now - lastStatusMs >= STATUS_INTERVAL_MS) {
     lastStatusMs = now;
     if (SocketClient::isConnected()) {
-      SocketClient::emitStatus(currentMode);
+      SocketClient::emitStatus(currentMode, currentLockStatus);
     } else {
       Serial.println("[WS] Postponing status update: Waiting for active connection...");
     }
