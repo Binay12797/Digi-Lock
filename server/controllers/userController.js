@@ -121,30 +121,23 @@ async function getUserProfile(req,res){
     }
 }
 
-async function addUser(req,res){
-    const{name,email,role,fingerprint}= req.body;
-    if(!name || !email || !fingerprint){
-        return res.status(400).json({success: false, message: "Missing fields or fingerprint token"});
-    }
-    try{
-        const newUser = new User({
-            name,
-            email,
-            role: role || "User",
-            fingerprint: fingerprint,
-            isActive: true
-        });
-        await newUser.save();
-        return res.status(201).json({success: true, message: "User added successfully"});
-
-    }catch(error){
-        return res.status(500).json({success: false, message: "user addition failed", error: error.message});
-    }
+async function userInfo(req,res){
+    try {
+    // Fetch all user records from your collection, sorted by newest first
+    const users = await User.find({}).sort({ createdAt: -1 });
+    //console.log(`[DB Debug] Found ${users.length} users in the database collection.`);
+    
+    res.status(200).json({ success: true, data: users });
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.status(500).json({ success: false, message: "Failed to retrieve users from database." });
+  }
 }
 module.exports={
     createUser,
     login,
     startEnrollment,
     getUserProfile,
-    addUser
+    
+    userInfo
 }

@@ -1,0 +1,136 @@
+import React, { useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
+// import axios from "axios";
+import api from "../../Api/api";
+import "./LoginSignup.css";
+
+import email_icon from "../../assets/email.png";
+import user_icon from "../../assets/person.png";
+import password_icon from "../../assets/password.png";
+
+import { AuthContext } from "../Context/AuthContext";
+
+const Login = () => {
+  const navigate = useNavigate();
+  const { login } = useContext(AuthContext);
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  //creating variables to capture login details form user
+  const [email, setEmail] = useState(""); //setEmail is a function that can change value of email
+  const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  //function to run when login button is pressed
+  const handleLogin = async () => {
+    setErrorMessage(""); //clears past errors
+
+    if (!emailRegex.test(email)) {
+      setErrorMessage("Please enter a valid Email address");
+      return;
+    }
+
+    try {
+      //now we should make an api request to running backend port.
+      const response = await api.post("/user/login", {
+        email: email,
+        password: password,
+      });
+      //await: wait till server response
+      //after obtaining response , response is stored in response.
+
+      login(response.data);
+
+      if (response.data.success) {
+        // alert("Welcome back!");
+        navigate("/Dashboard");
+      }
+    } catch (error) {
+      //to handle errors if server is down or details dosent match
+      if (error.response) {
+        setErrorMessage(error.response.data.message);
+      } else {
+        setErrorMessage(
+          "Cannot Connect to server. Backend might not be running",
+        );
+      }
+    }
+  };
+
+  return (
+    <>
+      {/* This way .auth-page is a fixed full-screen background layer behind everything */}
+      <div className="auth-page" />
+      <div className="page-layout-wrapper">
+        <div className="container">
+          <div className="header">
+            <div className="text">Login</div>
+            <div className="underline"></div>
+          </div>
+
+          {errorMessage && (
+            <div
+              style={{
+                color: "red",
+                textAlign: "center",
+                marginTop: "15px",
+                fontSize: "17px",
+              }}
+            >
+              {errorMessage}
+            </div>
+          )}
+
+          <div className="inputs">
+            <div className="input">
+              <img src={email_icon} alt="" />
+              <input
+                type="email"
+                required
+                onInvalid={(e) =>
+                  e.target.setCustomValidity(
+                    "Please enter a valid email format!",
+                  )
+                }
+                placeholder="Email Id"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />{" "}
+              {/*On change works every time an new character is entered or altered, e means event*/}
+            </div>
+
+            <div className="input">
+              <img src={password_icon} alt="" />
+              <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleLogin();
+                  }
+                }}
+              />
+            </div>
+          </div>
+
+          <div className="forgot-password">
+            Forgot Password? <span>click here</span>
+          </div>
+
+          <div className="submit-container">
+            <div className="submit" onClick={handleLogin}>
+              Login
+            </div>
+            <div className="line" />
+            <div className="submit gray" onClick={() => navigate("/Signup")}>
+              Create New Account
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default Login;

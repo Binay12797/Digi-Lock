@@ -1,0 +1,69 @@
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 80px;
+  background: rgba(10, 10, 15, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  justify-content: space-between; /* pushing the first item to the very start, the last item to the very end */
+  align-items: center;
+  padding: 0 50px;
+  box-sizing: border-box;
+  border-bottom: 1px solid rgba(0, 102, 255, 0.25);
+
+  z-index: 1000;
+  /* makes navbar sit in the top */
+}
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo {
+  height: 70px;
+  width: auto;
+  object-fit: contain;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.logo:hover {
+  transform: scale(1.05);
+}
+
+.navbar-title {
+  color: #ffffff;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+}
+
+.navbar-title:hover {
+  transform: scale(1.05);
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.navbar-item {
+  color: #c7c7c7;
+  font-size: 20px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  font-weight: 500;
+  /* controls thickness of the text */
+}
+
+.navbar-item:hover {
+  color: rgb(40, 67, 143);
+  transform: scale(1.05);
+}

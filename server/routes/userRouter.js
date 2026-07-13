@@ -9,5 +9,5 @@ userRouter.post("/create",userController.createUser);   //post the user data fro
 userRouter.post("/login",userController.login);
 userRouter.post("/startEnrollment",userController.startEnrollment);
 userRouter.get("/profile",verifyToken, userController.getUserProfile);
-userRouter.post("/addUser", userController.addUser);
+userRouter.get("/info",userController.userInfo);
 module.exports = userRouter;

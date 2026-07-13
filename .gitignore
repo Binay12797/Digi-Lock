@@ -80,3 +80,6 @@ coverage/
 *.swp
 *.swo
 ```
+node_modules
+.env
+hardware

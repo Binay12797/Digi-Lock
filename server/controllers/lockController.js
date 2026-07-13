@@ -1,6 +1,7 @@
 const Lock = require("../models/lockModel");
 async function getLockStatus(req,res){
     const {deviceId} = req.params;
+    console.log("request for lock status received");
     try{
         let device = await Lock.findOne({deviceId});
         if(!device){

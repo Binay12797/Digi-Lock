@@ -3,12 +3,44 @@ const User = require("../models/userModel");
 const accessLog = require("../models/accesslogModel");
 const { sendToDevice } = require("../services/wokwiSocketService");
 
+async function scan1(req, res) {
+    const success = sendToDevice({
+        command: "ENROLL_SCAN1"
+    });
 
+    if (!success) {
+        return res.status(500).json({
+            success: false, // ─── FIXED: typo "fakse" changed to false
+            message: "ESP not connected"
+        });
+    }
 
+    res.json({
+        success: true,
+        message: "Scan 1 requested"
+    });
+}
+
+async function scan2(req, res) {
+    const success = sendToDevice({
+        command: "ENROLL_SCAN2"
+    });
+
+    if (!success) {
+        return res.status(500).json({
+            success: false,
+            message: "ESP32 not connected"
+        });
+    }
+
+    res.json({
+        success: true,
+        message: "Scan 2 requested"
+    });
+}
 
 async function startEnrollment(req, res) {
     const { sessionId } = req.body;
-    //const user = await User.findById(sessionId);
 
     if (!sessionId) {
         return res.status(400).json({ success: false, message: "sessionId is required to start an enrollment session" });
@@ -17,25 +49,18 @@ async function startEnrollment(req, res) {
     try {
         enrollmentState.setSession(sessionId);
         console.log("Starting Enroll");
+       
 
-        const success = sendToDevice("door-lock-01",{
+        sendToDevice({
             command: "START_ENROLL",
-            //still left to put name given from the front end
-            name : "USER"
         });
 
-        if (!success) {
-            return res.status(500).json({
-                success: false,
-                message: "ESP32 not connected"
-            });
-        }
-
         console.log("START_ENROLL sent");
-
+        console.log(`Enrollment session successfully started for user: ${sessionId}. Ready for fingerprint payload.`)
         setTimeout(() => {
             const currentSession = enrollmentState.getSession();
             if (currentSession === sessionId) {
+                
                 console.log("enrollment session timedout");
 
                 const io = req.app.get("io");
@@ -53,55 +78,6 @@ async function startEnrollment(req, res) {
     }
 }
 
-async function scan1(req, res) {
-    const sessionId = enrollmentState.getSession();
-    if (!sessionId) {
-        return res.status(400).json({
-            success: false,
-            message: "No active enrollment session."
-        });
-    }
-    const success = sendToDevice("door-lock-01",{
-        command: "ENROLL_SCAN1"
-    });
-    if (!success) {
-        return res.status(500).json({
-            success: false, // ─── FIXED: typo "fakse" changed to false
-            message: "ESP not connected"
-        });
-    }
-    res.json({
-        success: true,
-        message: "Scan 1 requested"
-    });
-}
-
-async function scan2(req, res) {
-    const sessionId = enrollmentState.getSession();
-
-    if (!sessionId) {
-        return res.status(400).json({
-            success: false,
-            message: "No active enrollment session."
-        });
-    }
-    const success = sendToDevice("door-lock-01",{
-        command: "ENROLL_SCAN2"
-    });
-
-    if (!success) {
-        return res.status(500).json({
-            success: false,
-            message: "ESP32 not connected"
-        });
-    }
-
-    res.json({
-        success: true,
-        message: "Scan 2 requested"
-    });
-}
-
 async function enroll(req, res) {
     const { fingerprint } = req.body;
     const userId = enrollmentState.getSession();
@@ -112,70 +88,57 @@ async function enroll(req, res) {
     }
 
     try {
-        // =====================================================
-        // TEMPORARY: MongoDB integration disabled.
-        // Uncomment the code below once the database is connected.
-        // ====================================================
-        /*
         await User.findByIdAndUpdate(userId, {
-            fingerprint,
+            fingerprint: fingerprint,
             isActive: true
         });
-        */
-
-        io.emit("BIOMETRIC_LINKED", {
-            success: true,
-            message: "Registration successful!"
-        });
-
-        sendToDevice("door-lock-01",{
-            command: "SET_MODE",
-            mode: 0
-        });
-
+        
+        io.emit("BIOMETRIC_LINKED", { success: true, message: "Registration successful!" });
         enrollmentState.clearSession();
-
-        return res.json({
-            success: true,
-            message: "Enrollment simulation completed."
-        });
-
+        
+        return res.json({ success: true, message: "Data successfully synced to db" });
     } catch (error) {
-        return res.status(500).json({
-            success: false,
-            error: error.message
-        });
+        return res.status(500).json({ success: false, error: error.message });
     }
 }
-
 
 async function verification(req, res) {
-    const { uid } = req.body;
+    const { fingerprint } = req.body;
+    const io = req.app.get("io");
 
-    if (!uid) {
-        return res.status(400).json({
-            success: false,
-            message: "UID is required."
-        });
+    try {
+        const user = await User.findOne({ fingerprint, isActive: true });
+        
+        if (user) {
+            // ─── FIXED: Changed "User._id" and "User.name" to "user._id" and "user.name" ───
+            // The uppercase 'User' refers to the model template itself, while lowercase 'user' 
+            // refers to the specific individual record returned by findOne().
+            await accessLog.create({
+                userId: user._id, 
+                authType: "fingerprint",
+                status: "GRANTED",
+                scannedDataString: fingerprint
+            });
+
+            io.emit("NEW_ACCESS_LOG", { name: user.name, status: "GRANTED", timestamp: new Date() });
+            return res.json({ accessGranted: true, action: "OPEN_DOOR", username: user.name });
+
+        } else {
+            await accessLog.create({
+                userId: null,
+                authType: "fingerprint",
+                status: "DENIED",
+                scannedDataString: fingerprint
+            });
+
+            io.emit("NEW_ACCESS_LOG", { name: "Unknown user", status: "DENIED", timestamp: new Date() });
+            return res.status(401).json({ accessGranted: false, action: "LOCKED" });
+        }
+    } catch (error) {
+        return res.status(500).json({ success: false, error: error.message });
     }
-
-    const success = sendToDevice("door-lock-01",{
-        command: "AUTH_CHECK",
-        uid
-    });
-
-    if (!success) {
-        return res.status(500).json({
-            success: false,
-            message: "ESP32 not connected."
-        });
-    }
-
-    return res.status(200).json({
-        success: true,
-        message: "Authentication request sent to ESP."
-    });
 }
+
 module.exports = {
     enroll,
     verification,
