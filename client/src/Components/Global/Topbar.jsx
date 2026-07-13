@@ -11,7 +11,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import { useNavigate } from "react-router-dom";
 import AdminProfileMenu from "./AdminProfile";
 
-const Topbar = ({ selected, setSelected }) => {
+const Topbar = ({ selected, setSelected, serachQuery, setSearchQuery }) => {
   const theme = useTheme(); // theme shade
   const colors = tokens(theme.palette.mode); //directly to token shde
   const colorMode = useContext(ColorModeContext);
@@ -52,7 +52,12 @@ const Topbar = ({ selected, setSelected }) => {
             mr: "10px",
           }}
         >
-          <InputBase sx={{ ml: 2, flex: 1 }} placeholder="Search" />
+          <InputBase
+            sx={{ ml: 2, flex: 1 }}
+            placeholder={`Search ${selected}...`}
+            value={serachQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
           {/* //creates an section where you can input */}
           <IconButton type="button" sx={{ p: 1 }}>
             <SearchIcon />

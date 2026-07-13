@@ -76,7 +76,7 @@ const AccessLogs = () => {
               display: "flex",
               justifyContent: "center",
               backgroundColor:
-                currentStatus === "SUCCESS"
+                currentStatus === "GRANTED"
                   ? colors.greenAccent[700]
                   : colors.redAccent[700],
               borderRadius: "5px",

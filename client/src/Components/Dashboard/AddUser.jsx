@@ -135,8 +135,20 @@ const AddUser = () => {
 
   //triggers when we submit or form
   //handleSubmit is formiks built in tool
-  const handleSubmit = (values) => {
-    console.log(values);
+  //resetForm is built in helper funcion
+  const handleSubmit = async (values, { resetForm }) => {
+    try {
+      const response = await api.post("/user/addUser", values);
+
+      console.log("User Created:", response.data);
+
+      alert("User Created Successfully");
+
+      resetForm();
+    } catch (error) {
+      console.error("Failed to create user:", error);
+      alert(error.response?.data?.message || "Failed to create user");
+    }
   };
 
   return (
@@ -271,7 +283,10 @@ const AddUser = () => {
                 <Button
                   variant="outlined"
                   color={isEnrolling ? "error" : "secondary"}
-                  onClick={() => handleEnrollFingerprint(setFieldValue)}
+                  // onClick={() => handleEnrollFingerprint(setFieldValue)}
+                  onClick={() => {
+                    setFieldValue("fingerprintId", "fpchong-02");
+                  }}
                 >
                   Scan Finger
                 </Button>
