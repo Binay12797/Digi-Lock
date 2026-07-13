@@ -13,26 +13,30 @@ function initWokwiSocket(io){
         ws.on("message",async (rawData)=>{
             try{
                 const parsedData = JSON.parse(rawData.toString());
+                // -----------------------------------------
+                // Determine which device sent this message
+                // -----------------------------------------
+                const deviceId = parsedData.deviceId || ws.deviceId;
+                // Any valid message means the device is alive
+                if (deviceId) {
+                    deviceManager.heartbeat(deviceId);
+                }
                 // Device registration
                 if (parsedData.type === "HELLO") {
-                    const deviceId = parsedData.deviceId;
-                    if (!deviceId) {
+                    if (!parsedData.deviceId) {
                         console.log("HELLO received without deviceId.");
                         return;
                     }
-                    ws.deviceId = deviceId;
-                    deviceManager.register(deviceId, ws);
-                    console.log(`Device registered: ${deviceId}`);
+                    ws.deviceId = parsedData.deviceId;
+                    deviceManager.register(parsedData.deviceId, ws);
+                    console.log(`Device registered: ${parsedData.deviceId}`);
                     return;
                 }
-                console.log("Raw payload from wokwi:",parsedData);
+                console.log("Raw payload from wokwi:", parsedData);
                 // STATUS UPDATE
-                if (parsedData.type === "STATUS_UPDATE") 
-                {
-                     deviceManager.heartbeat(parsedData.deviceId);
-                     console.log("Status:",parsedData);
+                if (parsedData.type === "STATUS_UPDATE") {
+                    console.log("Status:", parsedData);
                 }
-
                 // ENROLLMENT PROGRESS
                 else if (parsedData.type === "ENROLL_PROGRESS") {
                     console.log("Enrollment Progress:", parsedData.state);
@@ -134,9 +138,8 @@ function initWokwiSocket(io){
 }
 
 //verifation haldler
-async function handleFingerprintScan(parsedData, io) {
+async function handleFingerprintScan(deviceId, parsedData, io) {
     const scannedToken = parsedData.fingerprint;
-    const deviceId = parsedData.deviceId;
     console.log("================================");
     console.log("Fingerprint Scan Received");
     console.log("Device:", deviceId);
@@ -145,7 +148,6 @@ async function handleFingerprintScan(parsedData, io) {
     const granted = verifyFingerprint(scannedToken);
     sendAuthenticationResult(deviceId, granted);
 }
-
 //temp verification id list - later replace with ids from databse
 function verifyFingerprint(uid) {
     // Temporary verification

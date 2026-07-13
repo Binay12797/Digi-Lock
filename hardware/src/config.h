@@ -14,7 +14,8 @@
 //   NOT "localhost" — the device has no idea what "localhost" means to it.
 // - If you deploy the backend somewhere (Render, Railway, a VPS, etc),
 //   put that host here instead.
-#define WS_HOST "192.168.110.233"
+//#define WS_HOST "192.168.110.233"
+#define WS_HOST "172.18.100.244"
 //#define WS_HOST "3.6.122.107"
 //#define WS_HOST "art-dinginess-activity.ngrok-free.dev"
 //#define WS_HOST  "host.wokwi.internal"
