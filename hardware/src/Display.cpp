@@ -23,9 +23,10 @@ namespace {
 
   const char *modeLabel(int mode) {
     switch (mode) {
+      case 0:  return "IDLE";
       case 1:  return "ENROLL";
-      case 0:
-      default: return "AUTH"; // 0 is the default running mode - no separate idle mode
+      case 2:  return "AUTH";
+      default: return "?";
     }
   }
 
@@ -39,6 +40,13 @@ namespace {
     display.println(SocketClient::isConnected() ? "WS:UP" : "WS:--");
 
     display.drawLine(0, 10, SCREEN_WIDTH - 1, 10, SSD1306_WHITE);
+  }
+
+  void drawIdle() {
+    display.setCursor(0, 20);
+    display.println("Waiting for backend");
+    display.setCursor(0, 32);
+    display.println("to SET_MODE...");
   }
 
   void drawEnroll() {
@@ -73,7 +81,6 @@ namespace Display {
 
 void begin() {
   Wire.begin(OLED_SDA_PIN, OLED_SCL_PIN);
-  Wire.setClock(400000); // fast-mode I2C: ~4x shorter blocking time per redraw
   available = display.begin(SSD1306_SWITCHCAPVCC, OLED_I2C_ADDR);
   if (!available) {
     Serial.println("[Display] SSD1306 not found at 0x3C - screen disabled");
@@ -100,8 +107,8 @@ void render(int mode) {
 
   switch (mode) {
     case 1:  drawEnroll(); break;
-    case 0:
-    default: drawAuth();   break;
+    case 2:  drawAuth();   break;
+    default: drawIdle();   break;
   }
 
   display.display();

@@ -3,6 +3,7 @@ const User = require("../models/userModel");
 const accessLog = require("../models/accesslogModel");
 const enrollmentState = require("./enrollmentState");
 const deviceManager = require("./deviceManager");
+let deviceSocket = null;
 
 function initWokwiSocket(io){
     const wss = new WebSocketServer({port: 8080});
