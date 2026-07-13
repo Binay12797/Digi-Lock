@@ -2,7 +2,10 @@ const {WebSocketServer} = require("ws");
 const User = require("../models/userModel");
 const accessLog = require("../models/accesslogModel");
 const enrollmentState = require("./enrollmentState");
+<<<<<<< HEAD
 const deviceManager = require("./deviceManager");
+=======
+>>>>>>> parent of d95904a (display fix)
 let deviceSocket = null;
 
 function initWokwiSocket(io){
