@@ -196,4 +196,4 @@ String stateString() {
   return "unknown";
 }
 
-} // namespace EnrollmentManage
+} // namespace EnrollmentManager

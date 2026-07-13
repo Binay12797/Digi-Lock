@@ -2,6 +2,9 @@ import axios from "axios";
 
 const api = axios.create({
   baseURL: "https://art-dinginess-activity.ngrok-free.dev",
+  headers: {
+    'ngrok-skip-browser-warning': 'true'
+  }
 });
 
 //this automatically attach JWT tocken to every request, in config
