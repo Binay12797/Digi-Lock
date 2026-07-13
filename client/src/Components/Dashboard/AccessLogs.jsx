@@ -4,6 +4,8 @@ import { useContext, useEffect, useState } from "react";
 import { tokens, ColorModeContext } from "../../theme";
 import api from "../../Api/api";
 
+import { useOutletContext } from "react-router-dom";
+
 const AccessLogs = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -11,6 +13,8 @@ const AccessLogs = () => {
 
   const [accessLogs, setAccessLogs] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const { searchQuery } = useOutletContext();
 
   useEffect(() => {
     const fetchAccessLogs = async () => {
@@ -101,6 +105,21 @@ const AccessLogs = () => {
     },
   ];
 
+  const filterAccesslogs = accessLogs.filter((accessLog) => {
+    const query = searchQuery.toLowerCase();
+
+    return (
+      accessLog.location?.toLowerCase().includes(query) ||
+      accessLog.deviceId?.toLowerCase().includes(query) ||
+      accessLog.lastAccessTime?.toLowerCase().includes(query) ||
+      accessLog.user?.toLowerCase().includes(query) ||
+      accessLog.action?.toLowerCase().includes(query) ||
+      accessLog.status?.toLowerCase().includes(query) ||
+      accessLog.reason?.toLowerCase().includes(query) ||
+      accessLog.method?.toLowerCase().includes(query)
+    );
+  });
+
   return (
     <Box sx={{ m: "20px" }}>
       <Typography variant="h5" sx={{ color: colors.greenAccent[400] }}>
@@ -131,7 +150,7 @@ const AccessLogs = () => {
       >
         <DataGrid
           checkboxSelection
-          rows={accessLogs}
+          rows={filterAccesslogs}
           columns={columns}
           getRowId={(row) => row._id}
           slotProps={{ toolbar: { showQuickFilter: true } }} // Modern standard replacement for showToolbar
