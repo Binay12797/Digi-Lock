@@ -53,6 +53,7 @@ const Topbar = ({ selected, setSelected }) => {
           }}
         >
           <InputBase sx={{ ml: 2, flex: 1 }} placeholder="Search" />
+          {/* //creates an section where you can input */}
           <IconButton type="button" sx={{ p: 1 }}>
             <SearchIcon />
           </IconButton>
