@@ -100,7 +100,6 @@ const AddUser = () => {
       socket.off("enrollmentError");
     };
   }, []);
-
   // must be inside as isEnrolling is definde inside
   const handleEnrollFingerprint = async (setFieldValue) => {
     try {

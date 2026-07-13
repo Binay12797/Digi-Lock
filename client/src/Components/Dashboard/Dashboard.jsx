@@ -15,6 +15,7 @@ import { useState } from "react";
 
 import LockUsageChart from "./LockUsageChart";
 import { lockUsageData } from "../Data/mockdata";
+import DashboardNotifications from "./DashboardNotifications";
 
 const Dashboard = () => {
   const theme = useTheme();
@@ -45,15 +46,20 @@ const Dashboard = () => {
         </Grid>
       </Box>
       <Box sx={{ mt: 3 }}>
+        {/* grid contariner divides page into 12 grids */}
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, md: 7 }}>
             <LockUsageChart lockData={lockUsageData} />
           </Grid>
-        </Grid>
 
-        <Box>
-          <Grid container></Grid>
-        </Box>
+          <Grid size={{ xs: 12, md: 5 }}>
+            <Card
+              sx={{ backgroundColor: colors.primary[400], borderRadius: 3 }}
+            >
+              <DashboardNotifications />
+            </Card>
+          </Grid>
+        </Grid>
       </Box>
     </Box>
   );
