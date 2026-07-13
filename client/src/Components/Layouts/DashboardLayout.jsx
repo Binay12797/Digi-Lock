@@ -2,11 +2,14 @@ import { useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
 import Topbar from "../Global/Topbar";
 import Sidebar from "../Global/Sidebar";
+import { useStepContext } from "@mui/material";
 
 const DashboardLayout = () => {
   const [selected, setSelected] = useState(() => {
     return localStorage.getItem("CurrentPage") || "Dashboard";
   }); // which item is currently selected ie on which page we are currently in
+
+  const [searchQuery, setSearchQuery] = useState("");
 
   //"Whenever the selected value changes ie the vaue writtem in {},[], run this code."--------> useEffect
   useEffect(() => {
@@ -19,10 +22,15 @@ const DashboardLayout = () => {
     <div style={{ display: "flex", height: "100vh" }}>
       <Sidebar selected={selected} setSelected={setSelected} />
       <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-        <Topbar selected={selected} setSelected={setSelected} />
+        <Topbar
+          selected={selected}
+          setSelected={setSelected}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+        />
         {/*flex: 1 on the Outlet wrapper:" It tells the content area to expand to fill all remaining vertical space under the Topbar. */}
         <div style={{ flex: 1, overflowY: "auto" }}>
-          <Outlet context={{ selected, setSelected }} />
+          <Outlet context={{ selected, setSelected, searchQuery }} />
           {/* The <Outlet/> is a hole you cut out in that container that holds your Sidebar and Topbar. You are telling React, "Whatever page the user clicks on, please show it right here inside this window" */}
         </div>
       </div>
