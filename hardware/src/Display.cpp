@@ -6,6 +6,7 @@
 #include "AuthManager.h"
 #include "EnrollmentManager.h"
 #include "SocketClient.h"
+#include "DoorManager.h"
 
 #define SCREEN_WIDTH  128
 #define SCREEN_HEIGHT 64
@@ -52,20 +53,24 @@ namespace {
     display.println(name.isEmpty() ? "-" : name);
   }
 
-  void drawAuth() {
-    display.setCursor(0, 20);
-    display.print("State: ");
-    display.println(AuthManager::stateString());
-
-    display.setCursor(0, 34);
-    display.print("Fails: ");
-    display.print(AuthManager::failedAttempts());
-    display.println("/3");
-
-    display.setCursor(0, 46);
-    display.print("Lockouts: ");
-    display.print(AuthManager::lockoutCount());
-    display.println("/3");
+  void drawAuth(DoorManager::DoorStatus doorStatus) {
+      display.setCursor(0, 20);
+      display.print("State: ");
+      display.println(AuthManager::stateString());
+      display.setCursor(0, 34);
+      display.print("Fails: ");
+      display.print(AuthManager::failedAttempts());
+      display.println("/3");
+      display.setCursor(0, 46);
+      display.print("Lockouts: ");
+      display.print(AuthManager::lockoutCount());
+      display.println("/3");
+      display.setCursor(0, 58);
+      display.print("Door: ");
+      if (doorStatus == DoorManager::LOCKED)
+          display.println("LOCKED");
+      else
+          display.println("OPEN");
   }
 }
 
@@ -88,7 +93,7 @@ void begin() {
   display.display();
 }
 
-void render(int mode) {
+void render(int mode, DoorManager::DoorStatus doorStatus) {
   if (!available) return;
 
   unsigned long now = millis();
@@ -101,7 +106,7 @@ void render(int mode) {
   switch (mode) {
     case 1:  drawEnroll(); break;
     case 0:
-    default: drawAuth();   break;
+    default: drawAuth(doorStatus);   break;
   }
 
   display.display();

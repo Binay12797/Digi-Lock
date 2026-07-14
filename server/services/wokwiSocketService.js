@@ -21,6 +21,24 @@ function initWokwiSocket(io){
                 if (parsedData.type === "STATUS_UPDATE") 
                 {
                     console.log("Status:", parsedData);
+                    /* ===============================================
+                    // Future Database Sync
+                    //
+                    // When MongoDB is enabled, update the Lock
+                    // document using the incoming STATUS_UPDATE.
+                    //
+                    // await Lock.findOneAndUpdate(
+                        { deviceId: parsedData.deviceId },
+                        {
+                            status: parsedData.status,
+                            lastUpdated: new Date()
+                        },
+                        {
+                            upsert: true
+                        }
+                    );
+                    //
+                    // ===============================================*/
                 }
 
                 // ENROLLMENT PROGRESS
@@ -129,10 +147,29 @@ async function handleFingerprintScan(parsedData, io) {
     sendAuthenticationResult(granted);
 }
 
-//temp verification id list - later replace with ids from databse
+// =====================================================
+// TEMPORARY AUTHORIZATION
+//
+// TODO (Database Integration)
+//
+// Replace this entire function with:
+//
+// async function verifyFingerprint(uid) {
+//     const user = await User.findOne({
+//         fingerprint: uid,
+//         isActive: true
+//     });
+//
+//     return !!user;
+// }
+//
+// =====================================================
 function verifyFingerprint(uid) {
-    // Temporary verification
-    return uid === "1";
+
+    // Temporary hardcoded fingerprint
+    const isAuthorized = (uid === "1");
+
+    return isAuthorized;
 }
 /* later for database implementation 
 async function verifyFingerprint(uid) {

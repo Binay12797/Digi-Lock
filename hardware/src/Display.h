@@ -1,5 +1,6 @@
 #pragma once
 #include <Arduino.h>
+#include "DoorManager.h"
 
 // Non-blocking OLED status screen (SSD1306, 128x64, I2C on SDA=21/SCL=22,
 // address 0x3C — matches oled1 in diagram.json). Purely a readout for
@@ -16,5 +17,5 @@
 // the other, so mode 0 always renders the auth screen.
 namespace Display {
   void begin();
-  void render(int mode); // 0 = authentication (default), 1 = enrollment
+  void render(int mode, DoorManager::DoorStatus status);; // 0 = authentication (default), 1 = enrollment
 }
