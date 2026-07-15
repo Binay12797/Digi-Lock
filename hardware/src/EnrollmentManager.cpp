@@ -23,10 +23,10 @@ void begin() {
 
     if (command == "START_ENROLL") {
       String name = data["name"] | "";
-      if (name.isEmpty()) {
-          Serial.println("[Enroll] START_ENROLL received with no 'name' field — ignored");
-         return;
-      }
+      // if (name.isEmpty()) {
+      //     Serial.println("[Enroll] START_ENROLL received with no 'name' field — ignored");
+      //    return;
+      // }
       EnrollmentManager::start(name);
       Serial.println("[Enroll] Initializing fingerprint enrollment matrix...");
         
