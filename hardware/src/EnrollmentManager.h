@@ -44,6 +44,7 @@ namespace EnrollmentManager {
   void scan2();
   void loop();
   void reset();
+  void onButtonPressed();
 
   EnrollState state();
   String      stateString();

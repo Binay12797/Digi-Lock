@@ -2,7 +2,6 @@ const enrollmentState = require("../services/enrollmentState");
 const User = require("../models/userModel");
 const accessLog = require("../models/accesslogModel");
 const { sendToDevice } = require("../services/wokwiSocketService");
-let enrollmentTimer = null;
 
 async function startEnrollment(req, res) {
     const { sessionId } = req.body;
@@ -54,11 +53,14 @@ async function startEnrollment(req, res) {
         console.log("START_ENROLL sent.");
 
         // Clear any previous timer just in case
-        if (enrollmentTimer) {
-            clearTimeout(enrollmentTimer);
+        const existingTimer = enrollmentState.getTimer();
+
+        if (existingTimer) {
+            clearTimeout(existingTimer);
+            enrollmentState.setTimer(null);
         }
 
-        enrollmentTimer = setTimeout(() => {
+        const timer = setTimeout(() => {
             const currentSession = enrollmentState.getSession();
 
             if (currentSession === sessionId) {
@@ -71,9 +73,9 @@ async function startEnrollment(req, res) {
                 });
 
                 enrollmentState.clearSession();
-                enrollmentTimer = null;
             }
         }, 60000);
+        enrollmentState.setTimer(timer);
 
         return res.json({
             success: true,
@@ -88,116 +90,6 @@ async function startEnrollment(req, res) {
     }
 }
 
-async function scan1(req, res) {
-    const sessionId = enrollmentState.getSession();
-
-    if (!sessionId) {
-        return res.status(400).json({
-            success: false,
-            message: "No active enrollment session."
-        });
-    }
-
-    const success = sendToDevice({
-        command: "ENROLL_SCAN1"
-    });
-
-    if (!success) {
-        return res.status(500).json({
-            success: false,
-            message: "ESP32 not connected."
-        });
-    }
-
-    return res.json({
-        success: true,
-        message: "Scan 1 requested."
-    });
-}
-
-async function scan2(req, res) {
-    const sessionId = enrollmentState.getSession();
-
-    if (!sessionId) {
-        return res.status(400).json({
-            success: false,
-            message: "No active enrollment session."
-        });
-    }
-
-    const success = sendToDevice({
-        command: "ENROLL_SCAN2"
-    });
-
-    if (!success) {
-        return res.status(500).json({
-            success: false,
-            message: "ESP32 not connected."
-        });
-    }
-
-    return res.json({
-        success: true,
-        message: "Scan 2 requested."
-    });
-}
-
-async function enroll(req, res) {
-    const { fingerprint } = req.body;
-    const userId = enrollmentState.getSession();
-    const io = req.app.get("io");
-
-    if (!userId) {
-        return res.status(400).json({
-            success: false,
-            message: "No active enrollment session found."
-        });
-    }
-
-    try {
-        // =====================================================
-        // TEMPORARY: MongoDB integration disabled.
-        // Uncomment when database integration is complete.
-        // =====================================================
-        /*
-        await User.findByIdAndUpdate(userId, {
-            fingerprint,
-            isActive: true
-        });
-        */
-
-        io.emit("BIOMETRIC_LINKED", {
-            success: true,
-            message: "Registration successful!"
-        });
-
-        const success = sendToDevice({
-            command: "SET_MODE",
-            mode: 0
-        });
-
-        if (!success) {
-            console.warn("Failed to send SET_MODE(0) to ESP32.");
-        }
-
-        enrollmentState.clearSession();
-        if (enrollmentTimer) {
-            clearTimeout(enrollmentTimer);
-            enrollmentTimer = null;
-        }
-
-        return res.json({
-            success: true,
-            message: "Enrollment simulation completed."
-        });
-
-    } catch (error) {
-        return res.status(500).json({
-            success: false,
-            error: error.message
-        });
-    }
-}
 
 async function verification(req, res) {
     const { uid } = req.body;
@@ -234,9 +126,6 @@ async function verification(req, res) {
 }
 
 module.exports = {
-    enroll,
     verification,
     startEnrollment,
-    scan1,
-    scan2
 };

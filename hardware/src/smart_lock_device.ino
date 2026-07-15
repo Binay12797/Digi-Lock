@@ -7,6 +7,7 @@
 #include "Display.h"
 #include "DoorManager.h"
 #include "Button.h"
+#include "RGBLed.h"
 
 // 0 = normal operation (authentication)
 // 1 = enrollment mode
@@ -65,9 +66,24 @@ void connectWiFi() {
 }
 
 //handling button
-void handleButton(ButtonManager::ButtonEvent event){
-    if(event == ButtonManager::BUTTON_PRESSED){
-        DoorManager::lockDoor();
+void handleButton(ButtonManager::ButtonEvent event)
+{
+    switch (event)
+    {
+        case ButtonManager::LOCK_BUTTON_PRESSED:
+            DoorManager::lockDoor();
+            AuthManager::reset();
+            break;
+        case ButtonManager::SCAN_BUTTON_PRESSED:
+            if (currentMode == 1){
+                EnrollmentManager::onButtonPressed();
+            }
+            else{
+                AuthManager::onScanButton();
+            }
+            break;
+        default:
+            break;
     }
 }
 
@@ -77,6 +93,7 @@ void setup() {
   Serial.begin(115200);
   Buzzer::begin();
   Display::begin();
+  RGBLed::begin();
   connectWiFi();
 
   EnrollmentManager::begin();   // registers its own command handler
@@ -93,6 +110,7 @@ void loop() {
   SocketClient::loop();
   Buzzer::loop();
   ButtonManager::loop();
+  RGBLed::loop();
   Display::render(
       currentMode,
       DoorManager::getDoorStatus()

@@ -62,21 +62,30 @@ function initWokwiSocket(io){
 
                     // =====================================================
                     // DATABASE SAVE (TEMPORARILY DISABLED)
-                    // Uncomment when MongoDB is enabled.
                     // =====================================================
+
                     /*
                     await User.findByIdAndUpdate(sessionId, {
                         fingerprint: scannedToken,
                         isActive: true
                     });
-
-                    console.log("Fingerprint successfully saved.");
                     */
-                    io.emit("FINGERPRINT_READY", {
+
+                    io.emit("BIOMETRIC_LINKED", {
                         success: true,
                         sessionId,
-                        fingerprint: scannedToken
+                        fingerprint: scannedToken,
+                        message: "Registration successful!"
                     });
+
+                    // Return ESP to normal mode
+                    sendToDevice({
+                        command: "SET_MODE",
+                        mode: 0
+                    });
+                    enrollmentState.clearSession();
+
+                    console.log("Enrollment session completed.");
                 }
                 else if (parsedData.type === "FINGERPRINT_SCAN") {
                     await handleFingerprintScan(parsedData, io);
@@ -121,8 +130,12 @@ function initWokwiSocket(io){
 
                     //io.emit("WOKWI_PRINT_CAPTURED",{fingerprint: parsedData.fingerprint});
                 
-            }catch(error){
-                console.log(` Plain-text String from Wokwi: ${rawData.toString()}`);
+            }catch (error) {
+                console.error("WebSocket handler error:");
+                console.error(error);
+
+                console.log("Raw message:");
+                console.log(rawData.toString());
             }
         });
 
@@ -139,11 +152,27 @@ function initWokwiSocket(io){
 //verifation haldler
 async function handleFingerprintScan(parsedData, io) {
     const scannedToken = parsedData.fingerprint;
+
     console.log("================================");
     console.log("Fingerprint Scan Received");
     console.log("UID:", scannedToken);
     console.log("================================");
-    const granted = verifyFingerprint(scannedToken);
+    const granted = await verifyFingerprint(scannedToken);
+    // Temporary
+    // Later this will also return the matched user.
+    const user = null;
+    // Database logging will go here.
+    /* =====================================================
+    DATABASE ACCESS LOG (Enable when MongoDB is active)
+
+    await accessLog.create({
+        userId: user ? user._id : null,
+        authType: "fingerprint",
+        status: granted ? "GRANTED" : "DENIED",
+        scannedDataString: scannedToken
+    });
+
+    ===================================================== */
     sendAuthenticationResult(granted);
 }
 
@@ -164,12 +193,8 @@ async function handleFingerprintScan(parsedData, io) {
 // }
 //
 // =====================================================
-function verifyFingerprint(uid) {
-
-    // Temporary hardcoded fingerprint
-    const isAuthorized = (uid === "1");
-
-    return isAuthorized;
+async function verifyFingerprint(uid) {
+    return uid === "FP-0001";
 }
 /* later for database implementation 
 async function verifyFingerprint(uid) {

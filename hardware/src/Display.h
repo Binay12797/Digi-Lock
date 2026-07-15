@@ -18,4 +18,5 @@
 namespace Display {
   void begin();
   void render(int mode, DoorManager::DoorStatus status);; // 0 = authentication (default), 1 = enrollment
+
 }

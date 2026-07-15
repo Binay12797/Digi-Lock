@@ -1,8 +1,10 @@
 #include "FingerprintSensor.h"
 
+
 namespace {
-  String template1 = "";
-  String template2 = "";
+    String template1 = "";
+    String template2 = "";
+    int nextFingerprintId = 1;
 }
 
 namespace FingerprintSensor {
@@ -23,14 +25,12 @@ bool captureTemplate2() {
 }
 
 String combineToUID() {
-  if (template1.isEmpty() || template2.isEmpty()) return "";
-  String uid = "FP-";
-  for (int i = 0; i < 4; i++) {
-    uid += String((template1[i % template1.length()] ^
-                   template2[i % template2.length()]), HEX);
-  }
-  uid.toUpperCase();
-  return uid;
-}
+    if (template1.isEmpty() || template2.isEmpty())
+        return "";
 
+    char buffer[12];
+    sprintf(buffer, "FP-%04d", nextFingerprintId++);
+
+    return String(buffer);
+}
 } // namespace FingerprintSensor
