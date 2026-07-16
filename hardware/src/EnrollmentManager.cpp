@@ -2,7 +2,7 @@
 #include "FingerprintSensor.h"
 #include "Buzzer.h"
 #include "SocketClient.h"
-
+extern int currentMode;
 namespace {
   EnrollState   state_            = ENROLL_IDLE;
   String        pendingName_      = "";
@@ -22,12 +22,14 @@ void begin() {
   SocketClient::onCommand([](const String &command, JsonObject data) {
 
     if (command == "START_ENROLL") {
-      String name = data["name"] | "";
-      // if (name.isEmpty()) {
-      //     Serial.println("[Enroll] START_ENROLL received with no 'name' field — ignored");
-      //    return;
-      // }
+      //String name = data["name"] | "";
+      String name = "Bigyan";
+      if (name.isEmpty()) {
+          Serial.println("[Enroll] START_ENROLL received with no 'name' field — ignored");
+         return;
+      }
       EnrollmentManager::start(name);
+      currentMode = 1;
       Serial.println("[Enroll] Initializing fingerprint enrollment matrix...");
         
         // Reset local scan state variables
@@ -56,6 +58,7 @@ void begin() {
         EnrollmentManager::reset();
         isReadyToScan = false;
         currentScanPass = 0;
+        currentMode = 0;
         Serial.println("[Enroll] Enrollment reset");
     }
   });
@@ -100,9 +103,9 @@ void scan1() {
 
     SocketClient::emitEnrollProgress("scan1_done", pendingName_);
 
-    state_ = ENROLL_WAITING_SCAN2;
+    state_ = ENROLL_WAITING_FOR_LIFT;
 
-    SocketClient::emitEnrollProgress("waiting_scan2", pendingName_);
+    SocketClient::emitEnrollProgress("processing", pendingName_);
 
     Serial.println("[Enroll] Scan 1 done — waiting for scan 2");
   }
@@ -124,6 +127,15 @@ void scan2() {
 
 void loop() {
   // ── Stage: brief pause after scan2 before processing ──────────────
+  if (state_ == ENROLL_WAITING_FOR_LIFT) {
+    // Check if finger is removed using your library's check parameter
+    // assuming FingerprintSensor returns false or FINGERPRINT_NOFINGER when empty
+    if (FingerprintSensor::isFingerRemoved()) { 
+      state_ = ENROLL_WAITING_SCAN2;
+      SocketClient::emitEnrollProgress("waiting_scan2", pendingName_);
+      Serial.println("[Enroll] Finger lifted clear. Ready for Scan 2.");
+    }
+  }
   if (state_ == ENROLL_SCAN2_DONE) {
     unsigned long elapsed = millis() - processingStartMs;
 
@@ -187,6 +199,7 @@ String stateString() {
     case ENROLL_IDLE:           return "idle";
     case ENROLL_WAITING_SCAN1:  return "waiting_scan1";
     case ENROLL_SCAN1_DONE:     return "scan1_done";
+    case ENROLL_WAITING_FOR_LIFT: return "waiting_for_lift";
     case ENROLL_WAITING_SCAN2:  return "waiting_scan2";
     case ENROLL_SCAN2_DONE:     return "scan2_done";
     case ENROLL_PROCESSING:     return "processing";

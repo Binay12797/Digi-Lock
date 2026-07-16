@@ -13,4 +13,5 @@ namespace FingerprintSensor {
   bool captureTemplate1();
   bool captureTemplate2();
   String combineToUID(); // combines both templates into one unique id
+  bool isFingerRemoved();
 }

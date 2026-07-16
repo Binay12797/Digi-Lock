@@ -49,10 +49,12 @@ namespace SocketClient {
   void emitEnrollProgress(const String &state, const String &name);
   void emitEnrollComplete(const String &name, const String &uid);
   void emitEnrollFailed(const String &name, const String &reason);
+  void emitScanTrigger();
   // Structured log entries, meant to feed an admin-facing log table.
   void emitEnrollLog(const String &name, const String &uid, bool success, const String &reason);
   void emitAccessLog(const String &uid, bool granted, const String &reason);
   void emitAlarm(int attempts);
+
 
   // ── Incoming ─────────────────────────────────────────────────────
   // Call onCommand() once per subscriber (e.g. AuthManager::begin(),

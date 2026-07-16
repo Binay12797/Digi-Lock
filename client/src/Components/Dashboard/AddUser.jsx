@@ -22,127 +22,178 @@ const initialValues = {
   lastName: "",
   email: "",
   relation: "",
-  contact: "", //its easier to import constact as string later we can ise phone regex to validate it
+  contact: "", 
   address: "",
   fingerprintId: "",
 };
 
-const phoneRegExp = /^\+?\d{1,15}$/; //emmet abbreviation, phone regex
+const phoneRegExp = /^\+?\d{1,15}$/;
 
 const userFormSchema = yup.object().shape({
-  firstName: yup.string().required("required"),
-  lastName: yup.string().required("required"),
-  email: yup.string().email("invalid email").required("required"),
-  relation: yup.string().required("required"),
+  firstName: yup.string().required("Required"),
+  lastName: yup.string().required("Required"),
+  email: yup.string().email("Invalid email").required("Required"),
+  relation: yup.string().required("Required"),
   contact: yup
     .string()
     .matches(phoneRegExp, "Phone number is not valid")
-    .required("required"),
-  address: yup.string().required("required"),
-  fingerprintId: yup.string().required("Please Scan fingerprint"),
+    .required("Required"),
+  address: yup.string().required("Required"),
+  fingerprintId: yup.string().required("Please scan fingerprint"),
 });
 
 const AddUser = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-
-  // isNonMobile  is boolean that says current device is mobile or desktop, Returns true if the viewport width is at least 600px, 600px is kind of standar helps to distinguish betn mobile and laptop
   const isNonMobile = useMediaQuery("(min-width:600px)");
 
   const [openDialog, setOpenDialog] = useState(false);
   const [isEnrolling, setIsEnrolling] = useState(false);
 
-  const setFieldValueRef = useRef(null); //works like a pointer
+  const setFieldValueRef = useRef(null); 
 
-  const [enrollmentStatus, setEnrollmentStatus] = useState(
-    "Waiting for fingerprint....",
-  );
-  const [instruction, setInstruction] = useState(
-    "Place your finger on scanner",
-  );
+  const [enrollmentStatus, setEnrollmentStatus] = useState("Waiting for fingerprint...");
+  const [instruction, setInstruction] = useState("Place your finger on scanner");
 
   const sessionIdRef = useRef(null);
 
   useEffect(() => {
-    //you tell socket.io "Whenever you receive an event named enrollmentStatus, run this function."
-    //.on "Start listening for this event."
-    //.emit() means: "Send an event."
-
-    socket.on("enrollmentStatus", (data) => {
-      if (data.sessionId !== sessionIdRef.current) return; //if session id deffers dont execute enrollmentSuccess Event
-      setEnrollmentStatus(data.message);
+    // 1. Listen for raw progress reports from ESP32
+    socket.on("ENROLL_PROGRESS", (data) => {
+      setEnrollmentStatus(`State: ${data.state}`);
+      
+      switch (data.state) {
+        case "started":
+          setInstruction("Initializing enrollment process...");
+          break;
+        case "waiting_scan1":
+          setInstruction("Place your finger on the sensor for Scan 1.");
+          break;
+        case "scan1_done":
+          setInstruction("Scan 1 captured successfully!");
+          break;
+        case "waiting_scan2":
+          setInstruction("Place the same finger back on the sensor for Scan 2.");
+          break;
+        case "scan2_done":
+          setInstruction("Scan 2 captured successfully!");
+          break;
+        case "processing":
+          setInstruction("Analyzing and compiling templates. Please hold...");
+          break;
+        default:
+          setInstruction("Processing...");
+      }
     });
 
-    socket.on("enrollmentSuccess", (data) => {
-      if (data.sessionId !== sessionIdRef.current) return; //if session id deffers dont execute enrollmentSuccess Event
-
-      setFieldValueRef.current?.("fingerprintId", data.fingerprintId); //?. means "only call it if it exists"
-
-      sessionIdRef.current = null;
-
-      //close the dialogue
-      setOpenDialog(false);
-      setIsEnrolling(false);
-
-      //disconnect as work is done
-      socket.disconnect();
+    // 2. Handle server-enforced timeout
+    socket.on("ENROLLMENT_TIMEOUT", (data) => {
+      console.warn(data.message);
+      alert("Enrollment session timed out. Please try again.");
+      handleCloseDialog();
     });
 
-    socket.on("enrollmentError", (data) => {
-      if (data.sessionId !== sessionIdRef.current) return; //if session id deffers dont execute enrollmentSuccess Event
-      console.log(data);
+    // 3. Listen for completed token
+    socket.on("FINGERPRINT_READY", (data) => {
+      if (data.success) {
+        console.log("Fingerprint successfully captured:", data.fingerprint);
+        
+        // Use ref to update Formik's internal state
+        if (setFieldValueRef.current) {
+          setFieldValueRef.current("fingerprintId", data.fingerprint);
+        }
+
+        // Auto-close dialog safely
+        setOpenDialog(false);
+        setIsEnrolling(false);
+        sessionIdRef.current = null;
+      }
     });
 
-    //.off() means: "Stop listening for this event." if you dont turn off listner multiple same listener will be formed when page is refreshed
+    // Cleanup ALL socket listeners to prevent memory leaks and multiple alert popups
     return () => {
-      socket.off("enrollmentStatus");
-      socket.off("enrollmentSuccess");
-      socket.off("enrollmentError");
+      socket.off("ENROLL_PROGRESS");
+      socket.off("ENROLLMENT_TIMEOUT");
+      socket.off("FINGERPRINT_READY");
     };
   }, []);
-  // must be inside as isEnrolling is definde inside
+
   const handleEnrollFingerprint = async (setFieldValue) => {
     try {
-      setFieldValueRef.current = setFieldValue; //stores the reference to the setFieldValue function inside .current.
-
+      setFieldValueRef.current = setFieldValue; 
       sessionIdRef.current = crypto.randomUUID();
 
-      await api.post("/api/startEnroll", {
-        sessionId: sessionIdRef.current,
-      });
-
-      socket.connect();
-
+      // 1. Open the UI loading dialog immediately
       setIsEnrolling(true);
       setOpenDialog(true);
+      setEnrollmentStatus("Establishing connection...");
+      setInstruction("Connecting to the gateway...");
 
-      socket.emit("StartEnrollment", {
+      // 2. MANUALLY CONNECT THE SOCKET
+      if (!socket.connected) {
+        console.log("🔌 Connecting socket manually...");
+        socket.connect();
+      }
+
+      // 3. Register enrollment on the backend
+      const response = await api.post("/api/startEnroll", {
         sessionId: sessionIdRef.current,
       });
+
+      if (response.data.success) {
+        setEnrollmentStatus("Waiting for device...");
+        setInstruction("Please place your finger on the scanner.");
+      }
+
     } catch (error) {
       console.error("Failed to start Enrollment:", error);
+      setEnrollmentStatus("Connection Failed");
+      setInstruction(error.response?.data?.message || "Could not start enrollment.");
+      
+      // Clean up socket connection if API call fails
+      socket.disconnect();
     }
   };
 
-  const handleCloseDialog = () => {
+  const handleCloseDialog = async () => {
+    // Notify backend to free up the session
+    if (sessionIdRef.current) {
+      try {
+        await api.post("/api/cancelEnroll", { sessionId: sessionIdRef.current });
+      } catch (err) {
+        console.warn("Failed to clear session on backend:", err.message);
+      }
+    }
+
     sessionIdRef.current = null;
-
-    socket.disconnect();
-
     setOpenDialog(false);
     setIsEnrolling(false);
-  };
+    setEnrollmentStatus("Waiting for fingerprint...");
+    setInstruction("Place your finger on scanner");
 
-  //triggers when we submit or form
-  //handleSubmit is formiks built in tool
-  const handleSubmit = (values) => {
-    console.log(values);
+    // 4. DISCONNECT THE SOCKET TO SAVE RESOURCES
+    console.log("🔌 Disconnecting socket manually...");
+    socket.disconnect();
+  };
+  const handleSubmit = async (values, { resetForm }) => {
+    console.log("Submitting Signup Data to Database:", values);
+    try {
+      const response = await api.post("/api/enroll", values);
+
+      if (response.data.success) {
+        alert("User successfully registered in the system!");
+        resetForm(); // Successfully clears Formik fields
+      }
+    } catch (error) {
+      console.error("Failed to submit form:", error);
+      alert(error.response?.data?.message || "Something went wrong during signup.");
+    }
   };
 
   return (
     <Box sx={{ m: "20px" }}>
       <Box>
-        <Typography variant="h5" sx={{ color: colors.greenAccent[400] }}>
+        <Typography variant="h5" sx={{ color: colors.greenAccent[400], mb: "10px" }}>
           Create a New User Profile
         </Typography>
       </Box>
@@ -152,102 +203,101 @@ const AddUser = () => {
         initialValues={initialValues}
         validationSchema={userFormSchema}
       >
-        {/* this is a function specifically known as an anonymous arrow function. they come from formik*/}
         {({
           values,
           errors,
           touched,
           handleBlur,
           handleChange,
-          handleSubmit,
+          handleSubmit: formikSubmit,
           setFieldValue,
         }) => (
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={formikSubmit}>
             <Box
               sx={{
                 mt: "15px",
                 display: "grid",
                 gap: "30px",
-                gridTemplateColumns: "repeat(4,minmax(0,1fr))", //four sections minsize 0 to 1 fractional units
-                "& > div": { gridColumn: isNonMobile ? undefined : "span 4" }, //for mobile device span is 4
+                gridTemplateColumns: "repeat(4,minmax(0,1fr))",
+                "& > div": { gridColumn: isNonMobile ? undefined : "span 4" },
               }}
             >
               <TextField
                 fullWidth
-                variant="filled" // fills the box with shade so its easier to see the box
+                variant="filled"
                 type="text"
                 label="First Name"
                 onBlur={handleBlur}
                 onChange={handleChange}
                 value={values.firstName}
-                name="firstName" //used by touched.firstName and errors.firstName
-                error={!!touched.firstName && !!errors.firstName} //passes boolean
-                helperText={touched.firstName && errors.firstName} //passes the text
+                name="firstName"
+                error={!!touched.firstName && !!errors.firstName}
+                helperText={touched.firstName && errors.firstName}
                 sx={{ gridColumn: "span 2" }}
               />
               <TextField
                 fullWidth
-                variant="filled" // fills the box with shade so its easier to see the box
+                variant="filled"
                 type="text"
                 label="Last Name"
                 onBlur={handleBlur}
                 onChange={handleChange}
                 value={values.lastName}
-                name="lastName" //used by touched.lastName and errors.lastName
-                error={!!touched.lastName && !!errors.lastName} //passes boolean
-                helperText={touched.lastName && errors.lastName} //passes the text
+                name="lastName"
+                error={!!touched.lastName && !!errors.lastName}
+                helperText={touched.lastName && errors.lastName}
                 sx={{ gridColumn: "span 2" }}
               />
               <TextField
                 fullWidth
-                variant="filled" // fills the box with shade so its easier to see the box
+                variant="filled"
                 type="text"
                 label="Email"
                 onBlur={handleBlur}
                 onChange={handleChange}
                 value={values.email}
-                name="email" //used by touched.email and errors.email
-                error={!!touched.email && !!errors.email} //passes boolean
-                helperText={touched.email && errors.email} //passes the text
+                name="email"
+                error={!!touched.email && !!errors.email}
+                helperText={touched.email && errors.email}
                 sx={{ gridColumn: "span 4" }}
               />
               <TextField
                 fullWidth
-                variant="filled" // fills the box with shade so its easier to see the box
+                variant="filled"
                 type="text"
                 label="Relation/Position"
                 onBlur={handleBlur}
                 onChange={handleChange}
                 value={values.relation}
                 name="relation"
-                error={!!touched.relation && !!errors.relation} //passes boolean
-                helperText={touched.relation && errors.relation} //passes the text
+                error={!!touched.relation && !!errors.relation}
+                helperText={touched.relation && errors.relation}
                 sx={{ gridColumn: "span 4" }}
               />
               <TextField
                 fullWidth
-                variant="filled" // fills the box with shade so its easier to see the box
+                variant="filled"
                 type="text"
                 label="Contact"
                 onBlur={handleBlur}
                 onChange={handleChange}
                 value={values.contact}
-                name="contact" //used by touched.contact and errors.contact
-                error={!!touched.contact && !!errors.contact} //passes boolean
-                helperText={touched.contact && errors.contact} //passes the text
+                name="contact"
+                error={!!touched.contact && !!errors.contact}
+                helperText={touched.contact && errors.contact}
                 sx={{ gridColumn: "span 4" }}
               />
               <TextField
                 fullWidth
-                variant="filled" // fills the box with shade so its easier to see the box
+                variant="filled"
                 type="text"
                 label="Address"
                 onBlur={handleBlur}
                 onChange={handleChange}
                 value={values.address}
-                name="address" //used by touched.address and errors.address
-                error={!!touched.address && !!errors.address} //passes boolean
-                helperText={touched.address && errors.address} //passes the text
+                name="address"
+                error={!!touched.address && !!errors.address}
+                helperText={touched.address && errors.address}
                 sx={{ gridColumn: "span 4" }}
               />
               <Box
@@ -263,7 +313,7 @@ const AddUser = () => {
                   variant="filled"
                   label="Fingerprint Id"
                   value={values.fingerprintId}
-                  disabled // User shouldn't edit this manually
+                  disabled 
                   error={!!touched.fingerprintId && !!errors.fingerprintId}
                   helperText={touched.fingerprintId && errors.fingerprintId}
                   sx={{ gridColumn: "span 3" }}
@@ -285,11 +335,12 @@ const AddUser = () => {
           </form>
         )}
       </Formik>
+
       <Dialog
         open={openDialog}
-        onClose={() => {}}
+        onClose={() => {}} // Block clicking background to close
         maxWidth="xs"
-        fullWidth //automatically sets width according to the content
+        fullWidth
         slotProps={{
           paper: {
             sx: {
@@ -302,7 +353,6 @@ const AddUser = () => {
           },
         }}
       >
-        {/* onClose={() => {} prevents closing by clicking outside currently */}
         <DialogTitle variant="h5">Enroll Fingerprint</DialogTitle>
 
         <DialogContent
@@ -315,8 +365,6 @@ const AddUser = () => {
           }}
         >
           <CircularProgress color="secondary" />
-          {/* colors.greenAccent[500] */}
-
           <Typography variant="h6">{enrollmentStatus}</Typography>
           <Typography variant="h6" color="secondary">
             {instruction}

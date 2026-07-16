@@ -30,7 +30,8 @@ enum EnrollState {
   ENROLL_SCAN2_DONE,
   ENROLL_PROCESSING,
   ENROLL_DONE,
-  ENROLL_FAILED
+  ENROLL_FAILED,
+  ENROLL_WAITING_FOR_LIFT
 };
 
 // Drives the two-scan enrollment flow. Storage no longer happens on the

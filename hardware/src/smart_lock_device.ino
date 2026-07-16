@@ -5,12 +5,25 @@
 #include "AuthManager.h"
 #include "SocketClient.h"
 #include "Display.h"
+#include "DoorManager.h"
+#include "Button.h"
 
 // 0 = normal operation (authentication)
 // 1 = enrollment mode
 // The React frontend / backend controls this via a { "command": "SET_MODE", "mode": N } message.
 int currentMode = 0;
-String currentLockStatus = "LOCKED";
+
+//sercurity status /*
+/*enum SecurityState
+{
+    SECURITY_NORMAL,
+    SECURITY_LOCKDOWN,
+    SECURITY_ALARM
+};
+
+
+SecurityState currentSecurityState = SECURITY_NORMAL;
+*/
 
 unsigned long lastStatusMs = 0;
 const unsigned long STATUS_INTERVAL_MS = 5000;
@@ -23,6 +36,7 @@ const unsigned long STATUS_INTERVAL_MS = 5000;
 // This file only needs to react to SET_MODE (system-level) and to
 // START_ENROLL for the purpose of switching currentMode, since only
 // main.ino knows about currentMode.
+
 void handleSystemCommand(const String &command, JsonObject data) {
   if (command == "SET_MODE") {
       int mode = data["mode"] | 0;
@@ -39,8 +53,8 @@ void handleSystemCommand(const String &command, JsonObject data) {
 // ── Setup / loop ────────────────────────────────────────────────────
 
 void connectWiFi() {
-  IPAddress dns(8, 8, 8, 8);
-  WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE, dns);
+  // IPAddress dns(8, 8, 8, 8);
+  // WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE, dns);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD, WIFI_CHANNEL);
   Serial.print("Connecting to WiFi");
   while (WiFi.status() != WL_CONNECTED) {
@@ -50,6 +64,36 @@ void connectWiFi() {
   Serial.println(" Connected! IP: " + WiFi.localIP().toString());
 }
 
+//handling button
+// void handleButton(ButtonManager::ButtonEvent event){
+//     if(event == ButtonManager::BUTTON_PRESSED){
+//         DoorManager::lockDoor();
+       
+//         // 3. Forward the message over your persistent socket connection 
+//         // Note: Ensure your SocketClient class has a broadcast/send function exposed (e.g., sendEvent or sendTXT)
+//         SocketClient::emitScanTrigger();
+//     }
+// }
+void handleButton(ButtonManager::ButtonEvent event) {
+    if (event == ButtonManager::BUTTON_PRESSED) {
+        
+        // If we aren't enrolling yet, start the enrollment process
+        if (EnrollmentManager::state() == ENROLL_IDLE) {
+            Serial.println("[Button] Starting enrollment...");
+            SocketClient::emitScanTrigger(); // Sends "SCAN_TRIGGER" to start
+        } 
+        // If the hardware is waiting for Scan 1, use the button to simulate Scan 1!
+        else if (EnrollmentManager::state() == ENROLL_WAITING_SCAN1) {
+            Serial.println("[Button] Simulating finger touch for Scan 1...");
+            EnrollmentManager::scan1();
+        } 
+        // If the hardware is waiting for Scan 2, use the button to simulate Scan 2!
+        else if (EnrollmentManager::state() == ENROLL_WAITING_SCAN2) {
+            Serial.println("[Button] Simulating finger touch for Scan 2...");
+            EnrollmentManager::scan2();
+        }
+    }
+}
 void setup() {
   // Force ESP32 to use Google's DNS server
   
@@ -60,36 +104,32 @@ void setup() {
 
   EnrollmentManager::begin();   // registers its own command handler
   AuthManager::begin();         // registers its own command handler
+  DoorManager::begin();
+  ButtonManager::begin();
+  ButtonManager::onEvent(handleButton);
   SocketClient::onCommand(handleSystemCommand);
   SocketClient::begin();        // connect last, once all handlers are registered
-
   Serial.println("[System] Ready.");
 }
 
 void loop() {
   SocketClient::loop();
   Buzzer::loop();
-  Display::render(currentMode);
-
-  if(currentMode == 1)
-  {
-      EnrollmentManager::loop();
+  ButtonManager::loop();
+  Display::render(
+      currentMode,
+      DoorManager::getDoorStatus()
+  );
+  if(currentMode == 1){
+    EnrollmentManager::loop();
   }
-  else
-  {
-      AuthManager::loop();
+  else{
+    AuthManager::loop();
   }
-
   unsigned long now = millis();
   if (now - lastStatusMs >= STATUS_INTERVAL_MS) {
     lastStatusMs = now;
-    if (SocketClient::isConnected()) {
-      SocketClient::emitStatus(currentMode, currentLockStatus);
-    } else {
-      Serial.println("[WS] Postponing status update: Waiting for active connection...");
-    }
-   // SocketClient::emitStatus(currentMode);
+    DoorManager::sendStatusUpdate();
   }
-
   delay(2);
 }

@@ -1,10 +1,7 @@
 import { io } from "socket.io-client";
 
-export const socket = io("http://localhost:3000", {
+export const socket = io("https://art-dinginess-activity.ngrok-free.dev", {
   autoConnect: false,
+  withCredentials: true,
+  transports: ["websocket", "polling"] // websocket is faster, polling acts as a backup
 });
-
-// With autoConnect: true:
-// As soon as your React app loads, it connects to the Socket.IO server.
-// Even if the user is on the login page or browsing pages that don't need real-time updates, the connection stays open.
-//so autoConnect: false,

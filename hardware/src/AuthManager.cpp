@@ -1,6 +1,7 @@
 #include "AuthManager.h"
 #include "Buzzer.h"
 #include "SocketClient.h"
+#include "DoorManager.h"
 
 namespace {
 
@@ -14,7 +15,7 @@ namespace {
   int lockoutCount_   = 0;
 
   const int MAX_FAILED_ATTEMPTS = 3;   // bad scans before a lockout
-  const int MAX_LOCKOUTS        = 3;   // lockouts before the alarm fires
+  const int MAX_LOCKOUTS        = 2;   // lockouts before the alarm fires
 
   // ── Alarm ──────────────────────────────────────────────────────────────────
   unsigned long alarmStartMs    = 0;
@@ -98,13 +99,18 @@ namespace AuthManager {
 
 void begin() {
   SocketClient::onCommand([](const String &command, JsonObject data) {
-    if      (command == "OPEN_DOOR")   { AuthManager::onBackendResult(true);  }
-    else if (command == "DENY_ACCESS") { AuthManager::onBackendResult(false); }
-    else if (command == "AUTH_CHECK")  {
-      // Backend-triggered test scan (e.g. a "test" button in the admin UI)
-      String uid = data["uid"] | "";
-      if (!uid.isEmpty()) AuthManager::checkUID(uid);
-    }
+  if (command == "OPEN_DOOR"){
+    DoorManager::unlockDoor();
+    AuthManager::onBackendResult(true);
+  }
+  else if (command == "DENY_ACCESS"){
+    AuthManager::onBackendResult(false);
+  }
+  else if (command == "AUTH_CHECK"){
+    String uid = data["uid"] | "";
+    if (!uid.isEmpty())
+      AuthManager::checkUID(uid);
+  }
   });
 }
 

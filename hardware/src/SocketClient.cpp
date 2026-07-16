@@ -110,7 +110,12 @@ void emitHello() {
   doc["deviceId"] = DEVICE_ID;
   sendMessage(doc);
 }
-
+void emitScanTrigger() {
+    JsonDocument doc;
+    doc["type"]     = "SCAN_TRIGGER";
+    doc["deviceId"] = DEVICE_ID;
+    sendMessage(doc);
+}
 // { "type": "STATUS_UPDATE", "deviceId": "...", "mode": N, "status": "LOCKED|UNLOCKED" }
 void emitStatus(int mode, const String &status) {
   JsonDocument doc;
