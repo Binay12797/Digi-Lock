@@ -103,7 +103,7 @@ async function startEnrollment(req, res) {
 
                 enrollmentState.clearSession();
             }
-        }, 60000);
+        , 60000);
         enrollmentState.setTimer(timer);
 
         return res.json({
