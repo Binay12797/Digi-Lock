@@ -9,6 +9,8 @@ import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 // import axios from "axios";
 import api from "../../Api/api";
 
+import { useOutletContext } from "react-router-dom";
+
 const Users = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -16,20 +18,22 @@ const Users = () => {
   const [users, setUsers] = useState([]); //array is passed
   const [loading, setLoading] = useState(true);
 
+  const { searchQuery } = useOutletContext();
+
   useEffect(() => {
     const fetchUsersData = async () => {
       try {
         const response = await api.get(`/user/info?t=${Date.now()}`);
         //setUsers(response.data.data || []);
         if (response.data.success) {
-  // Map through the array and assign the value of _id to a new id key
-  const formattedUsers = response.data.data.map(user => ({
-    ...user,
-    id: user._id // Maps MongoDB's _id to the standard id field MUI expects
-  }));
-  
-  setUsers(formattedUsers);
-}
+          // Map through the array and assign the value of _id to a new id key
+          const formattedUsers = response.data.data.map((user) => ({
+            ...user,
+            id: user._id, // Maps MongoDB's _id to the standard id field MUI expects
+          }));
+
+          setUsers(formattedUsers);
+        }
       } catch (error) {
         console.error("Error while fetching Users:", error);
       } finally {
@@ -79,6 +83,16 @@ const Users = () => {
     },
   ];
 
+  const filteredUsers = users.filter((user) => {
+    const query = searchQuery.toLowerCase();
+
+    return (
+      user.name?.toLowerCase().includes(query) ||
+      user.email?.toLowerCase().includes(query) ||
+      user.access?.toLowerCase().includes(query)
+    );
+  });
+
   return (
     <Box sx={{ m: "20px" }}>
       <Typography variant="h5" sx={{ color: colors.greenAccent[400] }}>
@@ -108,7 +122,7 @@ const Users = () => {
       >
         <DataGrid
           checkboxSelection
-          rows={users}
+          rows={filteredUsers}
           columns={columns}
           loading={loading}
         />

@@ -322,6 +322,9 @@ const AddUser = () => {
                   variant="outlined"
                   color={isEnrolling ? "error" : "secondary"}
                   onClick={() => handleEnrollFingerprint(setFieldValue)}
+                  // onClick={() => {
+                  //   setFieldValue("fingerprintId", "fpchong-02");
+                  // }}
                 >
                   Scan Finger
                 </Button>
