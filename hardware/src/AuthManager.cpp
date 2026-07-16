@@ -2,6 +2,7 @@
 #include "Buzzer.h"
 #include "SocketClient.h"
 #include "DoorManager.h"
+#include "RGBLed.h"
 
 namespace {
 
@@ -113,139 +114,186 @@ void begin() {
   }
   });
 }
+  void begin() {
+    RGBLed::begin();
+    RGBLed::setYellow();
 
-void checkUID(const String &uid) {
-  if (uid.isEmpty()) {
-    Serial.println("[Auth] AUTH_CHECK received with empty UID");
-    return;
-  }
-  if (state_ == AUTH_WAITING_SCAN ||
-      state_ == AUTH_SCANNING ||
-      state_ == AUTH_PROCESSING ||
-      state_ == AUTH_VERIFYING) {
+    SocketClient::onCommand([](const String &command, JsonObject data) {
 
-    Serial.println("[Auth] AUTH_CHECK ignored: authentication already in progress");
-    return;
-  }
-  if (state_ == AUTH_LOCKOUT) {
-    Serial.println("[Auth] AUTH_CHECK ignored: device is in lockout");
-    return;
-  }
-  if (state_ == AUTH_ALARM) {
-    Serial.println("[Auth] AUTH_CHECK ignored: alarm active");
-    return;
-  }
-  inputUID = uid;
-  state_ = AUTH_WAITING_SCAN;
-  stateStartMs = millis();
-  Serial.println("[Auth] Check started for UID: " + uid);
-}
-
-void reset() {
-  state_          = AUTH_IDLE;
-  inputUID        = "";
-  failedAttempts_ = 0;
-  lockoutCount_   = 0;
-}
-
-void onBackendResult(bool granted) {
-  if (state_ != AUTH_VERIFYING) return; // stale / unexpected response — ignore
-  applyResult(granted);
-}
-
-void loop() {
-  unsigned long now = millis();
-
-  switch (state_) {
-
-    case AUTH_WAITING_SCAN:
-      if (now - stateStartMs >= AUTH_WAITING_MS) {
-        state_ = AUTH_SCANNING;
-        stateStartMs = now;
-        Buzzer::beepScan();
-      }
-      break;
-
-    case AUTH_SCANNING:
-      if (now - stateStartMs >= AUTH_SCANNING_MS) {
-        state_ = AUTH_PROCESSING;
-        stateStartMs = now;
-        Buzzer::beepProcess();
-      }
-      break;
-
-    case AUTH_PROCESSING:
-      if (now - stateStartMs >= AUTH_PROCESSING_MS) {
-        state_ = AUTH_VERIFYING;
-        stateStartMs = now;
-        SocketClient::emitFingerprintScan(inputUID); // → backend looks up MongoDB
-      }
-      break;
-
-    case AUTH_VERIFYING:
-      // Waiting for onBackendResult(). Fail-safe: deny on timeout.
-      if (now - stateStartMs >= AUTH_VERIFY_TIMEOUT_MS) {
-        Serial.println("[Auth] Backend response timeout - denying");
-        applyResult(false, "backend_timeout");
-      }
-      break;
-
-    case AUTH_GRANTED:
-    case AUTH_DENIED:
-      if (now - stateStartMs >= AUTH_RESULT_HOLD_MS) {
-        state_ = AUTH_IDLE;
-      }
-      break;
-
-    // ── 1-minute lockout ────────────────────────────────────────────────────
-    case AUTH_LOCKOUT:
-      handleLockoutBuzzer(now);
-      if (now - stateStartMs >= LOCKOUT_DURATION_MS) {
-        failedAttempts_ = 0; // reset per-lockout counter
-        if (lockoutCount_ >= MAX_LOCKOUTS) {
-          triggerAlarm();    // escalate to full alarm
-        } else {
-          state_ = AUTH_IDLE;
-          Serial.println("[Auth] Lockout #" + String(lockoutCount_) +
-                         " expired — back to idle");
+        if (command == "OPEN_DOOR") {
+            DoorManager::unlockDoor();
+            AuthManager::onBackendResult(true);
         }
-      }
-      break;
+        else if (command == "DENY_ACCESS") {
+            AuthManager::onBackendResult(false);
+        }
+        else if (command == "AUTH_CHECK") {
+            String uid = data["uid"] | "";
 
-    // ── Alarm ───────────────────────────────────────────────────────────────
-    case AUTH_ALARM:
-      handleAlarmBuzzer(now);
-      if (now - alarmStartMs >= ALARM_DURATION_MS) {
-        state_          = AUTH_IDLE;
-        failedAttempts_ = 0;
-        lockoutCount_   = 0;
-        Buzzer::off();
-        Serial.println("[Auth] Alarm reset after timeout");
-      }
-      break;
-
-    default:
-      break;
+            if (!uid.isEmpty()) {
+                AuthManager::checkUID(uid);
+            }
+        }
+    });
   }
-}
 
-AuthState state()        { return state_;        }
-int       failedAttempts(){ return failedAttempts_; }
-int       lockoutCount()  { return lockoutCount_;  }
+  void checkUID(const String &uid) {
+      if (uid.isEmpty()) {
+          Serial.println("[Auth] AUTH_CHECK received with empty UID");
+          return;
+      }
+      if (!DoorManager::isLocked()) {
+          Serial.println("[Auth] Door already unlocked.");
+          return;
+      }
 
-String stateString() {
-  switch (state_) {
-    case AUTH_IDLE:         return "idle";
-    case AUTH_WAITING_SCAN: return "waiting_scan";
-    case AUTH_SCANNING:     return "scanning";
-    case AUTH_PROCESSING:   return "processing";
-    case AUTH_VERIFYING:    return "verifying";
-    case AUTH_GRANTED:      return "granted";
-    case AUTH_DENIED:       return "denied";
-    case AUTH_LOCKOUT:      return "lockout";
-    case AUTH_ALARM:        return "alarm";
+      // Don't accept new authentication requests during lockout/alarm.
+      if (state_ == AUTH_LOCKOUT) {
+          Serial.println("[Auth] AUTH_CHECK ignored: device is in lockout");
+          return;
+      }
+
+      if (state_ == AUTH_ALARM) {
+          Serial.println("[Auth] AUTH_CHECK ignored: alarm active");
+          return;
+      }
+
+      // Prevent overwriting an authentication already in progress.
+      if (state_ != AUTH_IDLE) {
+          Serial.println("[Auth] AUTH_CHECK ignored: authentication already in progress");
+          return;
+      }
+
+      inputUID = uid;
+      state_ = AUTH_WAITING_SCAN;
+
+      Serial.println("[Auth] Ready to scan UID: " + uid);
   }
-  return "unknown";
-}
+  void onScanButton() {
+      if (state_ != AUTH_WAITING_SCAN) {
+          Serial.println("[Auth] Scan ignored: no authentication request pending");
+          return;
+      }
+
+      state_ = AUTH_SCANNING;
+      stateStartMs = millis();
+
+      Buzzer::beepScan();
+      Serial.println("[Auth] Scan started");
+  }
+  void reset() {
+    state_ = AUTH_IDLE;
+    inputUID = "";
+    failedAttempts_ = 0;
+    lockoutCount_ = 0;
+    RGBLed::setYellow();
+  }
+
+  void onBackendResult(bool granted) {
+    if (state_ != AUTH_VERIFYING) return; // stale / unexpected response — ignore
+    applyResult(granted);
+  }
+
+  void loop() {
+    unsigned long now = millis();
+
+    switch (state_) {
+      case AUTH_IDLE:
+        RGBLed::setYellow();
+        break;
+      case AUTH_WAITING_SCAN:
+        // Waiting for the Scan button.
+        break;
+
+      case AUTH_SCANNING:
+        RGBLed::setYellow();
+        if (now - stateStartMs >= AUTH_SCANNING_MS) {
+          state_ = AUTH_PROCESSING;
+          stateStartMs = now;
+          Buzzer::beepProcess();
+        }
+        break;
+
+      case AUTH_PROCESSING:
+        RGBLed::setYellow();
+        if (now - stateStartMs >= AUTH_PROCESSING_MS) {
+          state_ = AUTH_VERIFYING;
+          stateStartMs = now;
+          SocketClient::emitFingerprintScan(inputUID); // → backend looks up MongoDB
+        }
+        break;
+
+      case AUTH_VERIFYING:
+        // Waiting for onBackendResult(). Fail-safe: deny on timeout.
+        RGBLed::setYellow();
+        if (now - stateStartMs >= AUTH_VERIFY_TIMEOUT_MS) {
+          Serial.println("[Auth] Backend response timeout - denying");
+          applyResult(false, "backend_timeout");
+        }
+        break;
+
+      case AUTH_GRANTED:
+        RGBLed::setGreen();
+        break;
+      case AUTH_DENIED:
+        RGBLed::setRed();
+        if (now - stateStartMs >= AUTH_RESULT_HOLD_MS) {
+          state_ = AUTH_IDLE;
+        }
+        
+        break;
+
+      // ── 1-minute lockout ────────────────────────────────────────────────────
+      case AUTH_LOCKOUT:
+        RGBLed::setSlowFlashRed();
+        handleLockoutBuzzer(now);
+        if (now - stateStartMs >= LOCKOUT_DURATION_MS) {
+          failedAttempts_ = 0; // reset per-lockout counter
+          if (lockoutCount_ >= MAX_LOCKOUTS) {
+            triggerAlarm();    // escalate to full alarm
+          } else {
+            state_ = AUTH_IDLE;
+            Serial.println("[Auth] Lockout #" + String(lockoutCount_) +
+                          " expired — back to idle");
+          }
+        }
+        break;
+
+      // ── Alarm ───────────────────────────────────────────────────────────────
+      case AUTH_ALARM:
+        handleAlarmBuzzer(now);
+        RGBLed::setFastFlashRed();
+        if (now - alarmStartMs >= ALARM_DURATION_MS) {
+          state_          = AUTH_IDLE;
+          failedAttempts_ = 0;
+          lockoutCount_   = 0;
+          Buzzer::off();
+          Serial.println("[Auth] Alarm reset after timeout");
+        }
+        break;
+
+      default:
+        break;
+    }
+  }
+
+  AuthState state()        { return state_;        }
+  int       failedAttempts(){ return failedAttempts_; }
+  int       lockoutCount()  { return lockoutCount_;  }
+
+  String stateString() {
+    switch (state_) {
+      case AUTH_IDLE:         return "idle";
+      case AUTH_WAITING_SCAN: return "waiting_scan";
+      case AUTH_SCANNING:     return "scanning";
+      case AUTH_PROCESSING:   return "processing";
+      case AUTH_VERIFYING:    return "verifying";
+      case AUTH_GRANTED:      return "granted";
+      case AUTH_DENIED:       return "denied";
+      case AUTH_LOCKOUT:      return "lockout";
+      case AUTH_ALARM:        return "alarm";
+    }
+    return "unknown";
+  }
 
 } // namespace AuthManager

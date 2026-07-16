@@ -34,6 +34,7 @@ namespace AuthManager {
 
   // Called by SocketClient when the backend responds.
   void onBackendResult(bool granted);
+  void onScanButton();
 
   AuthState state();
   String    stateString();

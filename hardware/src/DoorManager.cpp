@@ -1,25 +1,31 @@
 #include "DoorManager.h"
 #include "SocketClient.h"
 extern int currentMode;
-namespace DoorManager{
-    namespace{
+namespace DoorManager {
+    namespace {
         DoorStatus currentDoorStatus = LOCKED;
     }
-    void begin(){
+    void begin() {
         currentDoorStatus = LOCKED;
     }
-    DoorStatus getDoorStatus(){
+    DoorStatus getDoorStatus() {
         return currentDoorStatus;
     }
-    String doorStatusToString(){
-        switch (currentDoorStatus){
-            case LOCKED:   return "LOCKED";
-            case UNLOCKED: return "UNLOCKED";
-            default:       return "LOCKED";
+    bool isLocked() {
+        return currentDoorStatus == LOCKED;
+    }
+    String doorStatusToString() {
+        switch (currentDoorStatus) {
+            case LOCKED:
+                return "LOCKED";
+            case UNLOCKED:
+                return "UNLOCKED";
+            default:
+                return "LOCKED";
         }
     }
-    void sendStatusUpdate()
-    {
+
+    void sendStatusUpdate() {
         if (!SocketClient::isConnected()) {
             Serial.println("[WS] Postponing status update: Waiting for active connection...");
             return;
@@ -30,7 +36,11 @@ namespace DoorManager{
         );
     }
 
+<<<<<<< HEAD
     void unlockDoor(){
+=======
+    void unlockDoor() {
+>>>>>>> 6a94516205b8bdec65fee043a0d71ad786c6b17e
         if (currentDoorStatus == UNLOCKED)
             return;
         currentDoorStatus = UNLOCKED;
@@ -38,7 +48,11 @@ namespace DoorManager{
         sendStatusUpdate();
     }
 
+<<<<<<< HEAD
     void lockDoor(){
+=======
+    void lockDoor() {
+>>>>>>> 6a94516205b8bdec65fee043a0d71ad786c6b17e
         if (currentDoorStatus == LOCKED)
             return;
         currentDoorStatus = LOCKED;

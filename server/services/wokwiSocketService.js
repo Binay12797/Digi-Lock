@@ -26,6 +26,24 @@ function initWokwiSocket(io){
                 // 1. STATUS UPDATE
                 if (parsedData.type === "STATUS_UPDATE") {
                     console.log("Status:", parsedData);
+                    /* ===============================================
+                    // Future Database Sync
+                    //
+                    // When MongoDB is enabled, update the Lock
+                    // document using the incoming STATUS_UPDATE.
+                    //
+                    // await Lock.findOneAndUpdate(
+                        { deviceId: parsedData.deviceId },
+                        {
+                            status: parsedData.status,
+                            lastUpdated: new Date()
+                        },
+                        {
+                            upsert: true
+                        }
+                    );
+                    //
+                    // ===============================================*/
                 }
 
                 // 2. ENROLLMENT PROGRESS
@@ -59,25 +77,48 @@ function initWokwiSocket(io){
                     console.log("Fingerprint:", scannedToken);
                     console.log("==================================");
 
+<<<<<<< HEAD
                     // Cleanly reset/exit enrollment state on the hardware
                     ws.send(JSON.stringify({ 
                         command: "EXIT_ENROLL" 
                     }));
 
                     // Optional MongoDB Save (Uncomment if needed)
+=======
+                    // =====================================================
+                    // DATABASE SAVE (TEMPORARILY DISABLED)
+                    // =====================================================
+
+>>>>>>> 6a94516205b8bdec65fee043a0d71ad786c6b17e
                     /*
                     await User.findByIdAndUpdate(sessionId, {
                         fingerprint: scannedToken,
                         isActive: true
                     });
+<<<<<<< HEAD
                     console.log("Fingerprint successfully saved.");
                     */
 
                     io.emit("FINGERPRINT_READY", {
+=======
+                    */
+
+                    io.emit("BIOMETRIC_LINKED", {
+>>>>>>> 6a94516205b8bdec65fee043a0d71ad786c6b17e
                         success: true,
                         sessionId,
-                        fingerprint: scannedToken
+                        fingerprint: scannedToken,
+                        message: "Registration successful!"
                     });
+
+                    // Return ESP to normal mode
+                    sendToDevice({
+                        command: "SET_MODE",
+                        mode: 0
+                    });
+                    enrollmentState.clearSession();
+
+                    console.log("Enrollment session completed.");
                 }
 
                 // 4. AUTHENTICATION FINGERPRINT SCAN
@@ -85,6 +126,7 @@ function initWokwiSocket(io){
                     await handleFingerprintScan(parsedData, io);
                 }
 
+<<<<<<< HEAD
                 // 5. PHYSICAL BUTTON SCAN TRIGGER
                 else if (parsedData.type === "SCAN_TRIGGER") {
                     console.log(`[WS Intercept] Scan trigger requested by: ${parsedData.deviceId}`);
@@ -94,6 +136,16 @@ function initWokwiSocket(io){
 
             } catch (error) {
                 console.log(` Plain-text String from Wokwi: ${rawData.toString()}`);
+=======
+                    //io.emit("WOKWI_PRINT_CAPTURED",{fingerprint: parsedData.fingerprint});
+                
+            }catch (error) {
+                console.error("WebSocket handler error:");
+                console.error(error);
+
+                console.log("Raw message:");
+                console.log(rawData.toString());
+>>>>>>> 6a94516205b8bdec65fee043a0d71ad786c6b17e
             }
         });
 
@@ -111,17 +163,55 @@ function initWokwiSocket(io){
 // Verification handler
 async function handleFingerprintScan(parsedData, io) {
     const scannedToken = parsedData.fingerprint;
+
     console.log("================================");
     console.log("Fingerprint Scan Received");
     console.log("UID:", scannedToken);
     console.log("================================");
-    const granted = verifyFingerprint(scannedToken);
+    const granted = await verifyFingerprint(scannedToken);
+    // Temporary
+    // Later this will also return the matched user.
+    const user = null;
+    // Database logging will go here.
+    /* =====================================================
+    DATABASE ACCESS LOG (Enable when MongoDB is active)
+
+    await accessLog.create({
+        userId: user ? user._id : null,
+        authType: "fingerprint",
+        status: granted ? "GRANTED" : "DENIED",
+        scannedDataString: scannedToken
+    });
+
+    ===================================================== */
     sendAuthenticationResult(granted);
 }
 
+<<<<<<< HEAD
 // Temporary verification ID helper (replace with DB queries when ready)
 function verifyFingerprint(uid) {
     return uid === "1";
+=======
+// =====================================================
+// TEMPORARY AUTHORIZATION
+//
+// TODO (Database Integration)
+//
+// Replace this entire function with:
+//
+// async function verifyFingerprint(uid) {
+//     const user = await User.findOne({
+//         fingerprint: uid,
+//         isActive: true
+//     });
+//
+//     return !!user;
+// }
+//
+// =====================================================
+async function verifyFingerprint(uid) {
+    return uid === "FP-0001";
+>>>>>>> 6a94516205b8bdec65fee043a0d71ad786c6b17e
 }
 
 // Authentication helper

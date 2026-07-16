@@ -36,3 +36,7 @@
 // ────────────────────────────────────────────────────────────
 #define BUZZER_PIN     14
 #define LOCK_BUTTON_PIN 18
+#define SCAN_BUTTON_PIN  19
+#define RED_LED_PIN    25
+#define GREEN_LED_PIN  26
+#define YELLOW_LED_PIN   27

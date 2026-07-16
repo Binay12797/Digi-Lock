@@ -15,8 +15,6 @@ namespace EnrollmentManager {
 
 // ── Initialisation ────────────────────────────────────────────────────────────
 // Must be called once in setup(), AFTER SocketClient::begin().
-static int currentScanPass = 0;
-static bool isReadyToScan = false;
 
 void begin() {
   SocketClient::onCommand([](const String &command, JsonObject data) {
@@ -33,8 +31,6 @@ void begin() {
       Serial.println("[Enroll] Initializing fingerprint enrollment matrix...");
         
         // Reset local scan state variables
-        currentScanPass = 1; 
-        isReadyToScan = true; 
         
         Serial.println("[Hardware] Ready for finger placement.");
 
@@ -45,20 +41,14 @@ void begin() {
       SocketClient::emitEnrollFailed(nameAtCancel, "cancelled_by_admin");
       SocketClient::emitEnrollLog(nameAtCancel, "", false, "cancelled_by_admin");
       Serial.println("[Enroll] Cancelled by admin");
-      isReadyToScan = false;
-      currentScanPass = 0;
 
-    }else if (command == "ENROLL_SCAN1") {
-      Serial.println("[DEBUG] ENROLL_SCAN1 command received");
-      EnrollmentManager::scan1();
-    } else if (command == "ENROLL_SCAN2") {
-      EnrollmentManager::scan2();
     }else if (command == "EXIT_ENROLL") {
         Serial.println("[DEBUG] EXIT_ENROLL received");
         EnrollmentManager::reset();
         isReadyToScan = false;
         currentScanPass = 0;
         currentMode = 0;
+
         Serial.println("[Enroll] Enrollment reset");
     }
   });
@@ -78,6 +68,21 @@ void start(const String &name) {
   Serial.println("[Enroll] Started for: " + name + " — waiting for scan 1");
 }
 
+void onButtonPressed(){
+  switch (state_){
+    case ENROLL_WAITING_SCAN1:
+      scan1();
+      break;
+    
+    case ENROLL_WAITING_SCAN2:
+      scan2();
+      break;
+    
+    default:
+      break;
+  }
+}
+
 // Called by the main loop when the fingerprint sensor detects a finger
 // while an enrollment is in the ENROLL_WAITING_SCAN1 stage.
 void scan1() {
@@ -94,13 +99,9 @@ void scan1() {
   Serial.println("[DEBUG] Calling captureTemplate1()");
 
   if (FingerprintSensor::captureTemplate1()) {
-
     Serial.println("[DEBUG] captureTemplate1 SUCCESS");
-
     state_ = ENROLL_SCAN1_DONE;
-
     Buzzer::beepScan();
-
     SocketClient::emitEnrollProgress("scan1_done", pendingName_);
 
     state_ = ENROLL_WAITING_FOR_LIFT;
@@ -177,8 +178,12 @@ void loop() {
       // it already holds from the frontend form submission.
       state_ = ENROLL_DONE;
       Buzzer::beepSuccess();
+      Serial.println("[DEBUG] About to send ENROLL_COMPLETE");
       SocketClient::emitEnrollComplete(pendingName_, uid);
+
+      Serial.println("[DEBUG] About to send ENROLL_LOG");
       SocketClient::emitEnrollLog(pendingName_, uid, true, "enrolled");
+
       Serial.println("[Enroll] DONE — " + pendingName_ + " → " + uid);
     }
   }

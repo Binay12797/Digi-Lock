@@ -7,36 +7,16 @@
 #include "Display.h"
 #include "DoorManager.h"
 #include "Button.h"
+#include "RGBLed.h" // 🟢 Resolved Git conflict cleanly
 
 // 0 = normal operation (authentication)
 // 1 = enrollment mode
-// The React frontend / backend controls this via a { "command": "SET_MODE", "mode": N } message.
 int currentMode = 0;
-
-//sercurity status /*
-/*enum SecurityState
-{
-    SECURITY_NORMAL,
-    SECURITY_LOCKDOWN,
-    SECURITY_ALARM
-};
-
-
-SecurityState currentSecurityState = SECURITY_NORMAL;
-*/
 
 unsigned long lastStatusMs = 0;
 const unsigned long STATUS_INTERVAL_MS = 5000;
 
-// ── Handler for the events this file itself owns ────────────────────
-// EnrollmentManager::begin() and AuthManager::begin() each register
-// their own SocketClient::onCommand() subscriber for the commands they
-// own (START_ENROLL/CANCEL_ENROLL/ENROLL_SCAN1/ENROLL_SCAN2 and
-// OPEN_DOOR/DENY_ACCESS/AUTH_CHECK respectively — see SocketClient.h).
-// This file only needs to react to SET_MODE (system-level) and to
-// START_ENROLL for the purpose of switching currentMode, since only
-// main.ino knows about currentMode.
-
+// ── System Command Intercept ───────────────────────────────────────────
 void handleSystemCommand(const String &command, JsonObject data) {
   if (command == "SET_MODE") {
       int mode = data["mode"] | 0;
@@ -50,11 +30,9 @@ void handleSystemCommand(const String &command, JsonObject data) {
       Serial.println("[Mode] -> " + String(mode));
   }
 }
-// ── Setup / loop ────────────────────────────────────────────────────
 
+// ── WiFi Initialization ───────────────────────────────────────────────
 void connectWiFi() {
-  // IPAddress dns(8, 8, 8, 8);
-  // WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE, dns);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD, WIFI_CHANNEL);
   Serial.print("Connecting to WiFi");
   while (WiFi.status() != WL_CONNECTED) {
@@ -64,68 +42,80 @@ void connectWiFi() {
   Serial.println(" Connected! IP: " + WiFi.localIP().toString());
 }
 
-//handling button
-// void handleButton(ButtonManager::ButtonEvent event){
-//     if(event == ButtonManager::BUTTON_PRESSED){
-//         DoorManager::lockDoor();
-       
-//         // 3. Forward the message over your persistent socket connection 
-//         // Note: Ensure your SocketClient class has a broadcast/send function exposed (e.g., sendEvent or sendTXT)
-//         SocketClient::emitScanTrigger();
-//     }
-// }
+// ── Unified Button Manager Event Router ───────────────────────────────
 void handleButton(ButtonManager::ButtonEvent event) {
-    if (event == ButtonManager::BUTTON_PRESSED) {
-        
-        // If we aren't enrolling yet, start the enrollment process
-        if (EnrollmentManager::state() == ENROLL_IDLE) {
-            Serial.println("[Button] Starting enrollment...");
-            SocketClient::emitScanTrigger(); // Sends "SCAN_TRIGGER" to start
-        } 
-        // If the hardware is waiting for Scan 1, use the button to simulate Scan 1!
-        else if (EnrollmentManager::state() == ENROLL_WAITING_SCAN1) {
-            Serial.println("[Button] Simulating finger touch for Scan 1...");
-            EnrollmentManager::scan1();
-        } 
-        // If the hardware is waiting for Scan 2, use the button to simulate Scan 2!
-        else if (EnrollmentManager::state() == ENROLL_WAITING_SCAN2) {
-            Serial.println("[Button] Simulating finger touch for Scan 2...");
-            EnrollmentManager::scan2();
-        }
+    switch (event) {
+        case ButtonManager::LOCK_BUTTON_PRESSED:
+            Serial.println("[Button] Lock command triggered.");
+            DoorManager::lockDoor();
+            AuthManager::reset();
+            break;
+
+        case ButtonManager::SCAN_BUTTON_PRESSED:
+            // 🟢 If in Enrollment mode, step through the simulated Wokwi touch states
+            if (currentMode == 1) {
+                if (EnrollmentManager::state() == ENROLL_IDLE) {
+                    Serial.println("[Button] Starting enrollment sequence...");
+                    SocketClient::emitScanTrigger(); 
+                } 
+                else if (EnrollmentManager::state() == ENROLL_WAITING_SCAN1) {
+                    Serial.println("[Button] Simulating touch: Scan 1");
+                    EnrollmentManager::scan1();
+                } 
+                else if (EnrollmentManager::state() == ENROLL_WAITING_SCAN2) {
+                    Serial.println("[Button] Simulating touch: Scan 2");
+                    EnrollmentManager::scan2();
+                }
+            } 
+            // 🔵 If in Normal mode, process standard hardware authorization
+            else {
+                Serial.println("[Button] Simulating scan for Auth check...");
+                AuthManager::onScanButton();
+            }
+            break;
+
+        default:
+            break;
     }
 }
+
+// ── Setup ─────────────────────────────────────────────────────────────
 void setup() {
-  // Force ESP32 to use Google's DNS server
-  
   Serial.begin(115200);
   Buzzer::begin();
   Display::begin();
+  RGBLed::begin(); // 🟢 Initializing your new indicator layout
   connectWiFi();
 
-  EnrollmentManager::begin();   // registers its own command handler
-  AuthManager::begin();         // registers its own command handler
+  EnrollmentManager::begin();   
+  AuthManager::begin();         
   DoorManager::begin();
   ButtonManager::begin();
+  
   ButtonManager::onEvent(handleButton);
   SocketClient::onCommand(handleSystemCommand);
-  SocketClient::begin();        // connect last, once all handlers are registered
+  SocketClient::begin();        
   Serial.println("[System] Ready.");
 }
 
+// ── Main Loop ─────────────────────────────────────────────────────────
 void loop() {
   SocketClient::loop();
   Buzzer::loop();
   ButtonManager::loop();
+  RGBLed::loop(); // 🟢 Keeps your status animations processing smoothly
+  
   Display::render(
       currentMode,
       DoorManager::getDoorStatus()
   );
-  if(currentMode == 1){
+  
+  if (currentMode == 1) {
     EnrollmentManager::loop();
-  }
-  else{
+  } else {
     AuthManager::loop();
   }
+  
   unsigned long now = millis();
   if (now - lastStatusMs >= STATUS_INTERVAL_MS) {
     lastStatusMs = now;
