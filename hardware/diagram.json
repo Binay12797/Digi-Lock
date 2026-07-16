@@ -3,11 +3,7 @@
   "author": "Samebg Stha",
   "editor": "wokwi",
   "parts": [
-<<<<<<< HEAD
-    { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": 0, "left": 4.84, "attrs": {} },
-=======
     { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": 0, "left": -14.36, "attrs": {} },
->>>>>>> 6a94516205b8bdec65fee043a0d71ad786c6b17e
     {
       "type": "board-ssd1306",
       "id": "oled1",
@@ -33,11 +29,6 @@
     {
       "type": "wokwi-pushbutton",
       "id": "btn1",
-<<<<<<< HEAD
-      "top": 121.4,
-      "left": 124.8,
-      "attrs": { "color": "red", "xray": "1" }
-=======
       "top": 131,
       "left": 124.8,
       "attrs": { "color": "red", "xray": "1" }
@@ -114,7 +105,6 @@
       "left": -67.75,
       "rotate": 90,
       "attrs": { "value": "220" }
->>>>>>> 6a94516205b8bdec65fee043a0d71ad786c6b17e
     }
   ],
   "connections": [
@@ -125,9 +115,6 @@
     [ "r1:1", "esp:14", "green", [ "h0", "v-48" ] ],
     [ "bz1:1", "esp:GND.1", "green", [ "v19.2", "h57.6", "v-134.4" ] ],
     [ "esp:18", "btn1:1.l", "green", [ "h0" ] ],
-<<<<<<< HEAD
-    [ "esp:GND.3", "btn1:2.r", "black", [ "h96", "v67.2" ] ]
-=======
     [ "esp:GND.3", "btn1:2.r", "black", [ "h96", "v67.2" ] ],
     [ "esp:19", "btn2:1.l", "green", [ "h9.6" ] ],
     [ "esp:GND.3", "btn2:2.r", "black", [ "h96", "v172.8" ] ],
@@ -143,7 +130,6 @@
     [ "r3:1", "esp:26", "green", [ "h0", "v-48" ] ],
     [ "led3:C", "r4:2", "green", [ "v0", "h-18.8", "v-48" ] ],
     [ "r4:1", "esp:27", "green", [ "h0", "v-28.8" ] ]
->>>>>>> 6a94516205b8bdec65fee043a0d71ad786c6b17e
   ],
   "dependencies": {}
 }
