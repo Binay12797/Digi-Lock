@@ -36,11 +36,8 @@ namespace DoorManager {
         );
     }
 
-<<<<<<< HEAD
-    void unlockDoor(){
-=======
+    
     void unlockDoor() {
->>>>>>> 6a94516205b8bdec65fee043a0d71ad786c6b17e
         if (currentDoorStatus == UNLOCKED)
             return;
         currentDoorStatus = UNLOCKED;
@@ -48,11 +45,7 @@ namespace DoorManager {
         sendStatusUpdate();
     }
 
-<<<<<<< HEAD
-    void lockDoor(){
-=======
     void lockDoor() {
->>>>>>> 6a94516205b8bdec65fee043a0d71ad786c6b17e
         if (currentDoorStatus == LOCKED)
             return;
         currentDoorStatus = LOCKED;

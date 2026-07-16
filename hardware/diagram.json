@@ -106,6 +106,7 @@
       "rotate": 90,
       "attrs": { "value": "220" }
     }
+    
   ],
   "connections": [
     [ "esp:TX", "$serialMonitor:RX", "", [] ],

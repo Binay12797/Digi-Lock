@@ -2,7 +2,7 @@
 version = 1
 firmware = '.pio/build/esp32dev/firmware.bin'
 elf      = '.pio/build/esp32dev/firmware.elf'
-
+rfc2217ServerPort = 4000
 # Forward http://localhost:8080 -> port 80 on the simulated ESP32,
 # so you can open the web UI from your own browser during simulation.
 [[net.forward]]
