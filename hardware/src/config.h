@@ -18,7 +18,7 @@
 //#define WS_HOST "3.6.122.107"
 //#define WS_HOST "art-dinginess-activity.ngrok-free.dev"
 //#define WS_HOST  "host.wokwi.internal"
-#define WS_HOST "192.168.1.12"
+#define WS_HOST "192.168.1.10"
 //#define WS_HOST "172.18.100.244"
 #define WS_PORT 8080
 #define WS_PATH "/"
@@ -36,3 +36,7 @@
 // ────────────────────────────────────────────────────────────
 #define BUZZER_PIN     14
 #define LOCK_BUTTON_PIN 18
+#define SCAN_BUTTON_PIN  19
+#define RED_LED_PIN    25
+#define GREEN_LED_PIN  26
+#define YELLOW_LED_PIN   27

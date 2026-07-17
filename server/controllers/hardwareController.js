@@ -76,6 +76,16 @@ async function startEnrollment(req, res) {
         //     if (currentSession === sessionId) {
                 
         //         console.log("enrollment session timedout");
+        // Clear any previous timer just in case
+        const existingTimer = enrollmentState.getTimer();
+
+        if (existingTimer) {
+            clearTimeout(existingTimer);
+            enrollmentState.setTimer(null);
+        }
+
+        const timer = setTimeout(() => {
+            const currentSession = enrollmentState.getSession();
 
         //         const io = req.app.get("io");
 
@@ -87,6 +97,14 @@ async function startEnrollment(req, res) {
         //         enrollmentTimer = null;
         //     }
         // }, 60000);
+                io.emit("ENROLLMENT_TIMEOUT", {
+                    message: "Enrollment window expired."
+                });
+
+                enrollmentState.clearSession();
+            }
+        , 60000);
+        enrollmentState.setTimer(timer);
 
         return res.json({
             success: true,
@@ -164,6 +182,7 @@ async function enroll(req, res) {
         });
     }
 }
+
 async function verification(req, res) {
     const { fingerprint } = req.body;
     const io = req.app.get("io");
@@ -202,7 +221,6 @@ async function verification(req, res) {
 }
 
 module.exports = {
-    enroll,
     verification,
     startEnrollment,
     //scan1,

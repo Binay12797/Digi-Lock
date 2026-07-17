@@ -20,6 +20,8 @@ namespace DoorManager
     String doorStatusToString();
 
     void sendStatusUpdate();
+    
+    bool isLocked();
 }
 
 #endif

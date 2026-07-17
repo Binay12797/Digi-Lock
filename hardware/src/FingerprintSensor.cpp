@@ -1,9 +1,11 @@
 #include "FingerprintSensor.h"
 
+
 namespace {
   String template1 = "";
   String template2 = "";
   unsigned long scan1Time = 0;
+  int nextFingerprintId = 1;
 }
 
 namespace FingerprintSensor {
