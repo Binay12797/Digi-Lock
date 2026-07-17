@@ -4,6 +4,8 @@ import { useState } from "react";
 import { tokens } from "../../theme";
 import notificationsData from "../Data/mockdata";
 
+import { useOutletContext } from "react-router-dom";
+
 const formatEvent = (event) => {
   switch (event) {
     case "FAILED_FINGERPRINT":
@@ -32,6 +34,9 @@ const AlertAndNotifications = () => {
 
   const [notifications, setNotifications] = useState(notificationsData); // first variable second function
 
+  const { searchQuery } = useOutletContext();
+  // const searchQuery = useOutletContext(); if you write this then searchquery consist of all items on context selected,setselected
+
   const criticalCount = notifications.filter(
     (notifications) => notifications.severity === "critical",
   ).length;
@@ -45,6 +50,16 @@ const AlertAndNotifications = () => {
   ).length;
 
   const allCount = notifications.length;
+
+  const filteredNotifications = notifications.filter((notification) => {
+    const query = searchQuery.toLowerCase();
+
+    return (
+      formatEvent(notification.event).toLowerCase().includes(query) ||
+      notification.entityName?.toLowerCase().includes(query) ||
+      notification.severity?.toLowerCase().includes(query)
+    );
+  });
 
   return (
     <Box sx={{ m: "20px" }}>
@@ -147,7 +162,7 @@ const AlertAndNotifications = () => {
       </Typography>
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-        {[...notifications]
+        {[...filteredNotifications]
           // if b-a is positive it tells b should come before a ie sorted such that b>a ie highest come first
           .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
           .map((notification) => (

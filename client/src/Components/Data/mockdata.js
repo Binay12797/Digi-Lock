@@ -58,7 +58,7 @@ export const notificationsData = [
   },
 
   {
-    id: 4,
+    id: 5,
 
     event: "DOOR_OPENED",
 
@@ -171,7 +171,7 @@ export const fingerprintData = [
     locks: ["Office", "Main Entrance", "Server Room"],
   },
   {
-    id: 4,
+    id: 5,
     userName: "Rajab Bal",
     role: "Security",
     fingerprintId: null,
