@@ -23,7 +23,7 @@ void begin() {
     SocketClient::onCommand([](const String &command, JsonObject data) {
 
         if (command == "START_ENROLL") {
-            String name = "Bigyan";
+            String name = "User";
             if (name.isEmpty()) {
                 Serial.println("[Enroll] START_ENROLL received with no 'name' field — ignored");
                 return;
