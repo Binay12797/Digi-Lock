@@ -6,25 +6,25 @@ import notificationsData from "../Data/mockdata";
 
 import { useOutletContext } from "react-router-dom";
 
-const formatEvent = (event) => {
-  switch (event) {
+export const formatEvent = (notification) => {
+  switch (notification.event) {
     case "FAILED_FINGERPRINT":
-      return "🚨 Failed Fingerprint Attempt at ";
+      return `🚨 Failed Fingerprint Attempt at ${notification.entityName}`;
 
     case "LOCK_TAMPER":
-      return "🚨 Lock Tamper Detected at ";
+      return `🚨 Lock Tamper Detected at ${notification.entityName}`;
 
     case "LOCK_OFFLINE":
-      return "⚠️ Lock Offline at ";
+      return `⚠️ Lock Offline at ${notification.entityName}`;
 
     case "USER_ADDED":
-      return "ℹ️ Added New User ";
+      return `ℹ️ Added New User ${notification.entityName}`;
 
     case "DOOR_OPENED":
-      return "ℹ️ Door Openned by ";
+      return `ℹ️ ${notification.lockName}  Opened by ${notification.entityName}`;
 
     default:
-      return event;
+      return notification;
   }
 };
 
@@ -55,7 +55,9 @@ const AlertAndNotifications = () => {
     const query = searchQuery.toLowerCase();
 
     return (
-      formatEvent(notification.event).toLowerCase().includes(query) ||
+      formatEvent(notification).toLowerCase().includes(query) ||
+      notification.event?.toLowerCase().includes(query) ||
+      notification.lockName?.toLowerCase().includes(query) ||
       notification.entityName?.toLowerCase().includes(query) ||
       notification.severity?.toLowerCase().includes(query)
     );
@@ -190,8 +192,7 @@ const AlertAndNotifications = () => {
                   }}
                 >
                   <Typography variant="h5">
-                    {formatEvent(notification.event)}
-                    {notification.entityName}
+                    {formatEvent(notification)}
                   </Typography>
                   <Typography variant="h5">
                     {new Date(notification.timestamp).toLocaleString("en-US", {
