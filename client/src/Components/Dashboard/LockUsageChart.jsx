@@ -15,7 +15,7 @@ const LockUsageChart = ({ lockData }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
-  const latestFiveData = [...lockData]
+  const latestFiveData = [...(lockData || [])]
     .sort((a, b) => new Date(b.date) - new Date(a.date))
     .slice(0, 5)
     .reverse() // oldest → newest for the chart
@@ -39,7 +39,7 @@ const LockUsageChart = ({ lockData }) => {
       <CardContent>
         <Typography variant="h5">Unlocks</Typography>
         <Typography variant="subtitle2" mb={2}>
-          Todays successful unlocks over last five days
+          Successful unlocks during the last 5 days
         </Typography>
         {/* The ResponsiveContainer component is a container that adjusts its width and height based on the size of its parent element. */}
         <Box sx={{ mt: 3 }}>

@@ -117,7 +117,7 @@ export const dashboardStats = [
   {
     id: 1,
     title: "Total Locks",
-    value: 1,
+    value: 0,
     subtitle: "Registered locks",
     icon: "lock",
     color: "#3b82f6",
@@ -125,7 +125,7 @@ export const dashboardStats = [
   {
     id: 2,
     title: "Active Users",
-    value: 35,
+    value: 0,
     subtitle: "Registered users",
     icon: "users",
     color: "#10b981",
@@ -133,7 +133,7 @@ export const dashboardStats = [
   {
     id: 3,
     title: "Unlocks Today",
-    value: 84,
+    value: 0,
     subtitle: "Successful unlocks",
     icon: "unlock",
     color: "#8b5cf6",
@@ -141,7 +141,7 @@ export const dashboardStats = [
   {
     id: 4,
     title: "Failed Attempts",
-    value: 3,
+    value: 0,
     subtitle: "Failed authentications",
     icon: "warning",
     color: "#ef4444",

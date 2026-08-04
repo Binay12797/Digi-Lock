@@ -11,7 +11,7 @@ import { Bar, BarChart, ResponsiveContainer } from "recharts";
 import api from "../../Api/api";
 import { socket } from "../../Api/socket";
 
-import { dashboardStats } from "../Data/mockdata";
+import { dashboardStats, mockDataLocks } from "../Data/mockdata";
 import StatCards from "./StatCards";
 import { useState, useEffect } from "react";
 
@@ -23,8 +23,8 @@ const Dashboard = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
-  const [stats, setStats] = useState([]);
-  const [lockUsageData, setLockUsageData] = useState([]);
+  const [stats, setStats] = useState(dashboardStats);
+  const [lockUsageData, setLockUsageData] = useState();
 
   useEffect(() => {
     const fetchDashboard = async () => {
@@ -42,7 +42,7 @@ const Dashboard = () => {
   }, []);
 
   useEffect(() => {
-    socket.on("dashboardUpdate", (data) => {
+    const handleDashboardUpdate = (data) => {
       if (data.stats) {
         setStats(data.stats);
       }
@@ -50,10 +50,12 @@ const Dashboard = () => {
       if (data.lockUsage) {
         setLockUsageData(data.lockUsage);
       }
-    });
+    };
+
+    socket.on("dashboardUpdate", handleDashboardUpdate);
 
     return () => {
-      socket.off("dashboardUpdate");
+      socket.off("dashboardUpdate", handleDashboardUpdate);
     };
   }, []);
 

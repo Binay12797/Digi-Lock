@@ -1,4 +1,5 @@
-const router = require("express").Router();
+const { Router } = require("express");
 const dashboardController = require("../controllers/dashboardController");
-router.get("/", dashboardController.getDashboard);
-module.exports = router;
+const dashboardRouter = Router();
+dashboardRouter.get("/dashboard", dashboardController.getDashboard);
+module.exports = dashboardRouter;
