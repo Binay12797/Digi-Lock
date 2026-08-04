@@ -8,10 +8,12 @@ import {
 } from "@mui/material";
 import { tokens } from "../../theme";
 import { Bar, BarChart, ResponsiveContainer } from "recharts";
+import api from "../../Api/api";
+import { socket } from "../../Api/socket";
 
 import { dashboardStats } from "../Data/mockdata";
 import StatCards from "./StatCards";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import LockUsageChart from "./LockUsageChart";
 import { lockUsageData } from "../Data/mockdata";
@@ -21,7 +23,39 @@ const Dashboard = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
-  const [stats, setStats] = useState(dashboardStats);
+  const [stats, setStats] = useState([]);
+  const [lockUsageData, setLockUsageData] = useState([]);
+
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      try {
+        const response = await api.get("/dashboard");
+
+        setStats(response.data.stats);
+        setLockUsageData(response.data.lockUsage);
+      } catch (err) {
+        console.error("Dashboard fetch failed:", err);
+      }
+    };
+
+    fetchDashboard();
+  }, []);
+
+  useEffect(() => {
+    socket.on("dashboardUpdate", (data) => {
+      if (data.stats) {
+        setStats(data.stats);
+      }
+
+      if (data.lockUsage) {
+        setLockUsageData(data.lockUsage);
+      }
+    });
+
+    return () => {
+      socket.off("dashboardUpdate");
+    };
+  }, []);
 
   return (
     <Box sx={{ m: "20px" }}>

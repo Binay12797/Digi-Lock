@@ -47,8 +47,10 @@ const Users = () => {
   const columns = [
     { field: "id", headerName: "ID" }, //field represent value grabbed
     { field: "name", headerName: "Name", flex: 1, cellClassName: "name-cell" }, //flex: 1 will extend the cells width
-    { field: "email", headerName: "Email", flex: 1 },
     { field: "relation", headerName: "Relation", flex: 1 },
+    { field: "email", headerName: "Email", flex: 1 },
+    { field: "contact", headerName: "Contact", flex: 1 },
+    { field: "address", headerName: "Address", flex: 1 },
     // {
     //   field: "access",
     //   headerName: "Access Level",

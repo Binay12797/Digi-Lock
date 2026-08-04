@@ -17,6 +17,11 @@ const AccessLogs = () => {
 
   const { searchQuery } = useOutletContext();
 
+  //for more then three access denied
+  const consecutiveDenied =
+    accessLogs.length >= 3 &&
+    accessLogs.slice(0, 3).every((log) => log.status === "DENIED");
+
   useEffect(() => {
     const fetchAccessLogs = async () => {
       try {
@@ -50,8 +55,8 @@ const AccessLogs = () => {
   }, []);
 
   const columns = [
-    { field: "deviceId", headerName: "DeviceId", flex: 1 },
-    { field: "location", headerName: "Location", flex: 1 },
+    { field: "_id", headerName: "Log Id", flex: 1 },
+
     {
       field: "createdAt",
       headerName: "Last Access Time",
@@ -82,10 +87,17 @@ const AccessLogs = () => {
       field: "action",
       headerName: "Action",
       flex: 1,
+      valueGetter: (value, row) => {
+        const targetRow = row || value?.row;
+
+        return targetRow?.status === "GRANTED"
+          ? "Door Unlocked"
+          : "Access Denied";
+      },
     },
     {
       field: "status",
-      headerName: "Status",
+      headerName: "Access",
       flex: 1,
       renderCell: ({ row: { status } }) => {
         // Standardize status value parsing to uppercase to cleanly match conditions
@@ -111,16 +123,8 @@ const AccessLogs = () => {
         );
       },
     },
-    {
-      field: "reason",
-      headerName: "Reason",
-      flex: 1,
-    },
-    {
-      field: "method",
-      headerName: "Method",
-      flex: 1,
-    },
+
+    { field: "authType", headerName: "Method", flex: 1 },
   ];
 
   const filterAccesslogs = accessLogs.filter((accessLog) => {
@@ -144,6 +148,20 @@ const AccessLogs = () => {
         View Access Logs
       </Typography>
 
+      {consecutiveDenied && (
+        <Box
+          sx={{
+            mb: 2,
+            p: 2,
+            borderRadius: 2,
+            bgcolor: colors.redAccent[700],
+          }}
+        >
+          <Typography color="white">
+            🔒 Lock is in an Unresponsive State for 1 min
+          </Typography>
+        </Box>
+      )}
       <Box
         sx={{
           width: "100%",
