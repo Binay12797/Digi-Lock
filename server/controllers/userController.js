@@ -45,16 +45,6 @@ async function createUser(req,res){
     }
 };
 
-// async function signUpPage(req,res){
-//     res.render("sign-up");
-// }
-
-// async function loginPage(req,res){
-//     res.json({
-//         success: true,
-//         message: "Digilock auth operational"
-//     });
-// };
 
 
 

@@ -1,43 +1,9 @@
 const enrollmentState = require("../services/enrollmentState");
 const User = require("../models/addUserModel");
 const accessLog = require("../models/accesslogModel");
-//const { sendToDevice } = require("../services/wokwiSocketService");
 
-// async function scan1(req, res) {
-//     const success = sendToDevice({
-//         command: "ENROLL_SCAN1"
-//     });
 
-//     if (!success) {
-//         return res.status(500).json({
-//             success: false, // ─── FIXED: typo "fakse" changed to false
-//             message: "ESP not connected"
-//         });
-//     }
 
-//     res.json({
-//         success: true,
-//         message: "Scan 1 requested"
-//     });
-// }
-
-// async function scan2(req, res) {
-//     const success = sendToDevice({
-//         command: "ENROLL_SCAN2"
-//     });
-
-//     if (!success) {
-//         return res.status(500).json({
-//             success: false,
-//             message: "ESP32 not connected"
-//         });
-//     }
-
-//     res.json({
-//         success: true,
-//         message: "Scan 2 requested"
-//     });
-// }
 
 async function startEnrollment(req, res) {
     const{sendToDevice} = require("../services/wokwiSocketService");
@@ -71,13 +37,7 @@ async function startEnrollment(req, res) {
 
         console.log("START_ENROLL sent");
         console.log(`Enrollment session successfully started for user: ${sessionId}. Ready for fingerprint payload.`)
-        // setTimeout(() => {
-        //     const currentSession = enrollmentState.getSession();
-
-        //     if (currentSession === sessionId) {
-                
-        //         console.log("enrollment session timedout");
-        // Clear any previous timer just in case
+        
         const existingTimer = enrollmentState.getTimer();
 
         if (existingTimer) {
@@ -118,7 +78,7 @@ async function enroll(req, res) {
     const sessionId = enrollmentState.getSession();
     const io = req.app.get("io");
 
-    // 1. CRITICAL VALIDATION: Ensure the enrollment window hasn't timed out or cleared
+    
     if (!sessionId) {
         return res.status(400).json({
             success: false,
@@ -126,7 +86,7 @@ async function enroll(req, res) {
         });
     }
 
-    // 2. Validate essential fields
+   
     if (!firstName || !email || !fingerprintId) {
         return res.status(400).json({
             success: false,
@@ -135,7 +95,7 @@ async function enroll(req, res) {
     }
 
     try {
-        // 3. Create the new user profile in MongoDB
+        
         const newUser = await User.create({
             name: `${firstName} ${lastName}`,
             email,
@@ -148,7 +108,7 @@ async function enroll(req, res) {
 
         console.log(`[Database] User profile created for: ${newUser.name} (${newUser._id})`);
 
-        // 4. Notify any frontend listeners
+        
         if (io) {
             io.emit("BIOMETRIC_LINKED", { 
                 success: true, 
@@ -156,7 +116,7 @@ async function enroll(req, res) {
             });
         }
 
-        // 5. Clean up session
+        
         enrollmentState.clearSession();
         
         return res.status(201).json({ 
