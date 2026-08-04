@@ -2,7 +2,9 @@ require("dotenv").config();
 const User = require("../models/userModel");
 const enrollmentState = require("../services/enrollmentState");
 const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt")
+const bcrypt = require("bcrypt");
+const addUser = require("../models/addUserModel");
+
 
 async function createUser(req,res){
     try{
@@ -43,16 +45,6 @@ async function createUser(req,res){
     }
 };
 
-// async function signUpPage(req,res){
-//     res.render("sign-up");
-// }
-
-// async function loginPage(req,res){
-//     res.json({
-//         success: true,
-//         message: "Digilock auth operational"
-//     });
-// };
 
 
 
@@ -108,7 +100,7 @@ async function startEnrollment(req,res){
 
 async function getUserProfile(req,res){
     try{
-        const user = await User.findById(req.user.id).select("-password");
+        const user = await addUser.findById(req.user.id).select("-password");
         if(!user){
             return res.status(404).json({success: false, message: "User profile not found"});
 
@@ -124,7 +116,7 @@ async function getUserProfile(req,res){
 async function userInfo(req,res){
     try {
     // Fetch all user records from your collection, sorted by newest first
-    const users = await User.find({}).sort({ createdAt: -1 });
+    const users = await addUser.find({}).sort({ createdAt: -1 });
     //console.log(`[DB Debug] Found ${users.length} users in the database collection.`);
     
     res.status(200).json({ success: true, data: users });

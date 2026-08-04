@@ -1,45 +1,12 @@
 const enrollmentState = require("../services/enrollmentState");
 const User = require("../models/addUserModel");
 const accessLog = require("../models/accesslogModel");
-const { sendToDevice } = require("../services/wokwiSocketService");
 
-// async function scan1(req, res) {
-//     const success = sendToDevice({
-//         command: "ENROLL_SCAN1"
-//     });
 
-//     if (!success) {
-//         return res.status(500).json({
-//             success: false, // ─── FIXED: typo "fakse" changed to false
-//             message: "ESP not connected"
-//         });
-//     }
 
-//     res.json({
-//         success: true,
-//         message: "Scan 1 requested"
-//     });
-// }
-
-// async function scan2(req, res) {
-//     const success = sendToDevice({
-//         command: "ENROLL_SCAN2"
-//     });
-
-//     if (!success) {
-//         return res.status(500).json({
-//             success: false,
-//             message: "ESP32 not connected"
-//         });
-//     }
-
-//     res.json({
-//         success: true,
-//         message: "Scan 2 requested"
-//     });
-// }
 
 async function startEnrollment(req, res) {
+    const{sendToDevice} = require("../services/wokwiSocketService");
     const { sessionId } = req.body;
 
     if (!sessionId || typeof sessionId !== "string") {
@@ -70,13 +37,7 @@ async function startEnrollment(req, res) {
 
         console.log("START_ENROLL sent");
         console.log(`Enrollment session successfully started for user: ${sessionId}. Ready for fingerprint payload.`)
-        // setTimeout(() => {
-        //     const currentSession = enrollmentState.getSession();
-
-        //     if (currentSession === sessionId) {
-                
-        //         console.log("enrollment session timedout");
-        // Clear any previous timer just in case
+        
         const existingTimer = enrollmentState.getTimer();
 
         if (existingTimer) {
@@ -87,23 +48,14 @@ async function startEnrollment(req, res) {
         const timer = setTimeout(() => {
             const currentSession = enrollmentState.getSession();
 
-        //         const io = req.app.get("io");
-
-        //         io.emit("ENROLLMENT_TIMEOUT", {
-        //             message: "Enrollment window expired."
-        //         });
-
-        //         enrollmentState.clearSession();
-        //         enrollmentTimer = null;
-        //     }
-        // }, 60000);
+            const io = req.app.get("io");
                 io.emit("ENROLLMENT_TIMEOUT", {
                     message: "Enrollment window expired."
                 });
 
                 enrollmentState.clearSession();
             }
-        , 60000);
+        , 300000);
         enrollmentState.setTimer(timer);
 
         return res.json({
@@ -126,7 +78,7 @@ async function enroll(req, res) {
     const sessionId = enrollmentState.getSession();
     const io = req.app.get("io");
 
-    // 1. CRITICAL VALIDATION: Ensure the enrollment window hasn't timed out or cleared
+    
     if (!sessionId) {
         return res.status(400).json({
             success: false,
@@ -134,7 +86,7 @@ async function enroll(req, res) {
         });
     }
 
-    // 2. Validate essential fields
+   
     if (!firstName || !email || !fingerprintId) {
         return res.status(400).json({
             success: false,
@@ -143,7 +95,7 @@ async function enroll(req, res) {
     }
 
     try {
-        // 3. Create the new user profile in MongoDB
+        
         const newUser = await User.create({
             name: `${firstName} ${lastName}`,
             email,
@@ -156,7 +108,7 @@ async function enroll(req, res) {
 
         console.log(`[Database] User profile created for: ${newUser.name} (${newUser._id})`);
 
-        // 4. Notify any frontend listeners
+        
         if (io) {
             io.emit("BIOMETRIC_LINKED", { 
                 success: true, 
@@ -164,7 +116,7 @@ async function enroll(req, res) {
             });
         }
 
-        // 5. Clean up session
+        
         enrollmentState.clearSession();
         
         return res.status(201).json({ 
@@ -182,38 +134,53 @@ async function enroll(req, res) {
         });
     }
 }
+async function processVerification(fingerprint, io) {
+    const user = await User.findOne({ fingerprint, isActive: true });
+    let status = "DENIED";
+    let userId = null;
+    let username = "Unknown user";
+    let action = "LOCKED";
+
+    if (user) {
+        status = "GRANTED";
+        userId = user._id;
+        username = user.name;
+        action = "OPEN_DOOR";
+    }
+
+    // Write to Access Log in MongoDB
+    await accessLog.create({
+        userId,
+        authType: "fingerprint",
+        status,
+        scannedDataString: fingerprint
+    });
+
+    // Notify frontend clients of real-time scan event
+    if (io) {
+        io.emit("NEW_ACCESS_LOG", { 
+            name: username, 
+            status, 
+            timestamp: new Date() 
+        });
+    }
+
+    return { accessGranted: !!user, action, username };
+}
 
 async function verification(req, res) {
     const { fingerprint } = req.body;
+    
+    console.log("EXACT PAYLOAD RECEIVED:", JSON.stringify(rawFingerprint));
     const io = req.app.get("io");
 
     try {
-        const user = await User.findOne({ fingerprint, isActive: true });
+        const result = await processVerification(fingerprint, io);
         
-        if (user) {
-            // ─── FIXED: Changed "User._id" and "User.name" to "user._id" and "user.name" ───
-            // The uppercase 'User' refers to the model template itself, while lowercase 'user' 
-            // refers to the specific individual record returned by findOne().
-            await accessLog.create({
-                userId: user._id, 
-                authType: "fingerprint",
-                status: "GRANTED",
-                scannedDataString: fingerprint
-            });
-
-            io.emit("NEW_ACCESS_LOG", { name: user.name, status: "GRANTED", timestamp: new Date() });
-            return res.json({ accessGranted: true, action: "OPEN_DOOR", username: user.name });
-
+        if (result.accessGranted) {
+            return res.json(result);
         } else {
-            await accessLog.create({
-                userId: null,
-                authType: "fingerprint",
-                status: "DENIED",
-                scannedDataString: fingerprint
-            });
-
-            io.emit("NEW_ACCESS_LOG", { name: "Unknown user", status: "DENIED", timestamp: new Date() });
-            return res.status(401).json({ accessGranted: false, action: "LOCKED" });
+            return res.status(401).json(result);
         }
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
@@ -222,7 +189,9 @@ async function verification(req, res) {
 
 module.exports = {
     verification,
+    processVerification,
     startEnrollment,
+    enroll
     //scan1,
     //scan2
 };
