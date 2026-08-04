@@ -2,6 +2,7 @@ import { Box, Typography, useTheme } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { useContext, useEffect, useState } from "react";
 import { tokens, ColorModeContext } from "../../theme";
+import { socket } from "../../Api/socket";
 import api from "../../Api/api";
 
 import { useOutletContext } from "react-router-dom";
@@ -29,6 +30,23 @@ const AccessLogs = () => {
       }
     };
     fetchAccessLogs();
+  }, []);
+
+  //this activates when newAccessLog is created and socket finds it
+  useEffect(() => {
+    socket.on("newAccessLog", (newLog) => {
+      setAccessLogs((prev) => {
+        if (prev.some((log) => log._id === newLog._id)) {
+          return prev;
+        }
+
+        return [newLog, ...prev];
+      });
+    });
+
+    return () => {
+      socket.off("newAccessLog");
+    };
   }, []);
 
   const columns = [

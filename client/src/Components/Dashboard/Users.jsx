@@ -48,39 +48,40 @@ const Users = () => {
     { field: "id", headerName: "ID" }, //field represent value grabbed
     { field: "name", headerName: "Name", flex: 1, cellClassName: "name-cell" }, //flex: 1 will extend the cells width
     { field: "email", headerName: "Email", flex: 1 },
-    {
-      field: "access",
-      headerName: "Access Level",
-      flex: 1,
-      renderCell: ({ row: { access } }) => {
-        return (
-          <Box
-            sx={{
-              width: "60%",
-              m: " 10px auto",
-              p: "5px",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              backgroundColor:
-                access === "admin"
-                  ? colors.greenAccent[600]
-                  : colors.greenAccent[700],
+    { field: "relation", headerName: "Relation", flex: 1 },
+    // {
+    //   field: "access",
+    //   headerName: "Access Level",
+    //   flex: 1,
+    //   renderCell: ({ row: { access } }) => {
+    //     return (
+    //       <Box
+    //         sx={{
+    //           width: "60%",
+    //           m: " 10px auto",
+    //           p: "5px",
+    //           display: "flex",
+    //           justifyContent: "center",
+    //           alignItems: "center",
+    //           backgroundColor:
+    //             access === "admin"
+    //               ? colors.greenAccent[600]
+    //               : colors.greenAccent[700],
 
-              borderRadius: "4px",
-            }}
-          >
-            {/* we dont have if else so we use, as code after && is executed only if condition before is mett ie TRUE */}
-            {access === "admin" && <AdminPanelSettingsOutlinedIcon />}
-            {access === "manager" && <ManageAccountsIcon />}
-            {access === "user" && <LockOpenOutlinedIcon />}
-            <Typography color={colors.grey[100]} sx={{ ml: "5px" }}>
-              {access}
-            </Typography>
-          </Box>
-        ); //m: top , bottom
-      },
-    },
+    //           borderRadius: "4px",
+    //         }}
+    //       >
+    //         {/* we dont have if else so we use, as code after && is executed only if condition before is mett ie TRUE */}
+    //         {access === "admin" && <AdminPanelSettingsOutlinedIcon />}
+    //         {access === "manager" && <ManageAccountsIcon />}
+    //         {access === "user" && <LockOpenOutlinedIcon />}
+    //         <Typography color={colors.grey[100]} sx={{ ml: "5px" }}>
+    //           {access}
+    //         </Typography>
+    //       </Box>
+    //     ); //m: top , bottom
+    //   },
+    // },
   ];
 
   const filteredUsers = users.filter((user) => {

@@ -22,7 +22,7 @@ const initialValues = {
   lastName: "",
   email: "",
   relation: "",
-  contact: "", 
+  contact: "",
   address: "",
   fingerprintId: "",
 };
@@ -50,77 +50,94 @@ const AddUser = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [isEnrolling, setIsEnrolling] = useState(false);
 
-  const setFieldValueRef = useRef(null); 
+  const setFieldValueRef = useRef(null);
 
-  const [enrollmentStatus, setEnrollmentStatus] = useState("Waiting for fingerprint...");
-  const [instruction, setInstruction] = useState("Place your finger on scanner");
+  const [enrollmentStatus, setEnrollmentStatus] = useState(
+    "Waiting for fingerprint...",
+  );
+  const [instruction, setInstruction] = useState(
+    "Place your finger on scanner",
+  );
 
   const sessionIdRef = useRef(null);
 
   useEffect(() => {
-    // 1. Listen for raw progress reports from ESP32
-    socket.on("ENROLL_PROGRESS", (data) => {
+    // Handle enrollment progress updates
+    const handleProgress = (data) => {
       setEnrollmentStatus(`State: ${data.state}`);
-      
+
       switch (data.state) {
         case "started":
           setInstruction("Initializing enrollment process...");
           break;
+
         case "waiting_scan1":
           setInstruction("Place your finger on the sensor for Scan 1.");
           break;
+
         case "scan1_done":
           setInstruction("Scan 1 captured successfully!");
           break;
+
         case "waiting_scan2":
-          setInstruction("Place the same finger back on the sensor for Scan 2.");
+          setInstruction(
+            "Place the same finger back on the sensor for Scan 2.",
+          );
           break;
+
         case "scan2_done":
           setInstruction("Scan 2 captured successfully!");
           break;
+
         case "processing":
           setInstruction("Analyzing and compiling templates. Please hold...");
           break;
+
         default:
           setInstruction("Processing...");
       }
-    });
+    };
 
-    // 2. Handle server-enforced timeout
-    socket.on("ENROLLMENT_TIMEOUT", (data) => {
+    // Handle enrollment timeout
+    const handleTimeout = (data) => {
       console.warn(data.message);
       alert("Enrollment session timed out. Please try again.");
       handleCloseDialog();
-    });
+    };
 
-    // 3. Listen for completed token
-    socket.on("FINGERPRINT_READY", (data) => {
-      if (data.success) {
-        console.log("Fingerprint successfully captured:", data.fingerprint);
-        
-        // Use ref to update Formik's internal state
-        if (setFieldValueRef.current) {
-          setFieldValueRef.current("fingerprintId", data.fingerprint);
-        }
+    const handleFingerprintReady = (data) => {
+      if (!data.success) return;
 
-        // Auto-close dialog safely
-        setOpenDialog(false);
-        setIsEnrolling(false);
-        sessionIdRef.current = null;
+      console.log("Fingerprint successfully captured:", data.fingerprint);
+
+      if (setFieldValueRef.current) {
+        setFieldValueRef.current("fingerprintId", data.fingerprint);
       }
-    });
 
-    // Cleanup ALL socket listeners to prevent memory leaks and multiple alert popups
+      setOpenDialog(false);
+      setIsEnrolling(false);
+      sessionIdRef.current = null;
+    };
+
+    // Register listeners
+    socket.on("ENROLL_PROGRESS", handleProgress);
+    socket.on("ENROLLMENT_TIMEOUT", handleTimeout);
+    socket.on("FINGERPRINT_READY", handleFingerprintReady);
+
+    // Cleanup listeners
     return () => {
-      socket.off("ENROLL_PROGRESS");
-      socket.off("ENROLLMENT_TIMEOUT");
-      socket.off("FINGERPRINT_READY");
+      socket.off("ENROLL_PROGRESS", handleProgress);
+      socket.off("ENROLLMENT_TIMEOUT", handleTimeout);
+      socket.off("FINGERPRINT_READY", handleFingerprintReady);
+
+      //  cleanup
+      setFieldValueRef.current = null;
     };
   }, []);
 
   const handleEnrollFingerprint = async (setFieldValue) => {
     try {
-      setFieldValueRef.current = setFieldValue; 
+      setFieldValueRef.current = setFieldValue;
       sessionIdRef.current = crypto.randomUUID();
 
       // 1. Open the UI loading dialog immediately
@@ -128,12 +145,6 @@ const AddUser = () => {
       setOpenDialog(true);
       setEnrollmentStatus("Establishing connection...");
       setInstruction("Connecting to the gateway...");
-
-      // 2. MANUALLY CONNECT THE SOCKET
-      if (!socket.connected) {
-        console.log("🔌 Connecting socket manually...");
-        socket.connect();
-      }
 
       // 3. Register enrollment on the backend
       const response = await api.post("/api/startEnroll", {
@@ -144,14 +155,12 @@ const AddUser = () => {
         setEnrollmentStatus("Waiting for device...");
         setInstruction("Please place your finger on the scanner.");
       }
-
     } catch (error) {
       console.error("Failed to start Enrollment:", error);
       setEnrollmentStatus("Connection Failed");
-      setInstruction(error.response?.data?.message || "Could not start enrollment.");
-      
-      // Clean up socket connection if API call fails
-      socket.disconnect();
+      setInstruction(
+        error.response?.data?.message || "Could not start enrollment.",
+      );
     }
   };
 
@@ -159,7 +168,9 @@ const AddUser = () => {
     // Notify backend to free up the session
     if (sessionIdRef.current) {
       try {
-        await api.post("/api/cancelEnroll", { sessionId: sessionIdRef.current });
+        await api.post("/api/cancelEnroll", {
+          sessionId: sessionIdRef.current,
+        });
       } catch (err) {
         console.warn("Failed to clear session on backend:", err.message);
       }
@@ -170,10 +181,6 @@ const AddUser = () => {
     setIsEnrolling(false);
     setEnrollmentStatus("Waiting for fingerprint...");
     setInstruction("Place your finger on scanner");
-
-    // 4. DISCONNECT THE SOCKET TO SAVE RESOURCES
-    console.log("🔌 Disconnecting socket manually...");
-    socket.disconnect();
   };
   const handleSubmit = async (values, { resetForm }) => {
     console.log("Submitting Signup Data to Database:", values);
@@ -186,14 +193,19 @@ const AddUser = () => {
       }
     } catch (error) {
       console.error("Failed to submit form:", error);
-      alert(error.response?.data?.message || "Something went wrong during signup.");
+      alert(
+        error.response?.data?.message || "Something went wrong during signup.",
+      );
     }
   };
 
   return (
     <Box sx={{ m: "20px" }}>
       <Box>
-        <Typography variant="h5" sx={{ color: colors.greenAccent[400], mb: "10px" }}>
+        <Typography
+          variant="h5"
+          sx={{ color: colors.greenAccent[400], mb: "10px" }}
+        >
           Create a New User Profile
         </Typography>
       </Box>
@@ -313,7 +325,7 @@ const AddUser = () => {
                   variant="filled"
                   label="Fingerprint Id"
                   value={values.fingerprintId}
-                  disabled 
+                  disabled
                   error={!!touched.fingerprintId && !!errors.fingerprintId}
                   helperText={touched.fingerprintId && errors.fingerprintId}
                   sx={{ gridColumn: "span 3" }}

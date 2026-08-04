@@ -1,10 +1,9 @@
 import { Box, Typography, Card, CardContent, useTheme } from "@mui/material";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { tokens } from "../../theme";
-import notificationsData from "../Data/mockdata";
-
 import { useOutletContext } from "react-router-dom";
+import { socket } from "../../Api/socket";
 
 export const formatEvent = (notification) => {
   switch (notification.event) {
@@ -24,7 +23,7 @@ export const formatEvent = (notification) => {
       return `ℹ️ ${notification.lockName}  Opened by ${notification.entityName}`;
 
     default:
-      return notification;
+      return notification.event || "Unknown Event";
   }
 };
 
@@ -32,7 +31,7 @@ const AlertAndNotifications = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
-  const [notifications, setNotifications] = useState(notificationsData); // first variable second function
+  const [notifications, setNotifications] = useState([]); // first variable second function
 
   const { searchQuery } = useOutletContext();
   // const searchQuery = useOutletContext(); if you write this then searchquery consist of all items on context selected,setselected
@@ -62,6 +61,18 @@ const AlertAndNotifications = () => {
       notification.severity?.toLowerCase().includes(query)
     );
   });
+
+  useEffect(() => {
+    const handleNotification = (notification) => {
+      setNotifications((prev) => [notification, ...prev]);
+    };
+
+    socket.on("notification", handleNotification); //listen to the
+
+    return () => {
+      socket.off("notification", handleNotification);
+    };
+  }, []);
 
   return (
     <Box sx={{ m: "20px" }}>
@@ -171,7 +182,9 @@ const AlertAndNotifications = () => {
             //map is like an for loop, here creates card for each of the notifications data present
             //notification is just a variable name that points to the current notification an part of the array [notification, notification , notification]= notifications
             <Card
-              key={notification.id}
+              key={
+                notification._id || notification.id || notification.timestamp
+              }
               sx={{
                 bgcolor: colors.primary[400],
                 pt: "5px",

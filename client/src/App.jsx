@@ -20,9 +20,27 @@ import ProtectedRoute from "./Components/ProtectedRoute";
 import AlertAndNotifications from "./Components/Dashboard/AlertAndNotifications";
 import Fingerprints from "./Components/Dashboard/Fingerprints";
 import Contact from "./Components/Login-Signup/contact";
+import { useEffect } from "react";
+import { socket } from "./Api/socket";
 
 function App() {
   const [theme, colorMode] = useMode();
+
+  useEffect(() => {
+    socket.connect();
+
+    socket.on("connect", () => {
+      console.log("Connected", socket.id);
+    });
+
+    socket.on("disconnect", () => {
+      console.log("Disconnected");
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
 
   return (
     <ColorModeContext.Provider value={colorMode}>
@@ -44,9 +62,9 @@ function App() {
 
               <Route
                 element={
-                  // <ProtectedRoute>
-                  <DashboardLayout />
-                  // </ProtectedRoute>
+                  <ProtectedRoute>
+                    <DashboardLayout />
+                  </ProtectedRoute>
                 }
               >
                 <Route path="/Dashboard" element={<Dashboard />} />

@@ -12,9 +12,10 @@ import {
   DialogActions,
   TextField,
 } from "@mui/material";
-import { fingerprintData } from "../Data/mockdata";
-import { useState } from "react";
+
 import { tokens } from "../../theme";
+import api from "../../Api/api";
+import { useEffect, useState } from "react";
 
 import { useOutletContext } from "react-router-dom";
 
@@ -22,7 +23,7 @@ const Fingerprints = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
-  const [fingerprints, setFingerprints] = useState(fingerprintData);
+  const [fingerprints, setFingerprints] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [newLock, setNewLock] = useState("");
   const [open, setOpen] = useState(false);
@@ -39,9 +40,24 @@ const Fingerprints = () => {
       // "If the value on the left is null or undefined, use the value on the right instead."
       (fingerprint.fingerprintId ?? "").toLowerCase().includes(query) ||
       (fingerprint.enrolled ? "enrolled" : "not enrolled").includes(query) ||
-      fingerprint.locks.some((lock) => lock.toLowerCase().includes(query))
+      (fingerprint.locks ?? []).some((lock) =>
+        lock.toLowerCase().includes(query),
+      )
     );
   });
+
+  useEffect(() => {
+    fetchFingerprints();
+  }, []);
+
+  const fetchFingerprints = async () => {
+    try {
+      const res = await api.get("/fingerprint/get");
+      setFingerprints(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const openLockDialog = (user) => {
     setSelectedUser(user);
@@ -54,59 +70,63 @@ const Fingerprints = () => {
     setSelectedUser(null);
   };
 
-  const addLock = () => {
+  //async is essential
+  const addLock = async () => {
     if (!newLock.trim()) return;
 
-    setFingerprints((prev) =>
-      prev.map((user) =>
-        user.id === selectedUser.id
-          ? {
-              ...user,
-              locks: [...new Set([...user.locks, newLock.trim()])], //add new lock
-            }
-          : user,
-      ),
-    );
+    try {
+      const updatedLocks = [
+        ...new Set([...selectedUser.locks, newLock.trim()]),
+      ];
 
-    setNewLock(""); // making this empty
+      await api.patch(`/fingerprints/${selectedUser._id}/locks`, {
+        locks: updatedLocks,
+      });
+
+      fetchFingerprints();
+
+      setSelectedUser({
+        ...selectedUser,
+        locks: updatedLocks,
+      });
+
+      setNewLock("");
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const removeLock = (lockToRemove) => {
-    setFingerprints((prev) =>
-      prev.map((user) =>
-        user.id === selectedUser.id
-          ? {
-              ...user,
-              locks: user.locks.filter((lock) => lock !== lockToRemove), //remvoes the lock
-            }
-          : user,
-      ),
-    );
+  const removeLock = async (lockToRemove) => {
+    try {
+      const updatedLocks = selectedUser.locks.filter(
+        (lock) => lock !== lockToRemove,
+      );
 
-    setSelectedUser((prev) => ({
-      ...prev,
-      locks: prev.locks.filter((lock) => lock !== lockToRemove),
-    }));
+      await api.patch(`/fingerprints/${selectedUser._id}/locks`, {
+        locks: updatedLocks,
+      });
+
+      fetchFingerprints();
+
+      setSelectedUser({
+        ...selectedUser,
+        locks: updatedLocks,
+      });
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const deleteFingerprint = (id) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this fingerprint?",
-    );
+  const deleteFingerprint = async (id) => {
+    if (!window.confirm("Delete this fingerprint?")) return;
 
-    if (!confirmDelete) return;
+    try {
+      await api.delete(`/fingerprints/${id}`);
 
-    setFingerprints((prev) =>
-      prev.map((user) =>
-        user.id === id
-          ? {
-              ...user,
-              enrolled: false,
-              fingerprintId: null,
-            }
-          : user,
-      ),
-    );
+      fetchFingerprints();
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
@@ -119,7 +139,8 @@ const Fingerprints = () => {
         {/* curly bracket for js code */}
         {filteredfingerprints.map((user) => (
           //lets name varable user as each card will be for one user which will consist of one fingerprint
-          <Card key={user.id} sx={{ bgcolor: colors.primary[400], pt: "6px" }}>
+          //user._id for mongoDB
+          <Card key={user._id} sx={{ bgcolor: colors.primary[400], pt: "6px" }}>
             <CardContent>
               <Typography variant="h5">{user.userName}</Typography>
               <Typography>{user.role}</Typography>
@@ -145,7 +166,7 @@ const Fingerprints = () => {
 
                 <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                   <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-                    {user.locks.map((lock) => (
+                    {(user.locks ?? []).map((lock) => (
                       <Chip
                         key={lock}
                         label={lock}
@@ -170,8 +191,11 @@ const Fingerprints = () => {
 
                     <Button
                       variant="outlined"
-                      color={colors.grey[400]}
-                      onClick={() => deleteFingerprint(user.id)}
+                      sx={{
+                        color: colors.grey[400],
+                        borderColor: colors.grey[400],
+                      }}
+                      onClick={() => deleteFingerprint(user._id)}
                     >
                       Delete Fingerprint
                     </Button>
