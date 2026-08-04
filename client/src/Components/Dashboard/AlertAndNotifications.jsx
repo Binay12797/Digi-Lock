@@ -4,25 +4,27 @@ import { useState } from "react";
 import { tokens } from "../../theme";
 import notificationsData from "../Data/mockdata";
 
-const formatEvent = (event) => {
-  switch (event) {
+import { useOutletContext } from "react-router-dom";
+
+export const formatEvent = (notification) => {
+  switch (notification.event) {
     case "FAILED_FINGERPRINT":
-      return "🚨 Failed Fingerprint Attempt at ";
+      return `🚨 Failed Fingerprint Attempt at ${notification.entityName}`;
 
     case "LOCK_TAMPER":
-      return "🚨 Lock Tamper Detected at ";
+      return `🚨 Lock Tamper Detected at ${notification.entityName}`;
 
     case "LOCK_OFFLINE":
-      return "⚠️ Lock Offline at ";
+      return `⚠️ Lock Offline at ${notification.entityName}`;
 
     case "USER_ADDED":
-      return "ℹ️ Added New User ";
+      return `ℹ️ Added New User ${notification.entityName}`;
 
     case "DOOR_OPENED":
-      return "ℹ️ Door Openned by ";
+      return `ℹ️ ${notification.lockName}  Opened by ${notification.entityName}`;
 
     default:
-      return event;
+      return notification;
   }
 };
 
@@ -31,6 +33,9 @@ const AlertAndNotifications = () => {
   const colors = tokens(theme.palette.mode);
 
   const [notifications, setNotifications] = useState(notificationsData); // first variable second function
+
+  const { searchQuery } = useOutletContext();
+  // const searchQuery = useOutletContext(); if you write this then searchquery consist of all items on context selected,setselected
 
   const criticalCount = notifications.filter(
     (notifications) => notifications.severity === "critical",
@@ -45,6 +50,18 @@ const AlertAndNotifications = () => {
   ).length;
 
   const allCount = notifications.length;
+
+  const filteredNotifications = notifications.filter((notification) => {
+    const query = searchQuery.toLowerCase();
+
+    return (
+      formatEvent(notification).toLowerCase().includes(query) ||
+      notification.event?.toLowerCase().includes(query) ||
+      notification.lockName?.toLowerCase().includes(query) ||
+      notification.entityName?.toLowerCase().includes(query) ||
+      notification.severity?.toLowerCase().includes(query)
+    );
+  });
 
   return (
     <Box sx={{ m: "20px" }}>
@@ -147,7 +164,7 @@ const AlertAndNotifications = () => {
       </Typography>
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-        {[...notifications]
+        {[...filteredNotifications]
           // if b-a is positive it tells b should come before a ie sorted such that b>a ie highest come first
           .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
           .map((notification) => (
@@ -175,8 +192,7 @@ const AlertAndNotifications = () => {
                   }}
                 >
                   <Typography variant="h5">
-                    {formatEvent(notification.event)}
-                    {notification.entityName}
+                    {formatEvent(notification)}
                   </Typography>
                   <Typography variant="h5">
                     {new Date(notification.timestamp).toLocaleString("en-US", {

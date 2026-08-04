@@ -8,29 +8,8 @@ import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
 
 import { useOutletContext } from "react-router-dom";
-import AlertAndNotifications from "./AlertAndNotifications";
 
-const formatEvent = (event) => {
-  switch (event) {
-    case "FAILED_FINGERPRINT":
-      return "🚨 Failed Fingerprint Attempt at ";
-
-    case "LOCK_TAMPER":
-      return "🚨 Lock Tamper Detected at ";
-
-    case "LOCK_OFFLINE":
-      return "⚠️ Lock Offline at ";
-
-    case "USER_ADDED":
-      return "ℹ️ Added New User ";
-
-    case "DOOR_OPENED":
-      return "ℹ️ Door Openned by ";
-
-    default:
-      return event;
-  }
-};
+import { formatEvent } from "./AlertAndNotifications";
 
 const DashboardNotifications = () => {
   const theme = useTheme();
@@ -96,8 +75,7 @@ const DashboardNotifications = () => {
                   }}
                 >
                   <Typography variant="h6">
-                    {formatEvent(notification.event)}
-                    {notification.entityName}
+                    {formatEvent(notification)}
                   </Typography>
                   <Typography variant="h6">
                     {formatDistanceToNow(new Date(notification.timestamp), {

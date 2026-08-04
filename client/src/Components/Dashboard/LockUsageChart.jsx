@@ -15,6 +15,19 @@ const LockUsageChart = ({ lockData }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
+  const latestFiveData = [...lockData]
+    .sort((a, b) => new Date(b.date) - new Date(a.date))
+    .slice(0, 5)
+    .reverse() // oldest → newest for the chart
+    //item is just a parameter name representing the current object in the array while .map() loops through it.
+    .map((item) => ({
+      ...item,
+      date: new Date(item.date).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      }),
+    }));
+
   return (
     <Card
       sx={{
@@ -26,18 +39,18 @@ const LockUsageChart = ({ lockData }) => {
       <CardContent>
         <Typography variant="h5">Unlocks</Typography>
         <Typography variant="subtitle2" mb={2}>
-          Todays successful unlocks
+          Todays successful unlocks over last five days
         </Typography>
         {/* The ResponsiveContainer component is a container that adjusts its width and height based on the size of its parent element. */}
         <Box sx={{ mt: 3 }}>
           <ResponsiveContainer width={"100%"} height={320}>
             <BarChart
-              data={lockData} //passes data for mock data
+              data={latestFiveData} //passes data for mock data
               margin={{ top: 20, right: 20, left: 0, bottom: 5 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke={colors.grey[800]} />
               <XAxis
-                dataKey="lockName"
+                dataKey="date"
                 tick={{ fill: colors.grey[100] }}
                 tickLine={{ stroke: colors.grey[600] }}
                 axisLine={{ stroke: colors.grey[500] }}

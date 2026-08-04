@@ -4,6 +4,7 @@ import { useContext, useState, useEffect } from "react";
 import { tokens, ColorModeContext } from "../../theme";
 // import axios from "axios";
 import api from "../../Api/api";
+import { useOutletContext } from "react-router-dom";
 
 const Locks = () => {
   const theme = useTheme();
@@ -12,6 +13,8 @@ const Locks = () => {
 
   const [locks, setLocks] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const { searchQuery } = useOutletContext();
 
   //to export data from backend
   useEffect(() => {
@@ -104,6 +107,20 @@ const Locks = () => {
     },
   ];
 
+  const filteredLocks = locks.filter((lock) => {
+    const query = searchQuery.toLowerCase();
+
+    return (
+      lock._id?.toLowerCase().includes(query) ||
+      lock.deviceId?.toLowerCase().includes(query) ||
+      lock.location?.toLowerCase().includes(query) ||
+      lock.status?.toLowerCase().includes(query) ||
+      lock.isOnline?.toLowerCase().includes(query) ||
+      lock.time?.toLowerCase().includes(query) ||
+      lock.action?.toLowerCase().includes(query)
+    );
+  });
+
   return (
     <Box sx={{ m: "20px" }}>
       <Typography variant="h5" sx={{ color: colors.greenAccent[400] }}>
@@ -132,7 +149,7 @@ const Locks = () => {
       >
         <DataGrid
           checkboxSelection
-          rows={locks}
+          rows={filteredLocks}
           columns={columns}
           getRowId={(row) => row._id}
           loading={loading}

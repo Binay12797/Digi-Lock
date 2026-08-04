@@ -11,11 +11,29 @@ import { fingerprintData } from "../Data/mockdata";
 import { useState } from "react";
 import { tokens } from "../../theme";
 
+import { useOutletContext } from "react-router-dom";
+
 const Fingerprints = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
   const [fingerprints, setFingerprints] = useState(fingerprintData);
+
+  const { searchQuery } = useOutletContext();
+
+  const filteredfingerprints = fingerprints.filter((fingerprint) => {
+    const query = searchQuery.toLowerCase();
+
+    return (
+      fingerprint.id.toString()?.toLowerCase().includes(query) ||
+      fingerprint.userName?.toLowerCase().includes(query) ||
+      fingerprint.role?.toLowerCase().includes(query) ||
+      // "If the value on the left is null or undefined, use the value on the right instead."
+      (fingerprint.fingerprintId ?? "").toLowerCase().includes(query) ||
+      (fingerprint.enrolled ? "enrolled" : "not enrolled").includes(query) ||
+      fingerprint.locks.some((lock) => lock.toLowerCase().includes(query))
+    );
+  });
 
   return (
     <Box sx={{ m: "20px" }}>
@@ -25,13 +43,13 @@ const Fingerprints = () => {
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 4 }}>
         {/* curly bracket for js code */}
-        {fingerprints.map((user) => (
+        {filteredfingerprints.map((user) => (
           //lets name varable user as each card will be for one user which will consist of one fingerprint
           <Card key={user.id} sx={{ bgcolor: colors.primary[400], pt: "6px" }}>
             <CardContent>
               <Typography variant="h5">{user.userName}</Typography>
               <Typography>{user.role}</Typography>
-              <Typography sx={{ mt: 2 }}>
+              <Typography component="div" sx={{ mt: 2 }}>
                 <strong>Status:</strong>
                 <Typography
                   component="span"

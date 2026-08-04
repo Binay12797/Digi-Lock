@@ -19,6 +19,7 @@ import AuthProvider from "./Components/Context/AuthContext";
 import ProtectedRoute from "./Components/ProtectedRoute";
 import AlertAndNotifications from "./Components/Dashboard/AlertAndNotifications";
 import Fingerprints from "./Components/Dashboard/Fingerprints";
+import Contact from "./Components/Login-Signup/contact";
 
 function App() {
   const [theme, colorMode] = useMode();
@@ -38,6 +39,7 @@ function App() {
               <Route element={<AuthLayout />}>
                 <Route path="/Signup" element={<Signup />} />
                 <Route path="/Login" element={<Login />} />
+                <Route path="/contact" element={<Contact />} />
               </Route>
 
               <Route

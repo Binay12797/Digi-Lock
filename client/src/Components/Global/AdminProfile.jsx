@@ -15,9 +15,9 @@ import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 
 const AdminProfileMenu = ({ anchorEl, openProfile, handleClose }) => {
   const { logout } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
   const theme = useTheme(); // theme shade
   const colors = tokens(theme.palette.mode);
-  const email = "binaybista@gmail.com";
 
   return (
     <Box>
@@ -36,7 +36,7 @@ const AdminProfileMenu = ({ anchorEl, openProfile, handleClose }) => {
               mt: 1.5,
               bgcolor: colors.primary[400],
               backgroundImage: "none",
-              backdropFilter: "blur(10px)",
+              backdropFilter: "blur(25px)",
               color: colors.blueAccent[100],
               border: "1px",
               borderColor: colors.grey[600],
@@ -67,10 +67,10 @@ const AdminProfileMenu = ({ anchorEl, openProfile, handleClose }) => {
             }}
           >
             <Typography variant="h5" sx={{ color: colors.grey[100] }}>
-              Name: {}
+              Name: {user?.user?.name}
             </Typography>
             <Typography variant="h5" sx={{ color: colors.grey[100] }}>
-              Email: {email}
+              Email: {user?.user?.email}
             </Typography>
           </Box>
           <Divider sx={{ bgcolor: colors.grey[600] }} />
