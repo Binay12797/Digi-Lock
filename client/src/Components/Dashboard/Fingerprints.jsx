@@ -6,6 +6,11 @@ import {
   Card,
   CardContent,
   Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
 } from "@mui/material";
 import { fingerprintData } from "../Data/mockdata";
 import { useState } from "react";
@@ -18,6 +23,9 @@ const Fingerprints = () => {
   const colors = tokens(theme.palette.mode);
 
   const [fingerprints, setFingerprints] = useState(fingerprintData);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [newLock, setNewLock] = useState("");
+  const [open, setOpen] = useState(false);
 
   const { searchQuery } = useOutletContext();
 
@@ -34,6 +42,72 @@ const Fingerprints = () => {
       fingerprint.locks.some((lock) => lock.toLowerCase().includes(query))
     );
   });
+
+  const openLockDialog = (user) => {
+    setSelectedUser(user);
+    setNewLock("");
+    setOpen(true);
+  };
+
+  const closeDialog = () => {
+    setOpen(false);
+    setSelectedUser(null);
+  };
+
+  const addLock = () => {
+    if (!newLock.trim()) return;
+
+    setFingerprints((prev) =>
+      prev.map((user) =>
+        user.id === selectedUser.id
+          ? {
+              ...user,
+              locks: [...new Set([...user.locks, newLock.trim()])], //add new lock
+            }
+          : user,
+      ),
+    );
+
+    setNewLock(""); // making this empty
+  };
+
+  const removeLock = (lockToRemove) => {
+    setFingerprints((prev) =>
+      prev.map((user) =>
+        user.id === selectedUser.id
+          ? {
+              ...user,
+              locks: user.locks.filter((lock) => lock !== lockToRemove), //remvoes the lock
+            }
+          : user,
+      ),
+    );
+
+    setSelectedUser((prev) => ({
+      ...prev,
+      locks: prev.locks.filter((lock) => lock !== lockToRemove),
+    }));
+  };
+
+  const deleteFingerprint = (id) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this fingerprint?",
+    );
+
+    if (!confirmDelete) return;
+
+    setFingerprints((prev) =>
+      prev.map((user) =>
+        user.id === id
+          ? {
+              ...user,
+              enrolled: false,
+              fingerprintId: null,
+            }
+          : user,
+      ),
+    );
+  };
 
   return (
     <Box sx={{ m: "20px" }}>
@@ -87,11 +161,18 @@ const Fingerprints = () => {
                       gap: 2,
                     }}
                   >
-                    <Button variant="outlined" color={colors.grey[400]}>
-                      Update Fingerprint
+                    <Button
+                      variant="outlined"
+                      onClick={() => openLockDialog(user)}
+                    >
+                      Manage Locks
                     </Button>
 
-                    <Button variant="outlined" color={colors.grey[400]}>
+                    <Button
+                      variant="outlined"
+                      color={colors.grey[400]}
+                      onClick={() => deleteFingerprint(user.id)}
+                    >
                       Delete Fingerprint
                     </Button>
                   </Box>
@@ -100,6 +181,59 @@ const Fingerprints = () => {
             </CardContent>
           </Card>
         ))}
+
+        <Dialog open={open} onClose={closeDialog} maxWidth="sm" fullWidth>
+          <DialogTitle>
+            Manage Locks
+            {selectedUser && ` - ${selectedUser.userName}`}
+          </DialogTitle>
+
+          <DialogContent>
+            <Box
+              sx={{
+                display: "flex",
+                gap: "3px",
+                mt: 1,
+                mb: 1,
+              }}
+            >
+              <TextField
+                label="Lock Name"
+                fullWidth
+                value={newLock}
+                onChange={(e) => setNewLock(e.target.value)}
+              />
+
+              <Button
+                variant="outlined"
+                onClick={addLock}
+                sx={{ color: colors.greenAccent[400] }}
+              >
+                Add
+              </Button>
+            </Box>
+
+            <Typography sx={{ mb: 1 }}>Authorized Locks:</Typography>
+
+            <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+              {selectedUser?.locks.map((lock) => (
+                <Chip
+                  key={lock}
+                  label={lock}
+                  color="success"
+                  variant="outlined"
+                  onDelete={() => removeLock(lock)}
+                />
+              ))}
+            </Box>
+          </DialogContent>
+
+          <DialogActions>
+            <Button onClick={closeDialog} variant="outlined">
+              Close
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     </Box>
   );
