@@ -1,7 +1,7 @@
 const enrollmentState = require("../services/enrollmentState");
 const User = require("../models/addUserModel");
 const accessLog = require("../models/accesslogModel");
-const { getDashboardData } = require("../services/dashboardService");
+const {getDashboardData} = require("../services/dashboardServices");
 
 async function startEnrollment(req, res) {
   const { sendToDevice } = require("../services/wokwiSocketService");
