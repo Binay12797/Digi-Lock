@@ -9,7 +9,7 @@ import api from "../../Api/api";
 export const formatEvent = (notification) => {
   switch (notification.event) {
     case "FAILED_FINGERPRINT":
-      return `🚨 Failed Fingerprint Attempt at ${notification.entityName}`;
+      return `🚨 Failed Fingerprint Attempt: ${notification.entityName}`;
 
     case "LOCK_TAMPER":
       return `🚨 Lock Tamper Detected at ${notification.entityName}`;

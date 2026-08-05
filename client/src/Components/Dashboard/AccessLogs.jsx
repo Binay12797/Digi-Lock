@@ -157,8 +157,8 @@ const AccessLogs = () => {
             bgcolor: colors.redAccent[700],
           }}
         >
-          <Typography color="white">
-            🔒 Lock is in an Unresponsive State for 1 min
+          <Typography color="white" variant="h5">
+            🚨 Lock is in an Unresponsive State for 1 min
           </Typography>
         </Box>
       )}
