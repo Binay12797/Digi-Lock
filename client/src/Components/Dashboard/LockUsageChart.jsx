@@ -1,0 +1,85 @@
+import { Card, CardContent, Box, Typography } from "@mui/material";
+import { useTheme } from "@mui/material";
+import { tokens } from "../../theme";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+
+const LockUsageChart = ({ lockData }) => {
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
+
+  const latestFiveData = [...(lockData || [])]
+    .sort((a, b) => new Date(b.date) - new Date(a.date))
+    .slice(0, 5)
+    .reverse() // oldest → newest for the chart
+    //item is just a parameter name representing the current object in the array while .map() loops through it.
+    .map((item) => ({
+      ...item,
+      date: new Date(item.date).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      }),
+    }));
+
+  return (
+    <Card
+      sx={{
+        height: "100%",
+        bgcolor: colors.primary[400],
+        borderRadius: 3,
+      }}
+    >
+      <CardContent>
+        <Typography variant="h5">Unlocks</Typography>
+        <Typography variant="subtitle2" mb={2}>
+          Successful unlocks during the last 5 days
+        </Typography>
+        {/* The ResponsiveContainer component is a container that adjusts its width and height based on the size of its parent element. */}
+        <Box sx={{ mt: 3 }}>
+          <ResponsiveContainer width={"100%"} height={320}>
+            <BarChart
+              data={latestFiveData} //passes data for mock data
+              margin={{ top: 20, right: 20, left: 0, bottom: 5 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke={colors.grey[800]} />
+              <XAxis
+                dataKey="date"
+                tick={{ fill: colors.grey[100] }}
+                tickLine={{ stroke: colors.grey[600] }}
+                axisLine={{ stroke: colors.grey[500] }}
+              />
+              <YAxis
+                allowDecimals={false}
+                tick={{ fill: colors.grey[100] }}
+                axisLine={{ stroke: colors.grey[500] }}
+                tickLine={{ stroke: colors.grey[600] }}
+              />
+              <Tooltip
+                contentStyle={{
+                  background: colors.primary[500],
+                  border: "none",
+                  borderRadius: 8,
+                  color: "#fff",
+                }}
+              />
+              <Bar
+                dataKey="unlocks"
+                fill={colors.blueAccent[700]}
+                radius={[8, 8, 0, 0]}
+              ></Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </Box>
+      </CardContent>
+    </Card>
+  );
+};
+
+export default LockUsageChart;

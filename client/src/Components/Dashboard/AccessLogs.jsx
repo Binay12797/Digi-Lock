@@ -1,0 +1,200 @@
+import { Box, Typography, useTheme } from "@mui/material";
+import { DataGrid } from "@mui/x-data-grid";
+import { useContext, useEffect, useState } from "react";
+import { tokens, ColorModeContext } from "../../theme";
+import { socket } from "../../Api/socket";
+import api from "../../Api/api";
+
+import { useOutletContext } from "react-router-dom";
+
+const AccessLogs = () => {
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
+  const colorMode = useContext(ColorModeContext);
+
+  const [accessLogs, setAccessLogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const { searchQuery } = useOutletContext();
+
+  //for more then three access denied
+  const consecutiveDenied =
+    accessLogs.length >= 3 &&
+    accessLogs.slice(0, 3).every((log) => log.status === "DENIED");
+
+  useEffect(() => {
+    const fetchAccessLogs = async () => {
+      try {
+        // prevents locally stored cached response so an fresh request if forced, (This is called cache busting.)
+        const response = await api.get(`/api/Logs?t=${Date.now()}`); //?t=${Date.now()} this give timestamp so every request become something like /api/Logs?t=1750762145123 Since the number changes every request, the browser treats it as a completely new URL.
+        setAccessLogs(response.data.data || []); //[] is a fall back value if response.data.data is null
+      } catch (error) {
+        console.error("Error fetching Access Logs:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAccessLogs();
+  }, []);
+
+  //this activates when newAccessLog is created and socket finds it
+  useEffect(() => {
+    socket.on("newAccessLog", (newLog) => {
+      setAccessLogs((prev) => {
+        if (prev.some((log) => log._id === newLog._id)) {
+          return prev;
+        }
+
+        return [newLog, ...prev];
+      });
+    });
+
+    return () => {
+      socket.off("newAccessLog");
+    };
+  }, []);
+
+  const columns = [
+    { field: "_id", headerName: "Log Id", flex: 1 },
+
+    {
+      field: "createdAt",
+      headerName: "Last Access Time",
+      //  Read backend's 'createdAt' field and safely handle empty states to avoid NaN errors
+      valueGetter: (value, row) => {
+        const targetRow = row || value?.row; // this is done because different DataGrid versions pass different parameters.
+        return targetRow?.createdAt
+          ? new Date(targetRow.createdAt).getTime()
+          : 0;
+      },
+      renderCell: (params) =>
+        params.row.createdAt
+          ? new Date(params.row.createdAt).toLocaleString()
+          : "N/A",
+      flex: 1,
+    },
+    {
+      field: "userId",
+      headerName: "User Name",
+      //  Extracts the populated user name safely across varied DataGrid versions
+      valueGetter: (value, row) => {
+        const targetRow = row || value?.row;
+        return targetRow?.userId?.name || "Unknown User";
+      },
+      flex: 1,
+    },
+    {
+      field: "action",
+      headerName: "Action",
+      flex: 1,
+      valueGetter: (value, row) => {
+        const targetRow = row || value?.row;
+
+        return targetRow?.status === "GRANTED"
+          ? "Door Unlocked"
+          : "Access Denied";
+      },
+    },
+    {
+      field: "status",
+      headerName: "Access",
+      flex: 1,
+      renderCell: ({ row: { status } }) => {
+        // Standardize status value parsing to uppercase to cleanly match conditions
+        const currentStatus = status?.toUpperCase() || "FAILED"; //failed if status is undefined
+        return (
+          <Box
+            sx={{
+              width: "70%",
+              m: "15px auto",
+              display: "flex",
+              justifyContent: "center",
+              backgroundColor:
+                currentStatus === "GRANTED"
+                  ? colors.greenAccent[700]
+                  : colors.redAccent[700],
+              borderRadius: "5px",
+            }}
+          >
+            <Typography color={colors.grey[100]} sx={{ ml: "5px" }}>
+              {currentStatus}
+            </Typography>
+          </Box>
+        );
+      },
+    },
+
+    { field: "authType", headerName: "Method", flex: 1 },
+  ];
+
+  const filterAccesslogs = accessLogs.filter((accessLog) => {
+    const query = searchQuery.toLowerCase();
+
+    return (
+      accessLog.location?.toLowerCase().includes(query) ||
+      accessLog.deviceId?.toLowerCase().includes(query) ||
+      accessLog.lastAccessTime?.toLowerCase().includes(query) ||
+      accessLog.user?.toLowerCase().includes(query) ||
+      accessLog.action?.toLowerCase().includes(query) ||
+      accessLog.status?.toLowerCase().includes(query) ||
+      accessLog.reason?.toLowerCase().includes(query) ||
+      accessLog.method?.toLowerCase().includes(query)
+    );
+  });
+
+  return (
+    <Box sx={{ m: "20px" }}>
+      <Typography variant="h5" sx={{ color: colors.greenAccent[400] }}>
+        View Access Logs
+      </Typography>
+
+      {consecutiveDenied && (
+        <Box
+          sx={{
+            mb: 2,
+            p: 2,
+            borderRadius: 2,
+            bgcolor: colors.redAccent[700],
+          }}
+        >
+          <Typography color="white">
+            🔒 Lock is in an Unresponsive State for 1 min
+          </Typography>
+        </Box>
+      )}
+      <Box
+        sx={{
+          width: "100%",
+          m: "10px 0 0 0",
+          "& .MuiDataGrid-root": { border: "none" },
+          "& .MuiDataGrid-cell": { borderBottom: "none" },
+          "& .MuiDataGrid-columnHeaders": {
+            backgroundColor: `${colors.blueAccent[700]} !important`,
+            borderBottom: "none",
+          },
+          "& .MuiDataGrid-virtualScroller": {
+            backgroundColor: colors.primary[400],
+          },
+          "& .MuiDataGrid-footerContainer": {
+            backgroundColor: colors.blueAccent[700],
+            borderTop: "none",
+          },
+          "& .MuiCheckbox-root": {
+            color: `${colors.greenAccent[200]} !important`,
+          },
+        }}
+      >
+        <DataGrid
+          checkboxSelection
+          rows={filterAccesslogs}
+          columns={columns}
+          getRowId={(row) => row._id}
+          slotProps={{ toolbar: { showQuickFilter: true } }} // Modern standard replacement for showToolbar
+          loading={loading}
+        />
+      </Box>
+    </Box>
+  );
+};
+
+export default AccessLogs;

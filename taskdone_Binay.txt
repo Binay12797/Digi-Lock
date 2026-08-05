@@ -1,0 +1,267 @@
+date: Day 1
+
+npm create vite@latest
+Project name: Digi-Lock
+Package name: digi-lock (there are some rules on naming)
+frame work: React
+variant: JavaScript
+
+node_modules: consist of external Package and library that our project relies on
+public: consist of public assets 
+assets: consist of image on videos 
+
+.jsx : JavaScript XML
+
+cd client
+npm run dev
+
+jsx file name cannot contain - dash
+
+../ bring control outside current folder by one
+
+
+# Sometime really usefull
+
+Try:
+Ctrl + Shift + P
+then run:
+Developer: Reload Window
+
+flex is used to arrange item in a row / column , centre items horizontally
+font weight is for border of font
+
+rafc -- an extension command
+
+installing react router: (install in client)
+cd client
+npm install react-router-dom
+
+Day 2:
+install axios in client
+npm install axios
+
+create an fucntion handleLogin to handle login inputs and send data to backend from user name and password in login Package
+
+implemeted code for Enter key so that user dont have to manually press login button
+
+create an handlSignup function that handle signup
+
+Day 3:
+
+I decided to use material UI to design the webpage
+for which i used WebKit , WebKit is a fast, open-source web browser engine developed primarily by Apple.
+
+codes from webpage:
+npm install @mui/material @emotion/react @emotion/styled
+@mui/x-data-grid @mui/icons-material
+
+npm install react-pro-sidebar  (allows us to create sidebar more easily)
+
+vh : view port height in percentage
+
+finds: use ctrl+d to select and edit multiple same text at once
+
+useState: It allows a component to remember values between renders and triggers
+
+useContext: Normally in React, if a parent component has data that a deeply nested child component needs, you have to pass it down manually through every single component in between (a frustrating process known as "prop drilling"). useContext solves this.
+
+useMemo (The Performance Saver)
+Every time a component's state or props change, React re-runs the entire component function. If you have a really slow, complex math calculation inside that component, it will re-calculate every single time, slowing down your app.
+What it does: It "memoizes" (caches) the result of a calculation. It will only re-run that calculation if the specific dependencies it relies on change.
+
+
+extension: Tailwind Shades, creates multiple shades of a colour
+shortcut: ctrl+k + ctrl+g
+
+
+=> ({ ... }) * Meaning: Returns an object literal immediately.
+Return Value: The object defined inside the parentheses.
+Best For: Fast, simple, one-liner object creation without extra logic.
+
+=> { ... } * Meaning: Executes a standard block of code.
+Return Value: Returns undefined automatically, unless you explicitly type the return keyword.
+Best For: Complex logic where you need to run calculations or declare variables before returning a result.
+
+
+NOTE: I have written color for var and colour for codes
+
+shortcut: ctrl+D
+
+
+Day 3:
+npm install react-pro-sidebar
+
+[,] for arrays
+{,} for object
+
+// ❌ Wrong - these target the Box itself, not children
+"&.pro-sidebar-inner": { ... }
+
+// ✅ Correct - use descendant selectors
+"& .pro-sidebar-inner": { ... }  // note the space
+
+
+new Date(row.timestamp).getTime()
+This returns a number representing milliseconds since a fixed starting point in time:
+📍 1 January 1970, 00:00:00 UTC
+This is called the Unix Epoch
+
+new Date("2026-06-20T12:30:00Z").getTime() returns 1781968200000
+
+Data Fetching: Getting data from an API (like the axios call we just discussed).
+
+Day:
+ 
+i used formic over react hook form as i feel its more suitable for our project
+
+note: formik and formic are different formic is for python
+
+cd client
+npm install formik yup: installed formik and yup for add user
+
+formal parameters
+
+A schema is a structured framework, blueprint, or mental model used to organize information, concepts, or data
+
+yup.object(): This tells the app that the data being checked is an object. 
+.shape({ }): This defines the exact "shape" or blueprint of that object. Inside the curly brackets { }, you list the specific form fields and their rules.
+
+A phone regex (Regular Expression) is a search pattern used in programming and web development to match, validate, or extract phone numbers within a text
+
+day:
+A JWT consists of three parts separated by dots
+Header.Payload.Signature
+{
+  "alg": "HS256",
+  "typ": "JWT"
+}
+{
+  "userId": "12345",
+  "email": "john@example.com",
+  "role": "admin",
+  "exp": 1787641200
+}
+HMACSHA256(
+    header + "." + payload,
+    secretKey
+)
+
+If someone changes the payload: role: "user" to role: "admin"
+the signature no longer matches, and the server rejects the token.
+
+flow:
+
+User
+  │
+  │ Login (email + password)
+  ▼
+Server
+  │
+  │ Verify credentials
+  ▼
+Generate JWT
+  │
+  ▼
+Client stores JWT
+  │
+  │
+Future Requests
+  │
+Authorization: Bearer <JWT>
+  ▼
+Server verifies JWT
+  │
+  ▼
+Returns protected data
+
+
+Storage: Store the token securely. While localStorage is easy, using an HttpOnly cookie is more secure against XSS (Cross-Site Scripting) attacks because JavaScript cannot access it directly.
+
+Never put sensitive data (like passwords) inside the JWT payload. Anyone can decode the token to read its contents; the signature only prevents them from altering it.
+Use Environment Variables: Never hardcode your JWT_SECRET in your code. Keep it in a .env file that is listed in your .gitignore.
+Token Expiry: Always set an expiresIn time (e.g., 15m or 1h) when creating the token.
+
+You can create a new branch form past commits of any other existing branch
+
+note: opp1 || opp2  //here if first opp1 is false/null/undefined then opp2 runs
+
+`/locks/:deviceId?t=${Date.now()}` ${Date.now()} this part is operation
+
+binaybista@gmail.com
+Mang@pill09
+
+
+daY:
+
+to do:
+user profile
+alerts and notification
+fingerprints
+dashboard
+
+
+next day
+settings
+serach bar
+
+margin is the space outside an element's border, while padding is the space inside an element's border
+
+a small detail 
+while we import someting from ........................
+someting is function on that page not the whole page
+
+In JavaScript, toLocaleString() is a built-in method used to convert numbers, dates, and arrays into language-sensitive, localized strings
+Language-sensitive localized strings are text formats that change automatically based on a user's language, country, and cultural habits.
+
+ curly bracket for js code and () for HTML
+
+ A Chip in Material UI (MUI) is a compact UI component that represents an input, attribute, or action
+
+install recharts inside client
+ npm install recharts : for charts
+
+ The useEffect hook is a built-in React tool used to synchronized functional components with external systems or handle side effects
+
+Socket.IO is a JavaScript library that enables real-time, bidirectional communication between a client (browser) and a server
+  normally:
+  Client ----request----> Server
+  Client <---response---- Server
+
+  Socket.IO keeps a persistent connection open:
+  Client <=======================> Server
+          Always Connected
+
+  No refreshing.
+  No polling.
+  No delay.
+
+
+Installed Socket.io inside client
+for client: npm install socket.io-client //client and server used different versions 
+for server: npm install socket.io
+
+Use Socket.IO for
+New access logs
+Live notifications
+Lock status changes (online/offline)
+Tamper alerts
+Fingerprint enrollment progress
+Dashboard statistics updating in real time
+
+
+//stores the reference to the setFieldValue function inside .current.
+const setFieldValueRef = useRef(null);
+is
+
+const setFieldValueRef = {
+    current: null
+};
+
+setFieldValueRef.current = setFieldValue;
+
+
+Installed date-fns for converting time to : x min ago formatt
+npm install date-fns
+
+used ngrok for development and connecting to devices
+npx ngrok start --config ./ngrok.yml --all

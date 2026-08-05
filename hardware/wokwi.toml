@@ -1,0 +1,14 @@
+[wokwi]
+version = 1
+firmware = '.pio/build/esp32dev/firmware.bin'
+elf      = '.pio/build/esp32dev/firmware.elf'
+rfc2217ServerPort = 4000
+# Forward http://localhost:8080 -> port 80 on the simulated ESP32,
+# so you can open the web UI from your own browser during simulation.
+[[net.forward]]
+from = "localhost:8080"
+to   = "target:80"
+
+# NOTE: since the OLED (SSD1306) has been removed from the firmware,
+# remember to also remove its wiring/part from diagram.json if it's
+# still declared there (the I2C OLED on pins 21/22 is no longer used).
