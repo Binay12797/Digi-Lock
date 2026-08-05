@@ -29,21 +29,21 @@ const Fingerprints = () => {
   const [open, setOpen] = useState(false);
 
   const { searchQuery } = useOutletContext();
-
-  const filteredfingerprints = fingerprints.filter((fingerprint) => {
-    const query = searchQuery.toLowerCase();
-
-    return (
-      fingerprint.id.toString()?.toLowerCase().includes(query) ||
-      fingerprint.userName?.toLowerCase().includes(query) ||
-      fingerprint.role?.toLowerCase().includes(query) ||
-      // "If the value on the left is null or undefined, use the value on the right instead."
-      (fingerprint.fingerprintId ?? "").toLowerCase().includes(query) ||
-      (fingerprint.enrolled ? "enrolled" : "not enrolled").includes(query) ||
-      (fingerprint.locks ?? []).some((lock) =>
-        lock.toLowerCase().includes(query),
-      )
-    );
+  const query = (searchQuery || "").toLowerCase();
+ const filteredfingerprints = (Array.isArray(fingerprints) ? fingerprints : []).filter((fingerprint) => {
+  return (
+    // Safe navigation on fingerprint.id (since backend might not send `id`)
+    fingerprint._id?.toString().toLowerCase().includes(query) ||
+    fingerprint.id?.toString().toLowerCase().includes(query) ||
+    fingerprint.userName?.toLowerCase().includes(query) ||
+    fingerprint.role?.toLowerCase().includes(query) ||
+    fingerprint.relation?.toLowerCase().includes(query) ||
+    (fingerprint.fingerprintId ?? "").toString().toLowerCase().includes(query) ||
+    (fingerprint.enrolled ? "enrolled" : "not enrolled").includes(query) ||
+    (fingerprint.locks ?? []).some((lock) =>
+      lock.toLowerCase().includes(query)
+    )
+  );
   });
 
   useEffect(() => {
@@ -53,7 +53,7 @@ const Fingerprints = () => {
   const fetchFingerprints = async () => {
     try {
       const res = await api.get("/fingerprint/get");
-      setFingerprints(res.data);
+      setFingerprints(res.data.data);
     } catch (err) {
       console.error(err);
     }

@@ -9,7 +9,6 @@ const accesslogRouter = require("./routes/accesslogRouter");
 const lockRouter = require("./routes/lockRouter");
 const fingerprintRouter = require("./routes/fingerprintRouter");
 const dashboardRouter = require("./routes/dashboardRoutes");
-const dashboardRouter = require("./routes/dashboardRoutes");
 const server = express();
 
 const connectDB = require("./config/db");

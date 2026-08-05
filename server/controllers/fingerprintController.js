@@ -1,36 +1,27 @@
 const User = require("../models/addUserModel");
 
-async function getFingerprint(req,res){
-    try {
-        // 1. Fetch only the fields needed for the output, excluding locks, userName, etc.
-        const rawUsers = await User.find(
-            { fingerprintId: { $exists: true, $ne: null } },
-            "fingerprintId enrolled role -_id"
-        ).lean();
-
-        // 2. Map schema keys to your 3 target properties
-        const FingerprintData = rawUsers.map(user => ({
-            fingerprint: user.fingerprintId,                 
-            status: user.enrolled ? "Active" : "Inactive",  
-            relation: user.role                            
-        }));
-
-        return res.status(200).json({
-            success: true,
-            count: secureFingerprintData.length,
-            data: FingerprintData
-        });
-
-    } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: "Failed to fetch fingerprint directory",
-            error: error.message
-        });
-    }
-
+async function getFingerprint(req, res) {
+  try {
+    // Include _id, userName, role, enrolled, locks, fingerprintId
+    const users = await User.find(
+      { fingerprint: { $exists: true, $ne: null } },
+      "_id name relation isActive  fingerprint"
+    ).lean();
+    //console.log("Found Users in DB:", JSON.stringify(users, null, 2));
+    //console.log("RAW FULL DOCUMENTS:", JSON.stringify(users, null, 2));
+    return res.status(200).json({
+      success: true,
+      count: users.length,
+      data: users
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch fingerprint directory",
+      error: error.message
+    });
+  }
 }
-
 
 async function deleteFingerprint(req,res){
     const { id } = req.params;

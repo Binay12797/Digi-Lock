@@ -1,5 +1,3 @@
-
-
 const { WebSocketServer } = require("ws");
 const enrollmentState = require("./enrollmentState");
 const scanController = require("../controllers/scanController");
@@ -36,14 +34,36 @@ function initWokwiSocket(io) {
 
       // Map device socket if deviceId is supplied
       if (parsedData.deviceId) {
+        ws.deviceId = parsedData.deviceId; // Tag socket instance with device ID
         devices.set(parsedData.deviceId, ws);
       }
 
-      //  Dispatch events
+      // Dispatch events
       try {
         switch (parsedData.type) {
+          //  Initial Handshake from Hardware
+          case "HELLO":
+            console.log(`[Device Registered] ${parsedData.deviceId || "door-lock-01"}`);
+            
+            // Notify frontend that hardware is connected and online
+            io.emit("HARDWARE_STATUS_CHANGED", {
+              deviceId: parsedData.deviceId || "door-lock-01",
+              isOnline: true,
+              timestamp: new Date().toISOString()
+            });
+            break;
+
+          //  Periodic Status Update from Hardware
           case "STATUS_UPDATE":
             console.log(`[Status Update] Device ${parsedData.deviceId || "Default"}:`, parsedData);
+            
+            // Emit live lock state to React UI via Socket.io
+            io.emit("LOCK_STATUS_UPDATED", {
+              deviceId: parsedData.deviceId || "door-lock-01",
+              status: parsedData.status, // "LOCKED" or "UNLOCKED"
+              mode: parsedData.mode,     // 0 (Verification) or 1 (Enrollment)
+              timestamp: new Date().toISOString()
+            });
             break;
 
           case "ENROLL_PROGRESS":
@@ -79,6 +99,8 @@ function initWokwiSocket(io) {
 
     ws.on("close", () => {
       console.log("Wokwi connection closed");
+      const disconnectedId = ws.deviceId || "door-lock-01";
+
       if (deviceSocket === ws) {
         deviceSocket = null;
       }
@@ -90,6 +112,13 @@ function initWokwiSocket(io) {
           break;
         }
       }
+
+      // Notify React UI that hardware went offline
+      io.emit("HARDWARE_STATUS_CHANGED", {
+        deviceId: disconnectedId,
+        isOnline: false,
+        timestamp: new Date().toISOString()
+      });
     });
 
     ws.on("error", (err) => {
