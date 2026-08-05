@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { tokens } from "../../theme";
 import { useOutletContext } from "react-router-dom";
 import { socket } from "../../Api/socket";
+import api from "../../Api/api";
 
 export const formatEvent = (notification) => {
   switch (notification.event) {
@@ -64,6 +65,18 @@ const AlertAndNotifications = () => {
       notification.severity?.toLowerCase().includes(query)
     );
   });
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const response = await api.get("/notifications");
+        setNotifications(response.data.data);
+      } catch (err) {
+        console.error("Failed to fetch notifications:", err);
+      }
+    };
+
+    fetchNotifications();
+  }, []);
 
   useEffect(() => {
     const handleNotification = (notification) => {
@@ -180,14 +193,12 @@ const AlertAndNotifications = () => {
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         {[...filteredNotifications]
           // if b-a is positive it tells b should come before a ie sorted such that b>a ie highest come first
-          .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
           .map((notification) => (
             //map is like an for loop, here creates card for each of the notifications data present
             //notification is just a variable name that points to the current notification an part of the array [notification, notification , notification]= notifications
             <Card
-              key={
-                notification._id || notification.id || notification.timestamp
-              }
+              key={notification._id}
               sx={{
                 bgcolor: colors.primary[400],
                 pt: "5px",
@@ -211,7 +222,7 @@ const AlertAndNotifications = () => {
                     {formatEvent(notification)}
                   </Typography>
                   <Typography variant="h5">
-                    {new Date(notification.timestamp).toLocaleString("en-US", {
+                    {new Date(notification.createdAt).toLocaleString("en-US", {
                       dateStyle: "medium",
                       timeStyle: "short",
                     })}

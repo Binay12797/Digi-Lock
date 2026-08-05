@@ -4,6 +4,7 @@ const enrollmentState = require("../services/enrollmentState");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const addUser = require("../models/addUserModel");
+const Notification = require("../models/notificationModel");
 
 async function createUser(req, res) {
   try {
@@ -37,12 +38,13 @@ async function createUser(req, res) {
 
     console.log("Sending notification...");
 
-    io.emit("notification", {
+    const notification = await Notification.create({
       event: "USER_ADDED",
       severity: "info",
       entityName: newUser.name,
-      timestamp: new Date(),
     });
+
+    io.emit("notification", notification);
 
     console.log("user created");
     return res.status(201).json({

@@ -1,7 +1,8 @@
 const enrollmentState = require("../services/enrollmentState");
 const User = require("../models/addUserModel");
 const accessLog = require("../models/accesslogModel");
-const {getDashboardData} = require("../services/dashboardServices");
+const { getDashboardData } = require("../services/dashboardServices");
+const Notification = require("../models/notificationModel");
 
 async function startEnrollment(req, res) {
   const { sendToDevice } = require("../services/wokwiSocketService");
@@ -179,13 +180,14 @@ async function processVerification(fingerprint, io) {
     });
 
     // Send notification
-    io.emit("notification", {
+    const notification = await Notification.create({
       event: user ? "DOOR_OPENED" : "FAILED_FINGERPRINT",
       severity: user ? "info" : "critical",
       entityName: username,
-      lockName: "Main Door", // change this if you have the actual lock name
-      timestamp: new Date(),
+      lockName: "Main Door",
     });
+
+    io.emit("notification", notification);
   }
 
   return { accessGranted: !!user, action, username };
@@ -194,7 +196,7 @@ async function processVerification(fingerprint, io) {
 async function verification(req, res) {
   const { fingerprint } = req.body;
 
-  console.log("EXACT PAYLOAD RECEIVED:", JSON.stringify(rawFingerprint));
+  console.log("EXACT PAYLOAD RECEIVED:", fingerprint);
   const io = req.app.get("io");
 
   try {
