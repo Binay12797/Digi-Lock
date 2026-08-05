@@ -1,4 +1,4 @@
-const { getDashboardData } = require("../services/dashboardService");
+const {getDashboardData} = require("../services/dashboardServices");
 
 async function getDashboard(req, res) {
   try {
