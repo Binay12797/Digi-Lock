@@ -71,11 +71,20 @@ const DashboardNotifications = () => {
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         {[...notifications]
-          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+          .sort(
+            (a, b) =>
+              new Date(b.createdAt || b.timestamp) -
+              new Date(a.createdAt || a.timestamp),
+          )
           .slice(0, 5)
           .map((notification) => (
             <Card
-              key={notification._id}
+              key={
+                notification._id ||
+                notification.id ||
+                notification.createdAt ||
+                notification.timestamp
+              }
               sx={{
                 bgcolor:
                   theme.palette.mode === "light"
@@ -103,9 +112,14 @@ const DashboardNotifications = () => {
                   </Typography>
 
                   <Typography variant="h6">
-                    {formatDistanceToNow(new Date(notification.createdAt), {
-                      addSuffix: true,
-                    })}
+                    {formatDistanceToNow(
+                      new Date(
+                        notification.createdAt || notification.timestamp,
+                      ),
+                      {
+                        addSuffix: true,
+                      },
+                    )}
                   </Typography>
                 </Box>
               </CardContent>

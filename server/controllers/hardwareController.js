@@ -115,6 +115,14 @@ async function enroll(req, res) {
       `[Database] User profile created for: ${newUser.name} (${newUser._id})`,
     );
 
+    const notification = await Notification.create({
+      event: "USER_ADDED",
+      severity: "info",
+      entityName: newUser.name,
+    });
+
+    io.emit("notification", notification);
+
     if (io) {
       io.emit("BIOMETRIC_LINKED", {
         success: true,

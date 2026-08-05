@@ -36,16 +36,6 @@ async function createUser(req, res) {
 
     const io = req.app.get("io");
 
-    console.log("Sending notification...");
-
-    const notification = await Notification.create({
-      event: "USER_ADDED",
-      severity: "info",
-      entityName: newUser.name,
-    });
-
-    io.emit("notification", notification);
-
     console.log("user created");
     return res.status(201).json({
       success: true,

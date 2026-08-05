@@ -193,12 +193,21 @@ const AlertAndNotifications = () => {
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         {[...filteredNotifications]
           // if b-a is positive it tells b should come before a ie sorted such that b>a ie highest come first
-          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+          .sort(
+            (a, b) =>
+              new Date(b.createdAt || b.timestamp) -
+              new Date(a.createdAt || a.timestamp),
+          )
           .map((notification) => (
             //map is like an for loop, here creates card for each of the notifications data present
             //notification is just a variable name that points to the current notification an part of the array [notification, notification , notification]= notifications
             <Card
-              key={notification._id}
+              key={
+                notification._id ||
+                notification.id ||
+                notification.createdAt ||
+                notification.timestamp
+              }
               sx={{
                 bgcolor: colors.primary[400],
                 pt: "5px",
@@ -222,7 +231,9 @@ const AlertAndNotifications = () => {
                     {formatEvent(notification)}
                   </Typography>
                   <Typography variant="h5">
-                    {new Date(notification.createdAt).toLocaleString("en-US", {
+                    {new Date(
+                      notification.createdAt || notification.timestamp,
+                    ).toLocaleString("en-US", {
                       dateStyle: "medium",
                       timeStyle: "short",
                     })}
