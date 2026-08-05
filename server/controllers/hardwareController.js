@@ -177,6 +177,15 @@ async function processVerification(fingerprint, io) {
       lastUpdated: new Date(),
       isOnline: true,
     });
+
+    // Send notification
+    io.emit("notification", {
+      event: user ? "DOOR_OPENED" : "FAILED_FINGERPRINT",
+      severity: user ? "info" : "critical",
+      entityName: username,
+      lockName: "Main Door", // change this if you have the actual lock name
+      timestamp: new Date(),
+    });
   }
 
   return { accessGranted: !!user, action, username };

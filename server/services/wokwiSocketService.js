@@ -1,5 +1,3 @@
-
-
 const { WebSocketServer } = require("ws");
 const enrollmentState = require("./enrollmentState");
 const scanController = require("../controllers/scanController");
@@ -19,7 +17,14 @@ function initWokwiSocket(io) {
   wss.on("connection", (ws) => {
     console.log("Wokwi ESP32 connection established");
     io.emit("started");
-    
+
+    io.emit("notification", {
+      event: "LOCK_ONLINE",
+      severity: "info",
+      entityName: "Main Door",
+      timestamp: new Date(),
+    });
+
     deviceSocket = ws;
 
     ws.on("message", async (rawData) => {
@@ -43,7 +48,10 @@ function initWokwiSocket(io) {
       try {
         switch (parsedData.type) {
           case "STATUS_UPDATE":
-            console.log(`[Status Update] Device ${parsedData.deviceId || "Default"}:`, parsedData);
+            console.log(
+              `[Status Update] Device ${parsedData.deviceId || "Default"}:`,
+              parsedData,
+            );
             break;
 
           case "ENROLL_PROGRESS":
@@ -62,7 +70,9 @@ function initWokwiSocket(io) {
             break;
 
           case "SCAN_TRIGGER":
-            console.log(`[WS Intercept] Scan trigger requested by: ${parsedData.deviceId}`);
+            console.log(
+              `[WS Intercept] Scan trigger requested by: ${parsedData.deviceId}`,
+            );
             if (scanController.handleScanTrigger) {
               scanController.handleScanTrigger(parsedData, ws, io);
             }
@@ -79,10 +89,18 @@ function initWokwiSocket(io) {
 
     ws.on("close", () => {
       console.log("Wokwi connection closed");
+
+      io.emit("notification", {
+        event: "LOCK_OFFLINE",
+        severity: "warning",
+        entityName: "Main Door", // Replace with actual lock name if available
+        timestamp: new Date(),
+      });
+
       if (deviceSocket === ws) {
         deviceSocket = null;
       }
-      
+
       // Clean up device map entry
       for (const [id, socket] of devices.entries()) {
         if (socket === ws) {

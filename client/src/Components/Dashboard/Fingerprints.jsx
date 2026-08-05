@@ -82,7 +82,9 @@ const Fingerprints = () => {
             }}
           >
             <CardContent>
-              <Typography variant="h5">{user.name}</Typography>
+              <Typography variant="h5" fontWeight="100">
+                {user.name}
+              </Typography>
 
               <Typography>
                 <strong>Relation:</strong> {user.relation}

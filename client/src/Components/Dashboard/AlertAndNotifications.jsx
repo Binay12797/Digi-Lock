@@ -22,6 +22,9 @@ export const formatEvent = (notification) => {
     case "DOOR_OPENED":
       return `ℹ️ ${notification.lockName}  Opened by ${notification.entityName}`;
 
+    case "LOCK_ONLINE":
+      return `🟢 Lock Online at ${notification.entityName}`;
+
     default:
       return notification.event || "Unknown Event";
   }
