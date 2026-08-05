@@ -158,7 +158,7 @@ const AccessLogs = () => {
           }}
         >
           <Typography color="white" variant="h5">
-            🚨 Lock is in an Unresponsive State for 1 min
+            🚨 Three Consecutive authentication failure has occoured
           </Typography>
         </Box>
       )}
