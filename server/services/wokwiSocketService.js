@@ -2,6 +2,7 @@ const { WebSocketServer } = require("ws");
 const enrollmentState = require("./enrollmentState");
 const scanController = require("../controllers/scanController");
 const { processVerification } = require("../controllers/hardwareController");
+const Notification = require("../models/notificationModel");
 
 // Track connected devices by ID and active single device fallback
 const devices = new Map();
@@ -14,16 +15,17 @@ function initWokwiSocket(io) {
     console.log("WebSocket Server successfully listening on port 8080!");
   });
 
-  wss.on("connection", (ws) => {
+  wss.on("connection", async (ws) => {
     console.log("Wokwi ESP32 connection established");
     io.emit("started");
 
-    io.emit("notification", {
+    const notification = await Notification.create({
       event: "LOCK_ONLINE",
       severity: "info",
       entityName: "Main Door",
-      timestamp: new Date(),
     });
+
+    io.emit("notification", notification);
 
     deviceSocket = ws;
 
@@ -111,16 +113,17 @@ function initWokwiSocket(io) {
       }
     });
 
-    ws.on("close", () => {
+    ws.on("close", async () => {
       console.log("Wokwi connection closed");
       const disconnectedId = ws.deviceId || "door-lock-01";
 
-      io.emit("notification", {
+      const notification = await Notification.create({
         event: "LOCK_OFFLINE",
         severity: "warning",
-        entityName: "Main Door", // Replace with actual lock name if available
-        timestamp: new Date(),
+        entityName: "Main Door",
       });
+
+      io.emit("notification", notification);
 
       if (deviceSocket === ws) {
         deviceSocket = null;

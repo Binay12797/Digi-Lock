@@ -132,7 +132,7 @@ export const dashboardStats = [
   },
   {
     id: 3,
-    title: "Unlocks Today",
+    title: "Unlocks",
     value: 0,
     subtitle: "Successful unlocks",
     icon: "unlock",

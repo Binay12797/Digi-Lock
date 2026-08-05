@@ -9,6 +9,7 @@ const accesslogRouter = require("./routes/accesslogRouter");
 const lockRouter = require("./routes/lockRouter");
 const fingerprintRouter = require("./routes/fingerprintRouter");
 const dashboardRouter = require("./routes/dashboardRoutes");
+const notificationRouter = require("./routes/notificationRouter");
 const server = express();
 
 const connectDB = require("./config/db");
@@ -65,6 +66,7 @@ server.use("/api", accesslogRouter);
 server.use("/lock/status", lockRouter);
 server.use("/fingerprint", fingerprintRouter);
 server.use("/dashboard", dashboardRouter);
+server.use("/notifications", notificationRouter);
 
 httpServer.listen(PORT, () => {
   //listens at the port for req

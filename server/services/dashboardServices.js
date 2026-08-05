@@ -60,7 +60,7 @@ async function getDashboardData() {
       },
       {
         id: 3,
-        title: "Successful Unlocks",
+        title: "Unlocks",
         value: successfulUnlocks,
         subtitle: "Door Opened",
         icon: "unlock",

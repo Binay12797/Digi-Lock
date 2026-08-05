@@ -1,24 +1,47 @@
 import { Box, Typography, Card, CardContent, useTheme } from "@mui/material";
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { tokens } from "../../theme";
-import notificationsData from "../Data/mockdata";
-
 import { formatDistanceToNow } from "date-fns";
-import { useNavigate } from "react-router-dom";
-
-import { useOutletContext } from "react-router-dom";
-
+import { useNavigate, useOutletContext } from "react-router-dom";
 import { formatEvent } from "./AlertAndNotifications";
+import { socket } from "../../Api/socket";
+import api from "../../Api/api";
 
 const DashboardNotifications = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
-  const [notifications, setNotifications] = useState(notificationsData); // first variable second function
-  const navigate = useNavigate();
+  const [notifications, setNotifications] = useState([]);
 
+  const navigate = useNavigate();
   const { setSelected } = useOutletContext();
+
+  // Fetch notification history from MongoDB
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const response = await api.get("/notifications");
+        setNotifications(response.data.data);
+      } catch (err) {
+        console.error("Failed to fetch notifications:", err);
+      }
+    };
+
+    fetchNotifications();
+  }, []);
+
+  // Listen for new notifications
+  useEffect(() => {
+    const handleNotification = (notification) => {
+      setNotifications((prev) => [notification, ...prev]);
+    };
+
+    socket.on("notification", handleNotification);
+
+    return () => {
+      socket.off("notification", handleNotification);
+    };
+  }, []);
 
   return (
     <Box sx={{ m: "20px" }}>
@@ -26,13 +49,16 @@ const DashboardNotifications = () => {
         <Typography variant="h5" sx={{ mb: 2 }}>
           Recent Notifications
         </Typography>
+
         <Typography
           variant="h5"
           sx={{
             mb: 2,
             color: colors.greenAccent[400],
             cursor: "pointer",
-            "&:hover": { textDecoration: "underline" },
+            "&:hover": {
+              textDecoration: "underline",
+            },
           }}
           onClick={() => {
             navigate("/AlertAndNotifications");
@@ -42,16 +68,14 @@ const DashboardNotifications = () => {
           View All
         </Typography>
       </Box>
+
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-        {/* [...notifications] this is a spread operator creates a copy of notificaiton array so that sort dosent affect original array*/}
         {[...notifications]
-          .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
           .slice(0, 5)
           .map((notification) => (
-            //map is like an for loop, here creates card for each of the notifications data present
-            //notification is just a variable name that points to the current notification an part of the array [notification, notification , notification]= notifications
             <Card
-              key={notification.id}
+              key={notification._id}
               sx={{
                 bgcolor:
                   theme.palette.mode === "light"
@@ -77,9 +101,10 @@ const DashboardNotifications = () => {
                   <Typography variant="h6">
                     {formatEvent(notification)}
                   </Typography>
+
                   <Typography variant="h6">
-                    {formatDistanceToNow(new Date(notification.timestamp), {
-                      addSuffix: true, //with addSuffix true "ago" is added
+                    {formatDistanceToNow(new Date(notification.createdAt), {
+                      addSuffix: true,
                     })}
                   </Typography>
                 </Box>
