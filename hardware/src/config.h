@@ -1,6 +1,6 @@
 #pragma once
 
-#define WS_HOST "192.168.1.4"
+#define WS_HOST "172.18.81.14"
 //#define WS_HOST "172.18.100.244"
 #define WS_PORT 8080
 #define WS_PATH "/"
